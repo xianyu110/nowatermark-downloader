@@ -1,0 +1,53 @@
+// Cloudflare Workers deploy config — TEMPLATE.
+// Copy this file to wrangler.jsonc (gitignored), then replace the D1 id.
+// `pnpm cf:build` (NITRO_PRESET=cloudflare_module) merges wrangler.jsonc into
+// the generated .output/server/wrangler.json; deploy with `pnpm cf:deploy`.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nowatermarkdownloader",
+  "workers_dev": true,
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+  },
+  "vars": {
+    "DATABASE_PROVIDER": "d1",
+    // Server-side runtime fallbacks for the build-time VITE_* values — keep in
+    // sync with .env.production (better-auth trustedOrigins, payment callbacks).
+    "VITE_APP_URL": "https://nowatermarkdownloader.com",
+    "VITE_APP_NAME": "NoWatermark Downloader",
+    "VITE_APP_DESCRIPTION": "Paste a public video link and get a direct media URL.",
+    "VIDEO_PARSE_PRIMARY_URL": "",
+    "VIDEO_PARSE_FALLBACK_URLS": "",
+    "INITIAL_CREDITS_ENABLED": "true",
+    "INITIAL_CREDITS_AMOUNT": "3",
+    "INITIAL_CREDITS_VALID_DAYS": "7",
+    "INITIAL_CREDITS_DESCRIPTION": "New user trial credits"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "shipany-db",
+      "database_id": "REPLACE_WITH_OUTPUT_OF_WRANGLER_D1_CREATE",
+      "migrations_dir": "drizzle",
+    },
+  ],
+  "routes": [
+    {
+      "pattern": "nowatermarkdownloader.com/*",
+      "zone_name": "nowatermarkdownloader.com"
+    }
+  ],
+  // ── Postgres via Hyperdrive (instead of D1) ────────────────────────────────
+  // 1. npx wrangler hyperdrive create <name> --connection-string="postgres://..." (your direct PG url)
+  // 2. Set vars.DATABASE_PROVIDER to "postgresql" and remove the d1_databases block
+  // 3. Uncomment and fill the binding (the build keeps the postgres driver in
+  //    the bundle when DATABASE_PROVIDER=postgresql — see vite.config.ts):
+  // "hyperdrive": [
+  //   { "binding": "HYPERDRIVE", "id": "REPLACE_WITH_OUTPUT_OF_WRANGLER_HYPERDRIVE_CREATE" }
+  // ]
+  //
+  // Other optional bindings — uncomment when needed:
+  // "kv_namespaces":  [{ "binding": "CACHE",  "id": "..." }],
+  // "r2_buckets":     [{ "binding": "BUCKET", "bucket_name": "..." }]
+}
