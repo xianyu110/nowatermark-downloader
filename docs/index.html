@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="NoWatermark Downloader 是面向 TikTok、Instagram、YouTube、X 和 Facebook 等公开链接的在线视频解析、下载与视频转文字工具。"
+    />
+    <meta name="theme-color" content="#101828" />
+    <meta property="og:title" content="NoWatermark Downloader" />
+    <meta
+      property="og:description"
+      content="一个链接，完成公开视频解析、下载、音频导出与视频转文字。"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/homepage.png" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232563eb'/%3E%3Cpath d='M22 17h15l7 7v23H22z' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='m29 28 10 6-10 6z' fill='white'/%3E%3C/svg%3E"
+    />
+    <title>NoWatermark Downloader｜在线视频解析与转文字</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #101828;
+        --muted: #475467;
+        --line: #d0d5dd;
+        --surface: #f8fafc;
+        --white: #ffffff;
+        --blue: #2563eb;
+        --cyan: #0891b2;
+        --green: #087f5b;
+        --orange: #c2410c;
+        --max: 1120px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--white);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.7;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .skip-link {
+        position: absolute;
+        top: -48px;
+        left: 16px;
+        z-index: 20;
+        padding: 8px 12px;
+        color: var(--white);
+        background: var(--ink);
+      }
+
+      .skip-link:focus {
+        top: 12px;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid rgba(208, 213, 221, 0.8);
+        background: rgba(255, 255, 255, 0.96);
+      }
+
+      .nav {
+        width: min(calc(100% - 32px), var(--max));
+        min-height: 64px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--ink);
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 7px;
+        color: var(--white);
+        background: var(--blue);
+        font-size: 14px;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+      }
+
+      .nav-links a:hover,
+      .nav-links a:focus-visible {
+        color: var(--blue);
+      }
+
+      .hero {
+        position: relative;
+        min-height: min(680px, calc(100svh - 64px));
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        color: var(--white);
+        background-color: var(--ink);
+        background-image: url("assets/homepage.png");
+        background-position: center;
+        background-size: cover;
+      }
+
+      .hero::before {
+        position: absolute;
+        inset: 0;
+        content: "";
+        background: rgba(16, 24, 40, 0.82);
+      }
+
+      .hero-inner {
+        position: relative;
+        width: min(calc(100% - 32px), var(--max));
+        margin: 0 auto;
+        padding: 72px 0 92px;
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        color: #67e8f9;
+        font-size: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 820px;
+        margin-bottom: 20px;
+        font-size: clamp(42px, 7vw, 82px);
+        line-height: 1.02;
+        letter-spacing: 0;
+      }
+
+      .hero-copy {
+        max-width: 670px;
+        margin-bottom: 30px;
+        color: #e4e7ec;
+        font-size: 19px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .button {
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 18px;
+        border: 1px solid var(--white);
+        border-radius: 6px;
+        font-weight: 750;
+        text-decoration: none;
+      }
+
+      .button-primary {
+        border-color: var(--blue);
+        background: var(--blue);
+      }
+
+      .button-secondary {
+        background: rgba(16, 24, 40, 0.5);
+      }
+
+      .button:hover,
+      .button:focus-visible {
+        transform: translateY(-1px);
+      }
+
+      .band {
+        padding: 84px 0;
+      }
+
+      .band-muted {
+        background: var(--surface);
+      }
+
+      .band-dark {
+        color: var(--white);
+        background: #18181b;
+      }
+
+      .container {
+        width: min(calc(100% - 32px), var(--max));
+        margin: 0 auto;
+      }
+
+      .section-head {
+        max-width: 760px;
+        margin-bottom: 42px;
+      }
+
+      h2 {
+        margin-bottom: 14px;
+        font-size: clamp(30px, 4vw, 48px);
+        line-height: 1.15;
+        letter-spacing: 0;
+      }
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 20px;
+        letter-spacing: 0;
+      }
+
+      .lead,
+      .feature p,
+      .steps p,
+      .audience p {
+        color: var(--muted);
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 28px;
+      }
+
+      .feature {
+        min-width: 0;
+        padding-top: 18px;
+        border-top: 3px solid var(--blue);
+      }
+
+      .feature:nth-child(2) {
+        border-color: var(--cyan);
+      }
+
+      .feature:nth-child(3) {
+        border-color: var(--green);
+      }
+
+      .feature:nth-child(4) {
+        border-color: var(--orange);
+      }
+
+      .feature strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 25px;
+      }
+
+      .feature p {
+        margin-bottom: 0;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 32px;
+        counter-reset: steps;
+      }
+
+      .step {
+        counter-increment: steps;
+      }
+
+      .step::before {
+        width: 34px;
+        height: 34px;
+        margin-bottom: 16px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: var(--white);
+        background: var(--ink);
+        content: counter(steps);
+        font-weight: 800;
+      }
+
+      .workflow {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+        align-items: center;
+        gap: 52px;
+      }
+
+      .workflow p {
+        color: #d0d5dd;
+      }
+
+      .workflow figure {
+        margin: 0;
+      }
+
+      .workflow img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border: 1px solid #3f3f46;
+        border-radius: 6px;
+      }
+
+      .check-list {
+        margin: 22px 0 28px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .check-list li {
+        position: relative;
+        margin: 9px 0;
+        padding-left: 25px;
+      }
+
+      .check-list li::before {
+        position: absolute;
+        left: 0;
+        color: #34d399;
+        content: "✓";
+        font-weight: 900;
+      }
+
+      .audience {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--line);
+      }
+
+      .audience article {
+        min-width: 0;
+        padding: 28px;
+        background: var(--white);
+      }
+
+      .audience p {
+        margin-bottom: 0;
+      }
+
+      .notice {
+        margin-top: 40px;
+        padding: 20px 22px;
+        border-left: 4px solid var(--orange);
+        background: #fff7ed;
+      }
+
+      .notice strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .cta {
+        padding: 80px 0;
+        text-align: center;
+      }
+
+      .cta p {
+        max-width: 680px;
+        margin: 0 auto 26px;
+        color: var(--muted);
+      }
+
+      footer {
+        padding: 28px 0;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      footer a {
+        color: var(--blue);
+      }
+
+      @media (max-width: 860px) {
+        .nav-links a:not(.nav-cta) {
+          display: none;
+        }
+
+        .feature-grid,
+        .steps,
+        .workflow {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .workflow-copy {
+          grid-column: 1 / -1;
+        }
+
+        .workflow figure {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .hero {
+          min-height: min(560px, calc(100svh - 64px));
+          background-position: 42% center;
+        }
+
+        .hero-inner {
+          padding: 50px 0 66px;
+        }
+
+        h1 {
+          font-size: 42px;
+        }
+
+        .hero-copy {
+          font-size: 17px;
+        }
+
+        .band {
+          padding: 62px 0;
+        }
+
+        .feature-grid,
+        .steps,
+        .workflow,
+        .audience {
+          grid-template-columns: 1fr;
+        }
+
+        .button {
+          width: 100%;
+        }
+
+        .footer-inner {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">跳到正文</a>
+    <header class="site-header">
+      <nav class="nav" aria-label="主要导航">
+        <a class="brand" href="#top">
+          <span class="brand-mark" aria-hidden="true">N</span>
+          <span>NoWatermark</span>
+        </a>
+        <div class="nav-links">
+          <a href="#features">功能</a>
+          <a href="#workflow">工作流</a>
+          <a href="#audience">适合谁</a>
+          <a
+            class="nav-cta"
+            href="https://nowatermarkdownloader.com/"
+            target="_blank"
+            rel="noreferrer"
+            >打开工具</a
+          >
+        </div>
+      </nav>
+    </header>
+
+    <main id="content">
+      <section class="hero" id="top">
+        <div class="hero-inner">
+          <p class="eyebrow">在线视频解析与转文字</p>
+          <h1>NoWatermark Downloader</h1>
+          <p class="hero-copy">
+            粘贴一条公开视频链接，完成无水印解析、视频下载、音频导出与 AI
+            转文字。免费基础解析无需注册，每日可使用 3 次。
+          </p>
+          <div class="actions">
+            <a
+              class="button button-primary"
+              href="https://nowatermarkdownloader.com/"
+              target="_blank"
+              rel="noreferrer"
+              >立即解析视频</a
+            >
+            <a
+              class="button button-secondary"
+              href="https://nowatermarkdownloader.com/transcribe"
+              target="_blank"
+              rel="noreferrer"
+              >体验视频转文字</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="band" id="features">
+        <div class="container">
+          <div class="section-head">
+            <p class="eyebrow" style="color: var(--blue)">从链接到素材</p>
+            <h2>不只下载，也能继续处理</h2>
+            <p class="lead">
+              支持 TikTok、Instagram、YouTube、X / Twitter、Facebook
+              等平台的公开链接。主节点不可用时，系统会继续尝试健康的备用解析服务。
+            </p>
+          </div>
+          <div class="feature-grid">
+            <article class="feature">
+              <strong>3 次/日</strong>
+              <h3>免费基础解析</h3>
+              <p>无需登录，支持单条公开链接的 480P 与 720P 解析。</p>
+            </article>
+            <article class="feature">
+              <strong>多平台</strong>
+              <h3>统一输入入口</h3>
+              <p>不必为不同社交平台反复寻找不同下载工具。</p>
+            </article>
+            <article class="feature">
+              <strong>自动重试</strong>
+              <h3>备用服务链</h3>
+              <p>主服务失败后自动尝试可用节点，减少手动切换。</p>
+            </article>
+            <article class="feature">
+              <strong>Pro</strong>
+              <h3>高级创作能力</h3>
+              <p>解锁批量、音频、静音、高清画质、转写和 API。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="band band-muted">
+        <div class="container">
+          <div class="section-head">
+            <p class="eyebrow" style="color: var(--green)">只需三步</p>
+            <h2>复制、解析、下载</h2>
+          </div>
+          <div class="steps">
+            <article class="step">
+              <h3>复制公开链接</h3>
+              <p>从原平台复制公开视频或帖子的分享链接。</p>
+            </article>
+            <article class="step">
+              <h3>选择格式与画质</h3>
+              <p>粘贴链接，选择所需输出格式并启动解析。</p>
+            </article>
+            <article class="step">
+              <h3>使用解析结果</h3>
+              <p>预览视频、打开媒体文件，或复制得到的直链。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="band band-dark" id="workflow">
+        <div class="container workflow">
+          <div class="workflow-copy">
+            <p class="eyebrow">月度会员工作流</p>
+            <h2>把视频继续变成可编辑文字</h2>
+            <p>
+              直接从公开视频链接提取音频并生成带时间轴的文本。适合访谈、课程、播客切片和口播素材整理。
+            </p>
+            <ul class="check-list">
+              <li>导出 TXT 纯文本与 SRT 字幕</li>
+              <li>每批最多处理 5 条公开链接</li>
+              <li>仅音频、静音视频与 1080P / 最佳画质</li>
+              <li>API Key 与公开接口调用</li>
+            </ul>
+            <a
+              class="button button-primary"
+              href="https://nowatermarkdownloader.com/pricing"
+              target="_blank"
+              rel="noreferrer"
+              >查看会员方案</a
+            >
+          </div>
+          <figure>
+            <img
+              src="assets/video-to-text.png"
+              alt="NoWatermark Downloader 视频转文字页面"
+              width="1280"
+              height="720"
+              loading="lazy"
+            />
+          </figure>
+        </div>
+      </section>
+
+      <section class="band" id="audience">
+        <div class="container">
+          <div class="section-head">
+            <p class="eyebrow" style="color: var(--orange)">适用场景</p>
+            <h2>为重复处理视频素材的人准备</h2>
+          </div>
+          <div class="audience">
+            <article>
+              <h3>短视频创作者</h3>
+              <p>保存公开参考素材，提取音频，并生成字幕初稿。</p>
+            </article>
+            <article>
+              <h3>社媒运营人员</h3>
+              <p>集中处理多个平台的公开视频，减少重复操作。</p>
+            </article>
+            <article>
+              <h3>内容研究团队</h3>
+              <p>把公开视频中的语音整理为可检索、可编辑文本。</p>
+            </article>
+            <article>
+              <h3>开发与自动化团队</h3>
+              <p>通过会员 API Key 接入视频解析和转写工作流。</p>
+            </article>
+          </div>
+          <aside class="notice">
+            <strong>请尊重内容权利</strong>
+            仅处理公开可访问且你拥有权利、已获授权或平台规则允许使用的内容。私密、受限、已删除或暂不支持的链接可能无法解析。
+          </aside>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div class="container">
+          <h2>从一条公开链接开始</h2>
+          <p>
+            无需安装软件。打开 NoWatermark
+            Downloader，粘贴链接即可尝试第一次解析。
+          </p>
+          <div class="actions" style="justify-content: center">
+            <a
+              class="button button-primary"
+              href="https://nowatermarkdownloader.com/"
+              target="_blank"
+              rel="noreferrer"
+              >打开 NoWatermark Downloader</a
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <span>NoWatermark Downloader 公开介绍页</span>
+        <span
+          ><a href="https://nowatermarkdownloader.com/privacy-policy"
+            >隐私政策</a
+          >
+          ·
+          <a href="https://nowatermarkdownloader.com/copyright-policy"
+            >版权政策</a
+          ></span
+        >
+      </div>
+    </footer>
+  </body>
+</html>
