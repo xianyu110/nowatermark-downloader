@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { envConfigs } from '@/config';
 import { normalizeLocale, type SiteLocale } from '@/config/locale';
-import { getLocale, localizeUrl } from '@/paraglide/runtime.js';
+import { localizedPageHead } from '@/lib/seo';
+import { getLocale } from '@/paraglide/runtime.js';
 import { VideoTranscriber } from '@/blocks/video-transcriber';
 
 const routeLocale: SiteLocale = 'id';
@@ -46,22 +46,12 @@ export const Route = createFileRoute('/id/transcribe')({
     };
     const title = titles[locale];
     const description = descriptions[locale];
-    const canonical = localizeUrl(`${envConfigs.app_url}/transcribe`, {
+    return localizedPageHead({
       locale,
-    }).href;
-
-    return {
-      meta: [
-        { title },
-        { name: 'description', content: description },
-        { property: 'og:type', content: 'website' },
-        { property: 'og:title', content: title },
-        { property: 'og:description', content: description },
-        { property: 'og:url', content: canonical },
-        { name: 'twitter:card', content: 'summary' },
-      ],
-      links: [{ rel: 'canonical', href: canonical }],
-    };
+      path: '/transcribe',
+      title,
+      description,
+    });
   },
   component: TranscribePage,
 });

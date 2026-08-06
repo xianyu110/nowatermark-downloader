@@ -18,7 +18,10 @@ export const Route = createFileRoute('/robots.txt')({
           '',
         ].join('\n');
         return new Response(body, {
-          headers: { 'Content-Type': 'text/plain' },
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'public, max-age=3600',
+          },
         });
       },
     },

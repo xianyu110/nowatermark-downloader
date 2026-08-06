@@ -1,7 +1,6 @@
 import { Eraser, FileVideo, Mail, ShieldCheck } from 'lucide-react';
 
-import { envConfigs } from '@/config';
-import { siteLocales } from '@/config/locale';
+import { localizedPageHead } from '@/lib/seo';
 
 import type { SeoLocale } from './platform-downloader';
 
@@ -213,26 +212,13 @@ export function dataDeletionPath(locale: SeoLocale) {
 }
 
 export function dataDeletionHead(locale: SeoLocale) {
-  const appUrl = envConfigs.app_url.replace(/\/$/, '');
   const pageMetadata = metadata[locale] || metadata.en;
-  return {
-    meta: [
-      { title: pageMetadata.title },
-      { name: 'description', content: pageMetadata.description },
-      { property: 'og:type', content: 'website' },
-    ],
-    links: [
-      {
-        rel: 'canonical',
-        href: `${appUrl}${dataDeletionPath(locale)}`,
-      },
-      ...siteLocales.map((lang) => ({
-        rel: 'alternate',
-        hrefLang: lang,
-        href: `${appUrl}${dataDeletionPath(lang)}`,
-      })),
-    ],
-  };
+  return localizedPageHead({
+    locale,
+    path: '/data-deletion',
+    title: pageMetadata.title,
+    description: pageMetadata.description,
+  });
 }
 
 export function DataDeletionPage({ locale }: { locale: SeoLocale }) {

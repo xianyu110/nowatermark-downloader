@@ -27,9 +27,11 @@ import {
 } from 'lucide-react';
 
 import { useSession } from '@/core/auth/client';
+import { envConfigs } from '@/config';
 import { normalizeLocale, type SiteLocale } from '@/config/locale';
 import { getLocale } from '@/paraglide/runtime.js';
 import { usePaidMembership } from '@/hooks/use-paid-membership';
+import { JsonLd } from '@/components/json-ld';
 import { LocaleSelector } from '@/components/locale-selector';
 
 import '@/styles/copypilot-downloader.css';
@@ -2764,10 +2766,22 @@ export function CopypilotDownloader() {
   }, [input, result, t.result.publicVideo]);
 
   useEffect(() => {
-    const sharedUrl = new URLSearchParams(window.location.search).get('url');
-    if (sharedUrl && /^https?:\/\//i.test(sharedUrl)) {
-      setInput(sharedUrl);
-    }
+    const url = new URL(window.location.href);
+    const sharedUrl = url.searchParams.get('url')?.trim() || '';
+    if (!sharedUrl || !/^https?:\/\//i.test(sharedUrl)) return;
+
+    setInput(sharedUrl);
+    url.searchParams.delete('url');
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`
+    );
+
+    // Platform landing pages hand off their submitted URL here; continue the
+    // requested extraction so the user does not need to submit twice.
+    setLoading(true);
+    void parseCurrentSource(sharedUrl).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -2979,8 +2993,28 @@ export function CopypilotDownloader() {
     }
   }
 
+  const applicationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    '@id': `${envConfigs.app_url.replace(/\/$/, '')}/#application`,
+    name: 'NoWatermark Downloader',
+    url: `${envConfigs.app_url.replace(/\/$/, '')}${homeHref}`,
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Web',
+    inLanguage: locale,
+    description: t.hero.description,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    featureList: [
+      'Public video link parsing',
+      'No-watermark media downloads',
+      'Direct media URL and metadata',
+      'Video transcription for active members',
+    ],
+  };
+
   return (
     <main className="cp-site">
+      <JsonLd data={applicationSchema} />
       <header className="cp-header">
         <a className="cp-logo" href="#top" aria-label={t.navigation.homeLabel}>
           <span className="cp-logo-mark" aria-hidden="true">

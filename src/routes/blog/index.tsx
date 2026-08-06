@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import { normalizeLocale } from '@/config/locale';
+import { localizedPageHead } from '@/lib/seo';
 import { m } from '@/paraglide/messages.js';
-import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
+import { getLocale } from '@/paraglide/runtime.js';
 import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
 import { BlogCard } from '@/components/blog-card';
@@ -16,28 +18,13 @@ export const Route = createFileRoute('/blog/')({
     return { locale, posts };
   },
   head: ({ loaderData }) => {
-    const locale = loaderData?.locale;
-    const urlFor = (loc: string) =>
-      localizeUrl(`${envConfigs.app_url}/blog`, { locale: loc as any }).href;
-    return {
-      meta: [
-        {
-          title: `${m['blog.title']({}, { locale: locale as any })} | ${envConfigs.app_name}`,
-        },
-        {
-          name: 'description',
-          content: m['blog.description']({}, { locale: locale as any }),
-        },
-      ],
-      links: [
-        { rel: 'canonical', href: urlFor(locale ?? 'en') },
-        ...locales.map((loc) => ({
-          rel: 'alternate',
-          hrefLang: loc,
-          href: urlFor(loc),
-        })),
-      ],
-    };
+    const locale = normalizeLocale(loaderData?.locale);
+    return localizedPageHead({
+      locale,
+      path: '/blog',
+      title: `${m['blog.title']({}, { locale })} | ${envConfigs.app_name}`,
+      description: m['blog.description']({}, { locale }),
+    });
   },
   component: BlogPage,
 });

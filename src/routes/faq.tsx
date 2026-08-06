@@ -1,14 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { envConfigs } from '@/config';
-import { normalizeLocale, siteLocales } from '@/config/locale';
+import { normalizeLocale } from '@/config/locale';
+import { localizedPageHead } from '@/lib/seo';
 import { getLocale } from '@/paraglide/runtime.js';
 import type { SeoLocale } from '@/blocks/platform-downloader';
-import {
-  ResourcePage,
-  resourcePath,
-  type ResourceKind,
-} from '@/blocks/seo-resource-page';
+import { ResourcePage, type ResourceKind } from '@/blocks/seo-resource-page';
 
 function locale(): SeoLocale {
   return normalizeLocale(getLocale());
@@ -22,7 +18,6 @@ export const Route = createFileRoute('/faq')({
 });
 
 export function pageHead(kind: ResourceKind, currentLocale: SeoLocale) {
-  const appUrl = envConfigs.app_url.replace(/\/$/, '');
   const path =
     kind === 'faq'
       ? '/faq'
@@ -114,22 +109,10 @@ export function pageHead(kind: ResourceKind, currentLocale: SeoLocale) {
   const title = titles[kind][currentLocale] || titles[kind].en;
   const description =
     descriptions[kind][currentLocale] || descriptions[kind].en;
-  return {
-    meta: [
-      { title },
-      { name: 'description', content: description },
-      { property: 'og:type', content: 'website' },
-    ],
-    links: [
-      {
-        rel: 'canonical',
-        href: `${appUrl}${resourcePath(currentLocale, path)}`,
-      },
-      ...siteLocales.map((lang) => ({
-        rel: 'alternate',
-        hrefLang: lang,
-        href: `${appUrl}${resourcePath(lang, path)}`,
-      })),
-    ],
-  };
+  return localizedPageHead({
+    locale: currentLocale,
+    path,
+    title,
+    description,
+  });
 }

@@ -1,39 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import { AI_DISCOVERY_PAGES } from '@/lib/ai-discovery';
 import { baseLocale } from '@/paraglide/runtime.js';
 import { getLocalPosts, mergePosts } from '@/content/posts';
-
-const STATIC_PAGES: { path: string; title: string; description: string }[] = [
-  { path: '', title: 'Home', description: 'Landing page' },
-  { path: '/pricing', title: 'Pricing', description: 'Pricing plans' },
-  { path: '/blog', title: 'Blog', description: 'Blog posts and articles' },
-  {
-    path: '/api-docs',
-    title: 'API Documentation',
-    description: 'Video parsing and transcription API',
-  },
-  {
-    path: '/faq',
-    title: 'FAQ',
-    description: 'Public video downloader questions',
-  },
-  {
-    path: '/how-to-download-videos',
-    title: 'How to Download Videos',
-    description: 'Public video download guide',
-  },
-  {
-    path: '/tools/tiktok-downloader',
-    title: 'TikTok Downloader',
-    description: 'Public TikTok video tool',
-  },
-  {
-    path: '/tools/instagram-downloader',
-    title: 'Instagram Reels Downloader',
-    description: 'Public Instagram video tool',
-  },
-];
 
 export const Route = createFileRoute('/llms-full.txt')({
   server: {
@@ -48,7 +18,7 @@ export const Route = createFileRoute('/llms-full.txt')({
           '',
           '## Pages',
           '',
-          ...STATIC_PAGES.map(
+          ...AI_DISCOVERY_PAGES.map(
             (p) => `- [${p.title}](${app_url}${p.path}): ${p.description}`
           ),
         ];
@@ -106,7 +76,10 @@ export const Route = createFileRoute('/llms-full.txt')({
         lines.push('');
 
         return new Response(lines.join('\n'), {
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'public, max-age=3600',
+          },
         });
       },
     },

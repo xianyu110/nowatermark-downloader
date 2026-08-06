@@ -2,6 +2,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 
 import { ResourcePage, type ResourceKind } from '@/blocks/seo-resource-page';
 
+import { StaticPageContent, staticPageHead } from '../(pages)/-static-page';
 import { pageHead } from '../faq';
 
 const resources: Record<string, ResourceKind> = {
@@ -9,13 +10,30 @@ const resources: Record<string, ResourceKind> = {
   'how-to-download-videos': 'guide',
   'api-docs': 'api',
 };
+const staticSlugs = new Set([
+  'privacy-policy',
+  'user-agreement',
+  'terms-of-service',
+  'refund-policy',
+  'copyright-policy',
+]);
 
 export const Route = createFileRoute('/ja/$resource')({
   beforeLoad: ({ params }) => {
-    if (!resources[params.resource]) throw notFound();
+    if (!resources[params.resource] && !staticSlugs.has(params.resource)) {
+      throw notFound();
+    }
   },
-  head: ({ params }) => pageHead(resources[params.resource]!, 'ja'),
-  component: () => (
-    <ResourcePage kind={resources[Route.useParams().resource]!} locale="ja" />
-  ),
+  head: ({ params }) =>
+    resources[params.resource]
+      ? pageHead(resources[params.resource]!, 'ja')
+      : staticPageHead(params.resource, 'ja'),
+  component: () => {
+    const slug = Route.useParams().resource;
+    return resources[slug] ? (
+      <ResourcePage kind={resources[slug]!} locale="ja" />
+    ) : (
+      <StaticPageContent slug={slug} locale="ja" />
+    );
+  },
 });

@@ -1,9 +1,10 @@
 import type { ComponentType } from 'react';
 import { notFound, useLoaderData } from '@tanstack/react-router';
 
-import { envConfigs } from '@/config';
+import { normalizeLocale, type SiteLocale } from '@/config/locale';
+import { localizedPageHead } from '@/lib/seo';
 import { m } from '@/paraglide/messages.js';
-import { baseLocale, getLocale, localizeUrl } from '@/paraglide/runtime.js';
+import { baseLocale, getLocale } from '@/paraglide/runtime.js';
 
 type PageMeta = {
   title: string;
@@ -22,7 +23,7 @@ const pages = import.meta.glob<PageModule>('/src/content/pages/*.mdx', {
   eager: true,
 });
 
-function loadPage(slug: string, locale: string): PageModule | null {
+export function loadPage(slug: string, locale: string): PageModule | null {
   return (
     pages[`/src/content/pages/${slug}.${locale}.mdx`] ??
     pages[`/src/content/pages/${slug}.${baseLocale}.mdx`] ??
@@ -30,7 +31,51 @@ function loadPage(slug: string, locale: string): PageModule | null {
   );
 }
 
-type LoaderData = { meta: PageMeta; slug: string; locale: string };
+type LoaderData = {
+  meta: PageMeta;
+  slug: string;
+  locale: SiteLocale;
+  contentLocale: SiteLocale;
+  isFallback: boolean;
+};
+
+export function staticPageData(slug: string, locale: SiteLocale) {
+  const page = loadPage(slug, locale);
+  if (!page) return null;
+  const hasLocalizedPage = Boolean(
+    pages[`/src/content/pages/${slug}.${locale}.mdx`]
+  );
+  return {
+    meta: page.meta,
+    contentLocale: hasLocalizedPage ? locale : baseLocale,
+    isFallback: !hasLocalizedPage,
+  };
+}
+
+export function staticPageHead(slug: string, locale: SiteLocale) {
+  const data = staticPageData(slug, locale);
+  if (!data) return {};
+  const pageHead = localizedPageHead({
+    locale: data.contentLocale,
+    path: `/${slug}`,
+    title: data.meta.title,
+    description: data.meta.description,
+  });
+  return {
+    meta: [
+      ...pageHead.meta,
+      ...(data.isFallback
+        ? [
+            {
+              name: 'robots',
+              content: 'noindex, follow',
+            },
+          ]
+        : []),
+    ],
+    links: pageHead.links,
+  };
+}
 
 // Shared route options for static MDX pages. Each page gets its own
 // explicit route file (e.g. privacy-policy.tsx) so static segments
@@ -39,46 +84,48 @@ type LoaderData = { meta: PageMeta; slug: string; locale: string };
 export function staticPageRouteOptions(slug: string) {
   return {
     loader: (): LoaderData => {
-      const locale = getLocale();
-      const page = loadPage(slug, locale);
-      if (!page) throw notFound();
-      return { meta: page.meta, slug, locale };
+      const locale = normalizeLocale(getLocale());
+      const data = staticPageData(slug, locale);
+      if (!data) throw notFound();
+      return {
+        meta: data.meta,
+        slug,
+        locale,
+        contentLocale: data.contentLocale,
+        isFallback: data.isFallback,
+      };
     },
     head: ({ loaderData }: { loaderData?: LoaderData }) => {
       if (!loaderData) return {};
-      const { meta, locale } = loaderData;
-      const canonical = localizeUrl(`${envConfigs.app_url}/${slug}`, {
-        locale: locale as ReturnType<typeof getLocale>,
-      }).href;
-      return {
-        meta: [
-          { title: meta.title },
-          { name: 'description', content: meta.description },
-        ],
-        links: [{ rel: 'canonical', href: canonical }],
-      };
+      return staticPageHead(loaderData.slug, loaderData.locale);
     },
     component: StaticPage,
   };
 }
 
-function StaticPage() {
-  const { meta, slug, locale } = useLoaderData({
-    strict: false,
-  }) as LoaderData;
-
-  const page = loadPage(slug, locale)!;
+export function StaticPageContent({
+  slug,
+  locale,
+}: {
+  slug: string;
+  locale: SiteLocale;
+}) {
+  const data = staticPageData(slug, locale);
+  if (!data) return null;
+  const page = loadPage(slug, data.contentLocale)!;
   const Content = page.default;
 
   return (
     <article>
       <header className="border-border mb-6 border-b pb-5">
         <h1 className="text-foreground text-3xl font-semibold tracking-tight md:text-4xl">
-          {meta.title}
+          {data.meta.title}
         </h1>
-        <p className="text-muted-foreground mt-2 text-sm">{meta.description}</p>
+        <p className="text-muted-foreground mt-2 text-sm">
+          {data.meta.description}
+        </p>
         <p className="text-muted-foreground mt-2 text-xs">
-          {m['common.pages.last_updated']()}: {meta.updated_at}
+          {m['common.pages.last_updated']()}: {data.meta.updated_at}
         </p>
       </header>
       <div className="text-foreground/90 text-[15px] leading-7">
@@ -86,4 +133,12 @@ function StaticPage() {
       </div>
     </article>
   );
+}
+
+function StaticPage() {
+  const { meta, slug, contentLocale } = useLoaderData({
+    strict: false,
+  }) as LoaderData;
+
+  return <StaticPageContent slug={slug} locale={contentLocale} />;
 }

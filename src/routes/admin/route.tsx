@@ -9,10 +9,12 @@ import {
 } from 'lucide-react';
 
 import { envConfigs } from '@/config';
+import { privatePageHead } from '@/lib/seo';
 import { m } from '@/paraglide/messages.js';
 import { AppLayout } from '@/components/app-layout';
 
 export const Route = createFileRoute('/admin')({
+  head: privatePageHead,
   component: AdminLayout,
 });
 

@@ -2,19 +2,18 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
 import { localePath, siteLocales } from '@/config/locale';
+import { hreflangForLocale } from '@/lib/seo';
 import { baseLocale, locales } from '@/paraglide/runtime.js';
 import { getLocalPosts, mergePosts } from '@/content/posts';
 
-const STATIC_PATHS = [
-  '',
-  '/pricing',
+const ALL_LOCALE_STATIC_PATHS = ['', '/pricing', '/transcribe'];
+const EDITORIAL_PATHS = [
   '/blog',
   '/privacy-policy',
   '/user-agreement',
   '/terms-of-service',
   '/refund-policy',
   '/copyright-policy',
-  '/transcribe',
 ];
 const SEO_LOCALES = siteLocales;
 const SEO_PATHS = [
@@ -45,11 +44,11 @@ function urlFor(path: string, locale: string): string {
   return `${appUrl}${localePath(locale as (typeof siteLocales)[number], path || '/')}`;
 }
 
-function entryXml(e: Entry): string {
+function entryXml(e: Entry, locale: string): string {
   const alternates = (e.locales || locales)
     .map(
       (loc) =>
-        `    <xhtml:link rel="alternate" hreflang="${loc}" href="${urlFor(e.path, loc)}"/>`
+        `    <xhtml:link rel="alternate" hreflang="${hreflangForLocale(loc as (typeof siteLocales)[number])}" href="${urlFor(e.path, loc)}"/>`
     )
     .concat(
       `    <xhtml:link rel="alternate" hreflang="x-default" href="${urlFor(e.path, 'en')}"/>`
@@ -57,7 +56,7 @@ function entryXml(e: Entry): string {
     .join('\n');
   return [
     '  <url>',
-    `    <loc>${urlFor(e.path, baseLocale)}</loc>`,
+    `    <loc>${urlFor(e.path, locale)}</loc>`,
     alternates,
     e.lastModified ? `    <lastmod>${e.lastModified}</lastmod>` : null,
     `    <changefreq>${e.changeFrequency}</changefreq>`,
@@ -72,11 +71,20 @@ export const Route = createFileRoute('/sitemap.xml')({
   server: {
     handlers: {
       GET: async () => {
-        const entries: Entry[] = STATIC_PATHS.map((path) => ({
+        const entries: Entry[] = ALL_LOCALE_STATIC_PATHS.map((path) => ({
           path,
           changeFrequency: path === '/blog' ? 'daily' : 'weekly',
           priority: path === '' ? 1 : 0.8,
+          locales: SEO_LOCALES,
         }));
+        for (const path of EDITORIAL_PATHS) {
+          entries.push({
+            path,
+            changeFrequency: path === '/blog' ? 'daily' : 'weekly',
+            priority: path === '/blog' ? 0.8 : 0.5,
+            locales: ['en', 'zh'],
+          });
+        }
         for (const path of SEO_PATHS) {
           entries.push({
             path,
@@ -113,6 +121,7 @@ export const Route = createFileRoute('/sitemap.xml')({
               lastModified: post.createdAt,
               changeFrequency: 'monthly',
               priority: 0.6,
+              locales: [baseLocale],
             });
           }
         } catch {
@@ -123,6 +132,7 @@ export const Route = createFileRoute('/sitemap.xml')({
               lastModified: post.createdAt,
               changeFrequency: 'monthly',
               priority: 0.6,
+              locales: [baseLocale],
             });
           }
         }
@@ -130,13 +140,18 @@ export const Route = createFileRoute('/sitemap.xml')({
         const xml = [
           '<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
-          ...entries.map(entryXml),
+          ...entries.flatMap((entry) =>
+            (entry.locales || locales).map((locale) => entryXml(entry, locale))
+          ),
           '</urlset>',
           '',
         ].join('\n');
 
         return new Response(xml, {
-          headers: { 'Content-Type': 'application/xml' },
+          headers: {
+            'Content-Type': 'application/xml; charset=utf-8',
+            'Cache-Control': 'public, max-age=3600',
+          },
         });
       },
     },

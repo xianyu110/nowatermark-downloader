@@ -14,6 +14,7 @@ import { ThemeProvider } from 'next-themes';
 import { envConfigs } from '@/config';
 import { normalizeLocale, siteLocales } from '@/config/locale';
 import { getQueryClient } from '@/lib/query-client';
+import { hreflangForLocale } from '@/lib/seo';
 import { getLocale, getLocaleForUrl } from '@/paraglide/runtime.js';
 import { Ads } from '@/components/analytics/ads';
 import { GoogleAnalytics } from '@/components/analytics/google-analytics';
@@ -100,14 +101,14 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const { analytics } = Route.useLoaderData();
+  const { analytics, documentLocale } = Route.useLoaderData();
   const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: envConfigs.app_name,
     url: envConfigs.app_url,
     description: envConfigs.app_description,
-    inLanguage: siteLocales,
+    inLanguage: hreflangForLocale(documentLocale),
   };
 
   return (

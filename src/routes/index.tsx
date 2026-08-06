@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { envConfigs } from '@/config';
 import { normalizeLocale, type SiteLocale } from '@/config/locale';
-import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
+import { localizedPageHead } from '@/lib/seo';
+import { getLocale } from '@/paraglide/runtime.js';
 import { CopypilotDownloader } from '@/blocks/copypilot-downloader';
 
 function HomePage() {
@@ -38,32 +38,7 @@ export const Route = createFileRoute('/')({
     };
     const title = titles[locale];
     const description = descriptions[locale];
-    const canonical = localizeUrl(`${envConfigs.app_url}/`, { locale }).href;
-
-    return {
-      meta: [
-        { title },
-        { name: 'description', content: description },
-        { property: 'og:type', content: 'website' },
-        { property: 'og:site_name', content: 'NoWatermark' },
-        { property: 'og:title', content: title },
-        { property: 'og:description', content: description },
-        { property: 'og:url', content: canonical },
-        { name: 'twitter:card', content: 'summary' },
-        { name: 'twitter:title', content: title },
-        { name: 'twitter:description', content: description },
-      ],
-      links: [
-        { rel: 'canonical', href: canonical },
-        ...locales.map((alternateLocale) => ({
-          rel: 'alternate',
-          hrefLang: alternateLocale,
-          href: localizeUrl(`${envConfigs.app_url}/`, {
-            locale: alternateLocale,
-          }).href,
-        })),
-      ],
-    };
+    return localizedPageHead({ locale, path: '/', title, description });
   },
   component: HomePage,
 });

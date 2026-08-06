@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { normalizeLocale, type SiteLocale } from '@/config/locale';
+import { localizedPageHead } from '@/lib/seo';
 import { getLocale } from '@/paraglide/runtime.js';
 import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
@@ -33,12 +34,12 @@ export const Route = createFileRoute('/pricing')({
       ja: 'クリエイターとチーム向けの動画解析クレジットと月額プランをご案内します。',
       ko: '크리에이터와 팀을 위한 동영상 분석 크레딧 및 월간 요금제를 비교하세요.',
     };
-    return {
-      meta: [
-        { title: titles[locale] },
-        { name: 'description', content: descriptions[locale] },
-      ],
-    };
+    return localizedPageHead({
+      locale,
+      path: '/pricing',
+      title: titles[locale],
+      description: descriptions[locale],
+    });
   },
   component: PricingPage,
 });

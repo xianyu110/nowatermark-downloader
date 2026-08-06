@@ -12,11 +12,13 @@ import {
 } from 'lucide-react';
 
 import { envConfigs } from '@/config';
+import { privatePageHead } from '@/lib/seo';
 import { m } from '@/paraglide/messages.js';
 import { SupportWidget } from '@/blocks/support-widget';
 import { AppLayout } from '@/components/app-layout';
 
 export const Route = createFileRoute('/settings')({
+  head: privatePageHead,
   component: SettingsLayout,
 });
 

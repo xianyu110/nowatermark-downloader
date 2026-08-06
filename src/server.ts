@@ -29,6 +29,11 @@ function ensureCloudflareEnv(): Promise<void> {
 export default {
   async fetch(req: Request): Promise<Response> {
     await ensureCloudflareEnv();
+    const requestUrl = new URL(req.url);
+    if (requestUrl.pathname.length > 1 && requestUrl.pathname.endsWith('/')) {
+      requestUrl.pathname = requestUrl.pathname.replace(/\/+$/, '');
+      return Response.redirect(requestUrl.toString(), 308);
+    }
     const response = await paraglideMiddleware(req, () => handler.fetch(req));
     const utmSource = new URL(req.url).searchParams.get('utm_source');
     const existing = getCookieFromHeader(

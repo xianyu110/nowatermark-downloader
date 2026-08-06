@@ -1,12 +1,10 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 
-import { envConfigs } from '@/config';
-import { siteLocales } from '@/config/locale';
+import { localizedPageHead } from '@/lib/seo';
 import {
   getPlatformCopy,
   isPlatformSlug,
   PlatformDownloader,
-  platformPath,
   type SeoLocale,
 } from '@/blocks/platform-downloader';
 
@@ -18,25 +16,12 @@ export const Route = createFileRoute('/it/tools/$platform')({
   },
   head: ({ params }) => {
     const item = getPlatformCopy(params.platform, locale)!;
-    const appUrl = envConfigs.app_url.replace(/\/$/, '');
-    return {
-      meta: [
-        { title: `${item.name} | NoWatermark` },
-        { name: 'description', content: item.description },
-        { property: 'og:type', content: 'website' },
-      ],
-      links: [
-        {
-          rel: 'canonical',
-          href: `${appUrl}${platformPath(locale, params.platform)}`,
-        },
-        ...siteLocales.map((lang) => ({
-          rel: 'alternate',
-          hrefLang: lang,
-          href: `${appUrl}${platformPath(lang, params.platform)}`,
-        })),
-      ],
-    };
+    return localizedPageHead({
+      locale,
+      path: `/tools/${params.platform}`,
+      title: `${item.name} | NoWatermark`,
+      description: item.description,
+    });
   },
   component: SpanishToolPlatformPage,
 });
