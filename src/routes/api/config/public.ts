@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { filterPublicConfigs, getAllConfigs } from '@/modules/config/service';
+import { getAvailablePaymentProviders } from '@/modules/payment/service';
 import { respData } from '@/lib/resp';
 
 const noStore = {
@@ -28,6 +29,8 @@ const publicKeys = [
   'paypal_enabled',
   'alipay_enabled',
   'wechat_enabled',
+  'video_parse_credits_enabled',
+  'anonymous_free_daily_limit',
   'google_analytics_id',
   'plausible_domain',
   'plausible_src',
@@ -48,6 +51,16 @@ function isEmailSendingConfigured(configs: Record<string, string>): boolean {
 async function GET({ request }: { request: Request }) {
   const configs = await getAllConfigs();
   const result = filterPublicConfigs(configs, publicKeys);
+  const availableProviders = new Set(
+    await getAvailablePaymentProviders().catch(() => [])
+  );
+  for (const provider of ['stripe', 'creem', 'paypal', 'alipay', 'wechat']) {
+    result[`${provider}_enabled`] =
+      configs[`${provider}_enabled`] === 'true' &&
+      availableProviders.has(provider)
+        ? 'true'
+        : 'false';
+  }
   const emailConfigured = isEmailSendingConfigured(configs);
   result.password_reset_enabled =
     configs.email_auth_enabled !== 'false' && emailConfigured

@@ -79,6 +79,29 @@ export async function getCurrentSubscription(userId: string) {
   return result;
 }
 
+function entitlementEndTime(value: Date | string | number | null | undefined) {
+  if (!value) return null;
+  const timestamp =
+    value instanceof Date ? value.getTime() : new Date(value).getTime();
+  return Number.isFinite(timestamp) ? timestamp : null;
+}
+
+export async function getActivePaidSubscription(userId: string) {
+  const current = await getCurrentSubscription(userId);
+  if (!current) return null;
+
+  const endsAt = entitlementEndTime(
+    current.canceledEndAt || current.currentPeriodEnd
+  );
+  if (endsAt !== null && endsAt <= Date.now()) return null;
+
+  return current;
+}
+
+export async function hasActivePaidMembership(userId: string) {
+  return Boolean(await getActivePaidSubscription(userId));
+}
+
 export async function getSubscriptions(params: {
   userId?: string;
   status?: string;

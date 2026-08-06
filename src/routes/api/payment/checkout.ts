@@ -3,7 +3,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import { getAuth } from '@/core/auth';
 import { getPricingProduct } from '@/config/pricing';
 import { getAllConfigs } from '@/modules/config/service';
-import { createCheckout } from '@/modules/payment/service';
+import {
+  createCheckout,
+  getAvailablePaymentProviders,
+} from '@/modules/payment/service';
 import { enforceMinIntervalRateLimit } from '@/lib/rate-limit';
 import { respData, respErr } from '@/lib/resp';
 
@@ -23,6 +26,17 @@ function safeSameOriginPath(
   }
 }
 
+function providerSupportsCurrency(provider: string, currency: string) {
+  const normalizedCurrency = currency.toLowerCase();
+  if (normalizedCurrency === 'usd') {
+    return ['stripe', 'creem', 'paypal'].includes(provider);
+  }
+  if (normalizedCurrency === 'cny') {
+    return ['stripe', 'alipay', 'wechat'].includes(provider);
+  }
+  return provider === 'stripe';
+}
+
 async function POST({ request }: { request: Request }) {
   const limited = enforceMinIntervalRateLimit(request, {
     intervalMs: 1000,
@@ -31,7 +45,8 @@ async function POST({ request }: { request: Request }) {
   if (limited) return limited;
 
   try {
-    const auth = getAuth();
+    const configs = await getAllConfigs();
+    const auth = getAuth(configs);
     const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session?.user) {
@@ -52,16 +67,35 @@ async function POST({ request }: { request: Request }) {
       return respErr('Unknown product');
     }
 
-    // Optional per-provider "test amount" override (admin-configured).
-    // Only the charged amount is overridden — credits granted and order
-    // amount stored both come from the authoritative catalog.
-    const configs = await getAllConfigs();
-    const providerKey = payment_provider || configs.default_payment_provider;
-    const testAmountRaw = providerKey
-      ? configs[`${providerKey}_test_amount`]
-      : undefined;
-    const testAmount = testAmountRaw ? parseInt(testAmountRaw) : 0;
-    const chargeAmount = testAmount > 0 ? testAmount : product.priceInCents;
+    if (configs.video_parse_credits_enabled !== 'true') {
+      return respErr('Checkout is not available yet.', { status: 503 });
+    }
+
+    if (
+      payment_provider !== undefined &&
+      typeof payment_provider !== 'string'
+    ) {
+      return respErr('Invalid payment provider');
+    }
+
+    const providerKey =
+      payment_provider?.trim() || configs.default_payment_provider?.trim();
+    if (!providerKey) {
+      return respErr('No payment provider configured.', { status: 503 });
+    }
+    if (configs[`${providerKey}_enabled`] !== 'true') {
+      return respErr('Payment provider is not enabled.', { status: 503 });
+    }
+    if (!providerSupportsCurrency(providerKey, product.currency)) {
+      return respErr('Payment provider does not support this currency.');
+    }
+
+    const availableProviders = await getAvailablePaymentProviders();
+    if (!availableProviders.includes(providerKey)) {
+      return respErr('Payment provider is not fully configured.', {
+        status: 503,
+      });
+    }
 
     // Build success/cancel URLs — only accept same-origin redirects.
     const baseUrl = configs.app_url || 'http://localhost:3000';
@@ -87,7 +121,7 @@ async function POST({ request }: { request: Request }) {
       creditsValidDays: product.creditsValidDays,
       paymentOrder: {
         productId: product.productId,
-        price: { amount: chargeAmount, currency: product.currency },
+        price: { amount: product.priceInCents, currency: product.currency },
         type: product.type,
         description: product.description,
         successUrl,
@@ -105,7 +139,7 @@ async function POST({ request }: { request: Request }) {
             }
           : undefined,
       },
-      provider: payment_provider,
+      provider: providerKey,
     });
 
     return respData({ checkout_url: checkout.checkoutInfo.checkoutUrl });

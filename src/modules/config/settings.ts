@@ -160,6 +160,12 @@ export function getSettingGroups(): SettingGroup[] {
       tab: 'ai',
     },
     {
+      name: 'transcription',
+      title: 'Video Transcription',
+      description: 'Speech-to-text model, limits, and credit cost',
+      tab: 'ai',
+    },
+    {
       name: 'anthropic',
       title: 'Anthropic',
       description: 'Anthropic Claude API',
@@ -788,6 +794,35 @@ export function getSettings(): Setting[] {
       type: 'password',
       placeholder: 'sk-xxx',
       group: 'openai',
+      tab: 'ai',
+    },
+
+    // ─── AI / Video transcription ───────────────────────────────────
+    {
+      name: 'video_transcription_model',
+      title: 'Transcription Model',
+      type: 'text',
+      placeholder: 'whisper-1',
+      tip: 'Model accepted by the configured OpenAI-compatible /audio/transcriptions endpoint',
+      group: 'transcription',
+      tab: 'ai',
+    },
+    {
+      name: 'video_transcription_credit_cost',
+      title: 'Credits Per Transcription',
+      type: 'number',
+      placeholder: '1',
+      tip: 'Credits are refunded automatically when transcription fails',
+      group: 'transcription',
+      tab: 'ai',
+    },
+    {
+      name: 'video_transcription_max_bytes',
+      title: 'Maximum Media Bytes',
+      type: 'number',
+      placeholder: '26214400',
+      tip: 'Maximum media size fetched by the Worker; 26214400 equals 25 MB',
+      group: 'transcription',
       tab: 'ai',
     },
 

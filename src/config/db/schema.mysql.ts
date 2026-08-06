@@ -308,6 +308,45 @@ export const credit = table(
   ]
 );
 
+export const anonymousUsage = table(
+  'anonymous_usage',
+  {
+    id: varchar191('id').primaryKey(),
+    usageDate: varchar('usage_date', { length: 10 }).notNull(),
+    successfulParses: int('successful_parses').notNull().default(0),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [index('idx_anonymous_usage_date').on(table.usageDate)]
+);
+
+export const parseHistory = table(
+  'parse_history',
+  {
+    id: varchar191('id').primaryKey(),
+    userId: varchar191('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    sourceUrl: longtext('source_url').notNull(),
+    platform: varchar('platform', { length: 100 }).notNull().default(''),
+    title: varchar('title', { length: 500 }).notNull().default(''),
+    mediaType: varchar('media_type', { length: 30 }).notNull(),
+    requestedMode: varchar('requested_mode', { length: 30 }).notNull(),
+    requestedQuality: varchar('requested_quality', { length: 30 }).notNull(),
+    provider: varchar('provider', { length: 100 }).notNull().default(''),
+    mediaUrl: longtext('media_url').notNull(),
+    videoUrl: longtext('video_url'),
+    coverUrl: longtext('cover_url'),
+    filename: varchar('filename', { length: 500 }),
+    duration: int('duration'),
+    resultJson: longtext('result_json').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_parse_history_user_created').on(table.userId, table.createdAt),
+  ]
+);
+
 export const apikey = table(
   'apikey',
   {
@@ -502,6 +541,8 @@ export type Subscription = typeof subscription.$inferSelect;
 export type NewSubscription = typeof subscription.$inferInsert;
 export type Credit = typeof credit.$inferSelect;
 export type NewCredit = typeof credit.$inferInsert;
+export type ParseHistory = typeof parseHistory.$inferSelect;
+export type NewParseHistory = typeof parseHistory.$inferInsert;
 export type Apikey = typeof apikey.$inferSelect;
 export type NewApikey = typeof apikey.$inferInsert;
 export type Role = typeof role.$inferSelect;

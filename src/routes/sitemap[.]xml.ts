@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
-import { baseLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
+import { localePath, siteLocales } from '@/config/locale';
+import { baseLocale, locales } from '@/paraglide/runtime.js';
 import { getLocalPosts, mergePosts } from '@/content/posts';
 
 const STATIC_PATHS = [
@@ -11,6 +12,23 @@ const STATIC_PATHS = [
   '/privacy-policy',
   '/user-agreement',
   '/terms-of-service',
+  '/refund-policy',
+  '/copyright-policy',
+  '/transcribe',
+];
+const SEO_LOCALES = siteLocales;
+const SEO_PATHS = [
+  '/faq',
+  '/how-to-download-videos',
+  '/api-docs',
+  '/data-deletion',
+];
+const TOOL_SLUGS = [
+  'tiktok-downloader',
+  'instagram-downloader',
+  'youtube-downloader',
+  'facebook-video-downloader',
+  'twitter-video-downloader',
 ];
 
 type Entry = {
@@ -18,19 +36,23 @@ type Entry = {
   lastModified?: string;
   changeFrequency: string;
   priority: number;
+  locales?: readonly string[];
 };
 
 function urlFor(path: string, locale: string): string {
-  return localizeUrl(`${envConfigs.app_url}${path || '/'}`, {
-    locale: locale as (typeof locales)[number],
-  }).href;
+  const appUrl = envConfigs.app_url.replace(/\/$/, '');
+  if (locale === 'en') return `${appUrl}${path || '/'}`;
+  return `${appUrl}${localePath(locale as (typeof siteLocales)[number], path || '/')}`;
 }
 
 function entryXml(e: Entry): string {
-  const alternates = locales
+  const alternates = (e.locales || locales)
     .map(
       (loc) =>
         `    <xhtml:link rel="alternate" hreflang="${loc}" href="${urlFor(e.path, loc)}"/>`
+    )
+    .concat(
+      `    <xhtml:link rel="alternate" hreflang="x-default" href="${urlFor(e.path, 'en')}"/>`
     )
     .join('\n');
   return [
@@ -55,6 +77,22 @@ export const Route = createFileRoute('/sitemap.xml')({
           changeFrequency: path === '/blog' ? 'daily' : 'weekly',
           priority: path === '' ? 1 : 0.8,
         }));
+        for (const path of SEO_PATHS) {
+          entries.push({
+            path,
+            changeFrequency: path === '/api-docs' ? 'weekly' : 'monthly',
+            priority: path === '/faq' ? 0.8 : 0.7,
+            locales: SEO_LOCALES,
+          });
+        }
+        for (const slug of TOOL_SLUGS) {
+          entries.push({
+            path: `/tools/${slug}`,
+            changeFrequency: 'weekly',
+            priority: 0.85,
+            locales: SEO_LOCALES,
+          });
+        }
 
         // Blog posts: db posts merged with local MDX posts.
         try {

@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { Check, Copy, Plus, Trash2 } from 'lucide-react';
+import { Check, Copy, Crown, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import {
@@ -17,6 +17,8 @@ import {
   type PageResult,
 } from '@/lib/api-client';
 import { m } from '@/paraglide/messages.js';
+import { getLocale } from '@/paraglide/runtime.js';
+import { usePaidMembership } from '@/hooks/use-paid-membership';
 import { DataTable, type Column } from '@/components/data-table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -44,6 +46,24 @@ interface ApiKey {
 const PAGE_SIZE = 20;
 
 function ApiKeysPage() {
+  const isZh = getLocale() === 'zh';
+  const membershipQuery = usePaidMembership(true);
+  const isPaidMember = Boolean(membershipQuery.data);
+  const memberCopy = isZh
+    ? {
+        title: '公开 API 是会员专属功能',
+        description:
+          '开通月度会员后可创建 API Key，并通过服务端调用视频解析和视频转文字接口。',
+        cta: '查看会员套餐',
+        checking: '正在检查会员状态',
+      }
+    : {
+        title: 'Public API access is a member feature',
+        description:
+          'Subscribe to a monthly plan to create API keys and call video parsing or transcription from your server.',
+        cta: 'View membership plans',
+        checking: 'Checking membership',
+      };
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -192,10 +212,24 @@ function ApiKeysPage() {
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger className="bg-primary text-primary-foreground hover:bg-primary/80 inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-2.5 text-sm font-medium transition-colors">
-            <Plus className="size-4" />
-            {m['settings.apikeys.create_key']()}
-          </DialogTrigger>
+          {membershipQuery.isPending ? (
+            <Button size="sm" disabled>
+              {memberCopy.checking}
+            </Button>
+          ) : isPaidMember ? (
+            <DialogTrigger className="bg-primary text-primary-foreground hover:bg-primary/80 inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-2.5 text-sm font-medium transition-colors">
+              <Plus className="size-4" />
+              {m['settings.apikeys.create_key']()}
+            </DialogTrigger>
+          ) : (
+            <a
+              href={isZh ? '/zh/pricing' : '/pricing'}
+              className="bg-primary text-primary-foreground hover:bg-primary/80 inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-2.5 text-sm font-medium transition-colors"
+            >
+              <Crown className="size-4" />
+              {memberCopy.cta}
+            </a>
+          )}
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{m['settings.apikeys.create_title']()}</DialogTitle>
@@ -319,6 +353,28 @@ function ApiKeysPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {!membershipQuery.isPending && !isPaidMember ? (
+        <Card className="border-amber-200 bg-amber-50/70">
+          <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <Crown className="size-6 shrink-0 text-amber-700" />
+            <div className="min-w-0 flex-1">
+              <h2 className="font-semibold text-amber-950">
+                {memberCopy.title}
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-amber-900/75">
+                {memberCopy.description}
+              </p>
+            </div>
+            <a
+              href={isZh ? '/zh/pricing' : '/pricing'}
+              className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-amber-700 px-4 text-sm font-semibold text-white hover:bg-amber-800"
+            >
+              {memberCopy.cta}
+            </a>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardContent>

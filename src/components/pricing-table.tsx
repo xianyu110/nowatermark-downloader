@@ -50,9 +50,13 @@ export interface PricingGroup {
 export function PricingTable({
   groups,
   onCheckout,
+  checkoutEnabled = true,
+  unavailableText,
 }: {
   groups: PricingGroup[];
   onCheckout?: (plan: PricingPlan) => void;
+  checkoutEnabled?: boolean;
+  unavailableText?: string;
 }) {
   const [activeGroup, setActiveGroup] = useState(groups[0]?.key || '');
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -184,11 +188,13 @@ export function PricingTable({
               variant={plan.featured ? 'default' : 'outline'}
               className="h-10 w-full rounded-full text-sm font-medium"
               onClick={() => handleCheckout(plan)}
-              disabled={loadingId === plan.id}
+              disabled={!checkoutEnabled || loadingId === plan.id}
             >
-              {loadingId === plan.id
-                ? m['common.pricing.processing']()
-                : plan.buttonText || m['common.pricing.get_started']()}
+              {!checkoutEnabled
+                ? unavailableText || plan.buttonText
+                : loadingId === plan.id
+                  ? m['common.pricing.processing']()
+                  : plan.buttonText || m['common.pricing.get_started']()}
             </Button>
 
             {/* Features */}

@@ -22,7 +22,8 @@ pnpm dev
 - **Payment** — Stripe, PayPal, Alipay, WeChat Pay (checkout, subscriptions, webhooks)
 - **Credits** — FIFO consumption, expiration, auto-grant on signup
 - **RBAC** — Roles, permissions, wildcard matching, admin panel management
-- **API Keys** — CRUD + validation
+- **Member API Keys** — CRUD + validation for active monthly subscribers
+- **Member video transcription** — Turn parsed public video media into editable text and SRT subtitles
 - **Invite Codes** — Trial activation, batch generation, usage tracking
 - **CMS** — Categories and posts with full CRUD
 - **Image Upload** — Drop / paste / click uploader; uses S3/R2 if configured, falls back to inline base64 (size-capped) stored in DB
@@ -37,6 +38,48 @@ pnpm dev
 - **MDX Pages** — Privacy policy, terms of service (content in `src/content/pages/`), extensible via skill
 - **Database** — SQLite (dev) / PostgreSQL / MySQL via Drizzle ORM
 - **All code self-contained** — no external packages for business logic
+
+## Video Parse API
+
+Active monthly members can create an API key from account settings, then call
+the same parser used by the website with a Bearer token:
+
+```bash
+curl -X POST https://nowatermarkdownloader.com/api/parse \
+  -H 'Authorization: Bearer sk_your_api_key' \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://www.tiktok.com/@creator/video/123","mode":"auto","quality":"1080"}'
+```
+
+`mode` accepts `auto`, `audio`, or `mute`; `quality` accepts `max`, `1080`,
+`720`, or `480`. API-key requests use the account's credits, are written to
+parse history, and never consume anonymous daily quota. Invalid or revoked
+keys return `401`; accounts without an active monthly membership return `403`.
+API requests are never downgraded to anonymous access.
+
+## Video Transcription
+
+Active monthly members can open `/transcribe`, paste a supported public video
+link, and download the transcript as TXT or timestamped SRT. Credit packs by
+themselves do not unlock transcription. A successful request consumes the
+configured number of credits; failed requests are refunded. The page first
+uses the site's parser to obtain an audio URL, then sends the media to the
+server-side OpenAI-compatible transcription endpoint. The API is also
+available to member API-key clients:
+
+```bash
+curl -X POST https://nowatermarkdownloader.com/api/transcribe \
+  -H 'Authorization: Bearer sk_your_api_key' \
+  -H 'Content-Type: application/json' \
+  -d '{"mediaUrl":"https://cdn.example.com/audio.mp4","language":"zh"}'
+```
+
+Configure `openai_api_key` and `openai_base_url` in Admin → Settings → AI.
+`video_transcription_model` defaults to `whisper-1`,
+`video_transcription_credit_cost` defaults to `1`, and
+`video_transcription_max_bytes` defaults to `26214400` (25 MB). Never expose
+the transcription provider key in browser code or client-side environment
+variables.
 
 ## Tech Stack
 
@@ -107,7 +150,7 @@ replace the D1 database ID, then run:
 
 ```bash
 pnpm cf:build
-pnpm exec wrangler d1 migrations apply sphxiazai-db --remote
+pnpm exec wrangler d1 migrations apply nowatermarkdownloader-db --remote
 pnpm exec wrangler secret put AUTH_SECRET
 pnpm exec wrangler deploy --config .output/server/wrangler.json
 ```

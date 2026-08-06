@@ -6,6 +6,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "nowatermarkdownloader",
   "workers_dev": true,
+  "compatibility_date": "2026-08-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
     "enabled": true,
@@ -17,12 +18,24 @@
     "VITE_APP_URL": "https://nowatermarkdownloader.com",
     "VITE_APP_NAME": "NoWatermark Downloader",
     "VITE_APP_DESCRIPTION": "Paste a public video link and get a direct media URL.",
+    "VIDEO_PARSE_YOUTUBE_PRIMARY_URL": "",
+    "VIDEO_PARSE_YOUTUBE_FALLBACK_URLS": "",
+    "VIDEO_PARSE_TIKTOK_PRIMARY_URL": "",
+    "VIDEO_PARSE_TIKTOK_FALLBACK_URLS": "",
+    "VIDEO_PARSE_INSTAGRAM_PRIMARY_URL": "",
+    "VIDEO_PARSE_INSTAGRAM_FALLBACK_URLS": "",
+    "VIDEO_PARSE_X_PRIMARY_URL": "",
+    "VIDEO_PARSE_X_FALLBACK_URLS": "",
     "VIDEO_PARSE_PRIMARY_URL": "",
     "VIDEO_PARSE_FALLBACK_URLS": "",
+    "VIDEO_TRANSCRIPTION_MODEL": "whisper-1",
+    "VIDEO_TRANSCRIPTION_CREDIT_COST": "1",
+    "VIDEO_TRANSCRIPTION_MAX_BYTES": "26214400",
+    "ADMIN_EMAIL": "bgnwd15@gmail.com",
     "INITIAL_CREDITS_ENABLED": "true",
     "INITIAL_CREDITS_AMOUNT": "3",
     "INITIAL_CREDITS_VALID_DAYS": "7",
-    "INITIAL_CREDITS_DESCRIPTION": "New user trial credits"
+    "INITIAL_CREDITS_DESCRIPTION": "New user trial credits",
   },
   "d1_databases": [
     {
@@ -35,8 +48,8 @@
   "routes": [
     {
       "pattern": "nowatermarkdownloader.com/*",
-      "zone_name": "nowatermarkdownloader.com"
-    }
+      "zone_name": "nowatermarkdownloader.com",
+    },
   ],
   // ── Postgres via Hyperdrive (instead of D1) ────────────────────────────────
   // 1. npx wrangler hyperdrive create <name> --connection-string="postgres://..." (your direct PG url)

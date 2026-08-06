@@ -21,6 +21,12 @@ export function GoogleOneTap() {
     if (isPending) return;
     if (session?.user) return;
     if (
+      typeof window === 'undefined' ||
+      !/^\/(?:[a-z]{2}\/)?sign-(?:in|up)\/?$/.test(window.location.pathname)
+    ) {
+      return;
+    }
+    if (
       configs.google_one_tap_enabled !== 'true' ||
       !configs.google_client_id
     ) {

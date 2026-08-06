@@ -1,21 +1,69 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { VideoDownloaderTool } from '@/blocks/video-downloader-tool';
+import { envConfigs } from '@/config';
+import { normalizeLocale, type SiteLocale } from '@/config/locale';
+import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
+import { CopypilotDownloader } from '@/blocks/copypilot-downloader';
 
 function HomePage() {
-  return <VideoDownloaderTool />;
+  return <CopypilotDownloader />;
 }
 
 export const Route = createFileRoute('/')({
-  head: () => ({
-    meta: [
-      { title: 'NoWatermark Downloader' },
-      {
-        name: 'description',
-        content:
-          'Paste a public video link and get a direct media URL with automatic fallback retries.',
-      },
-    ],
-  }),
+  head: () => {
+    const locale = normalizeLocale(getLocale());
+    const titles: Record<SiteLocale, string> = {
+      en: 'NoWatermark Downloader',
+      zh: 'NoWatermark 视频去水印下载器',
+      es: 'Descargador NoWatermark',
+      pt: 'Baixador NoWatermark',
+      fr: 'Téléchargeur vidéo sans filigrane | NoWatermark',
+      de: 'Videos ohne Wasserzeichen herunterladen | NoWatermark',
+      it: 'Downloader video senza filigrana | NoWatermark',
+      id: 'Pengunduh video tanpa watermark | NoWatermark',
+      ja: '透かしなし動画ダウンローダー | NoWatermark',
+      ko: '워터마크 없는 동영상 다운로드 | NoWatermark',
+    };
+    const descriptions: Record<SiteLocale, string> = {
+      en: 'Download public videos without watermarks from TikTok, Instagram, YouTube, X, Facebook, and more.',
+      zh: '免费下载 TikTok、Instagram、YouTube、X、Facebook 等平台的公开无水印视频。',
+      es: 'Descarga videos públicos sin marca de agua de TikTok, Instagram, YouTube, X, Facebook y más.',
+      pt: 'Baixe vídeos públicos sem marca d’água do TikTok, Instagram, YouTube, X, Facebook e outros.',
+      fr: 'Téléchargez des vidéos publiques sans filigrane depuis TikTok, Instagram, YouTube, X, Facebook et plus encore.',
+      de: 'Lade öffentliche Videos von TikTok, Instagram, YouTube, X, Facebook und weiteren Plattformen ohne Wasserzeichen herunter.',
+      it: 'Scarica video pubblici senza filigrana da TikTok, Instagram, YouTube, X, Facebook e altre piattaforme.',
+      id: 'Unduh video publik tanpa watermark dari TikTok, Instagram, YouTube, X, Facebook, dan platform lainnya.',
+      ja: 'TikTok、Instagram、YouTube、X、Facebookなどの公開動画を透かしなしでダウンロードできます。',
+      ko: 'TikTok, Instagram, YouTube, X, Facebook 등 공개 동영상을 워터마크 없이 다운로드하세요.',
+    };
+    const title = titles[locale];
+    const description = descriptions[locale];
+    const canonical = localizeUrl(`${envConfigs.app_url}/`, { locale }).href;
+
+    return {
+      meta: [
+        { title },
+        { name: 'description', content: description },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: 'NoWatermark' },
+        { property: 'og:title', content: title },
+        { property: 'og:description', content: description },
+        { property: 'og:url', content: canonical },
+        { name: 'twitter:card', content: 'summary' },
+        { name: 'twitter:title', content: title },
+        { name: 'twitter:description', content: description },
+      ],
+      links: [
+        { rel: 'canonical', href: canonical },
+        ...locales.map((alternateLocale) => ({
+          rel: 'alternate',
+          hrefLang: alternateLocale,
+          href: localizeUrl(`${envConfigs.app_url}/`, {
+            locale: alternateLocale,
+          }).href,
+        })),
+      ],
+    };
+  },
   component: HomePage,
 });

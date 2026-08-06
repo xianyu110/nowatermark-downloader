@@ -1,6 +1,7 @@
-import { and, asc, desc, eq, gt, isNull, or, sql, sum } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, gte, isNull, or, sql, sum } from 'drizzle-orm';
 
 import { db } from '@/core/db';
+import { envConfigs } from '@/config';
 import { credit } from '@/config/db/schema';
 import { getSnowId, getUuid } from '@/lib/hash';
 
@@ -124,6 +125,114 @@ export async function consume(params: {
   } = params;
   const now = new Date();
 
+  if (!Number.isInteger(amount) || amount <= 0) {
+    return { success: false };
+  }
+
+  const buildConsumedCredit = (consumedItems: any[]): NewCredit => ({
+    id: getUuid(),
+    userId,
+    userEmail: userEmail || '',
+    transactionNo: getSnowId(),
+    transactionType: CreditTransactionType.CONSUME,
+    transactionScene: scene || '',
+    status: CreditStatus.ACTIVE,
+    description: description || '',
+    credits: -amount,
+    remainingCredits: 0,
+    consumedDetail: JSON.stringify(consumedItems),
+    metadata: metadata || '',
+  });
+
+  const restoreConsumedItems = async (runner: any, items: any[]) => {
+    for (const item of items) {
+      await runner
+        .update(credit)
+        .set({
+          remainingCredits: sql`${credit.remainingCredits} + ${item.creditsConsumed}`,
+        })
+        .where(eq(credit.id, item.creditId));
+    }
+  };
+
+  const executeD1 = async (runner: any) => {
+    let remainingToConsume = amount;
+    const consumedItems: any[] = [];
+    const maxPasses = 20;
+
+    try {
+      for (let pass = 0; pass < maxPasses && remainingToConsume > 0; pass++) {
+        const candidates = await runner
+          .select()
+          .from(credit)
+          .where(
+            and(
+              eq(credit.userId, userId),
+              eq(credit.transactionType, CreditTransactionType.GRANT),
+              eq(credit.status, CreditStatus.ACTIVE),
+              gt(credit.remainingCredits, 0),
+              or(isNull(credit.expiresAt), gt(credit.expiresAt, now))
+            )
+          )
+          .orderBy(
+            sql`${credit.expiresAt} is null`,
+            asc(credit.expiresAt),
+            asc(credit.createdAt)
+          )
+          .limit(100);
+
+        if (!candidates.length) break;
+
+        let progressed = false;
+        for (const item of candidates) {
+          if (remainingToConsume <= 0) break;
+          const toConsume = Math.min(remainingToConsume, item.remainingCredits);
+          const updatedRows = await runner
+            .update(credit)
+            .set({
+              remainingCredits: sql`${credit.remainingCredits} - ${toConsume}`,
+            })
+            .where(
+              and(
+                eq(credit.id, item.id),
+                eq(credit.status, CreditStatus.ACTIVE),
+                gte(credit.remainingCredits, toConsume),
+                or(isNull(credit.expiresAt), gt(credit.expiresAt, now))
+              )
+            )
+            .returning({ remainingCredits: credit.remainingCredits });
+
+          if (!updatedRows.length) continue;
+
+          const creditsAfter = updatedRows[0].remainingCredits;
+          consumedItems.push({
+            creditId: item.id,
+            transactionNo: item.transactionNo,
+            creditsConsumed: toConsume,
+            creditsBefore: creditsAfter + toConsume,
+            creditsAfter,
+          });
+          remainingToConsume -= toConsume;
+          progressed = true;
+        }
+
+        if (!progressed) continue;
+      }
+
+      if (remainingToConsume > 0) {
+        await restoreConsumedItems(runner, consumedItems);
+        return { success: false };
+      }
+
+      const consumedCredit = buildConsumedCredit(consumedItems);
+      await runner.insert(credit).values(consumedCredit);
+      return { success: true, consumedCredit };
+    } catch (error) {
+      await restoreConsumedItems(runner, consumedItems);
+      throw error;
+    }
+  };
+
   const execute = async (tx: any) => {
     // 1. Check balance
     const [balance] = await tx
@@ -163,7 +272,11 @@ export async function consume(params: {
             or(isNull(credit.expiresAt), gt(credit.expiresAt, now))
           )
         )
-        .orderBy(asc(credit.expiresAt))
+        .orderBy(
+          sql`${credit.expiresAt} is null`,
+          asc(credit.expiresAt),
+          asc(credit.createdAt)
+        )
         .limit(batchSize)
         .for('update');
 
@@ -192,26 +305,21 @@ export async function consume(params: {
       batchNo++;
     }
 
+    if (remainingToConsume > 0) {
+      await restoreConsumedItems(tx, consumedItems);
+      return { success: false };
+    }
+
     // 3. Create consumption record
-    const consumedCredit: NewCredit = {
-      id: getUuid(),
-      userId,
-      userEmail: userEmail || '',
-      transactionNo: getSnowId(),
-      transactionType: CreditTransactionType.CONSUME,
-      transactionScene: scene || '',
-      status: CreditStatus.ACTIVE,
-      description: description || '',
-      credits: -amount,
-      remainingCredits: 0,
-      consumedDetail: JSON.stringify(consumedItems),
-      metadata: metadata || '',
-    };
+    const consumedCredit = buildConsumedCredit(consumedItems);
     await tx.insert(credit).values(consumedCredit);
 
     return { success: true, consumedCredit };
   };
 
+  if (['d1', 'sqlite', 'turso'].includes(envConfigs.database_provider)) {
+    return executeD1(tx || db());
+  }
   if (tx) return execute(tx);
   return db().transaction(execute);
 }

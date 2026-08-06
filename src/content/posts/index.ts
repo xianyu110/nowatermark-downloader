@@ -106,7 +106,15 @@ export function mergePosts(
 }
 
 export function formatPostDate(dateIso: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale === 'zh' ? 'zh-CN' : 'en-US', {
+  const intlLocale =
+    locale === 'zh'
+      ? 'zh-CN'
+      : locale === 'es'
+        ? 'es-ES'
+        : locale === 'pt'
+          ? 'pt-BR'
+          : 'en-US';
+  return new Intl.DateTimeFormat(intlLocale, {
     year: 'numeric',
     month: locale === 'zh' ? 'long' : 'short',
     day: 'numeric',

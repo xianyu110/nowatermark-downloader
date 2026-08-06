@@ -35,8 +35,15 @@ export const envConfigs: Record<string, string> = {
   auth_secret: procEnv.AUTH_SECRET ?? '',
 
   // Product credits
+  video_parse_credits_enabled: procEnv.VIDEO_PARSE_CREDITS_ENABLED ?? 'false',
+  anonymous_free_daily_limit: procEnv.ANONYMOUS_FREE_DAILY_LIMIT ?? '3',
+  video_transcription_model: procEnv.VIDEO_TRANSCRIPTION_MODEL ?? 'whisper-1',
+  video_transcription_credit_cost:
+    procEnv.VIDEO_TRANSCRIPTION_CREDIT_COST ?? '1',
+  video_transcription_max_bytes:
+    procEnv.VIDEO_TRANSCRIPTION_MAX_BYTES ?? String(25 * 1024 * 1024),
   initial_credits_enabled: procEnv.INITIAL_CREDITS_ENABLED ?? 'true',
-  initial_credits_amount: procEnv.INITIAL_CREDITS_AMOUNT ?? '100',
+  initial_credits_amount: procEnv.INITIAL_CREDITS_AMOUNT ?? '5',
   initial_credits_valid_days: procEnv.INITIAL_CREDITS_VALID_DAYS ?? '7',
   initial_credits_description:
     procEnv.INITIAL_CREDITS_DESCRIPTION ?? 'New user trial credits',

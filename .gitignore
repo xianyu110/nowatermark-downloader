@@ -46,6 +46,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+/.playwright-cli/
+/output/playwright/
 
 # env — local files hold secrets, never commit (keep .env.example tracked)
 .env
@@ -65,3 +67,6 @@ package-lock.json
 
 # Runtime image uploads (no-storage local fallback)
 /public/uploads/
+
+# Local SEO analysis cache
+.seo-cache/

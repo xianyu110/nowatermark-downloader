@@ -19,6 +19,8 @@
     "db:studio": "tsx scripts/with-env.ts drizzle-kit studio --config=drizzle.config.ts",
     "rbac:init": "tsx scripts/with-env.ts tsx scripts/init-rbac.ts",
     "rbac:assign": "tsx scripts/with-env.ts tsx scripts/assign-role.ts",
+    "verify:credits": "tsx scripts/verify-credit-concurrency.ts",
+    "verify:anonymous-usage": "tsx scripts/verify-anonymous-usage-concurrency.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"

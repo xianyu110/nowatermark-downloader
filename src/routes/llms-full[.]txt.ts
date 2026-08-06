@@ -8,6 +8,31 @@ const STATIC_PAGES: { path: string; title: string; description: string }[] = [
   { path: '', title: 'Home', description: 'Landing page' },
   { path: '/pricing', title: 'Pricing', description: 'Pricing plans' },
   { path: '/blog', title: 'Blog', description: 'Blog posts and articles' },
+  {
+    path: '/api-docs',
+    title: 'API Documentation',
+    description: 'Video parsing and transcription API',
+  },
+  {
+    path: '/faq',
+    title: 'FAQ',
+    description: 'Public video downloader questions',
+  },
+  {
+    path: '/how-to-download-videos',
+    title: 'How to Download Videos',
+    description: 'Public video download guide',
+  },
+  {
+    path: '/tools/tiktok-downloader',
+    title: 'TikTok Downloader',
+    description: 'Public TikTok video tool',
+  },
+  {
+    path: '/tools/instagram-downloader',
+    title: 'Instagram Reels Downloader',
+    description: 'Public Instagram video tool',
+  },
 ];
 
 export const Route = createFileRoute('/llms-full.txt')({

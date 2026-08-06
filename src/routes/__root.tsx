@@ -12,13 +12,15 @@ import { createServerFn } from '@tanstack/react-start';
 import { ThemeProvider } from 'next-themes';
 
 import { envConfigs } from '@/config';
+import { normalizeLocale, siteLocales } from '@/config/locale';
 import { getQueryClient } from '@/lib/query-client';
-import { getLocale, locales, localizeUrl } from '@/paraglide/runtime.js';
+import { getLocale, getLocaleForUrl } from '@/paraglide/runtime.js';
 import { Ads } from '@/components/analytics/ads';
 import { GoogleAnalytics } from '@/components/analytics/google-analytics';
 import { Plausible } from '@/components/analytics/plausible';
 import { CustomerService } from '@/components/customer-service';
 import { GoogleOneTap } from '@/components/google-one-tap';
+import { JsonLd } from '@/components/json-ld';
 import { SandboxPreviewBridge } from '@/components/sandbox-preview-bridge';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -53,18 +55,27 @@ const getAnalyticsConfigs = createServerFn().handler(async () => {
   };
 });
 
+const getDocumentLocale = createServerFn().handler(async () => {
+  const { getRequestUrl } = await import('@tanstack/react-start/server');
+  const requestUrl = getRequestUrl();
+  const firstPathSegment = requestUrl.pathname.split('/')[1];
+
+  if ((siteLocales as readonly string[]).includes(firstPathSegment)) {
+    return normalizeLocale(firstPathSegment);
+  }
+
+  return getLocaleForUrl(requestUrl);
+});
+
 export const Route = createRootRoute({
-  loader: () => getAnalyticsConfigs(),
+  loader: async () => {
+    const [analytics, documentLocale] = await Promise.all([
+      getAnalyticsConfigs(),
+      getDocumentLocale(),
+    ]);
+    return { analytics, documentLocale };
+  },
   head: () => {
-    // head() runs on the SSR server AND again on the client during hydration.
-    // On the client, app_url falls back to the localhost dev default when
-    // VITE_APP_URL wasn't inlined into the client bundle at build — which would
-    // emit a second, localhost set of hreflang links. Prefer the live origin
-    // on the client so it always matches; the server uses the configured URL.
-    const appUrl =
-      (typeof window !== 'undefined' && window.location?.origin) ||
-      envConfigs.app_url ||
-      '';
     return {
       meta: [
         { charSet: 'utf-8' },
@@ -79,11 +90,6 @@ export const Route = createRootRoute({
           type: 'image/svg+xml',
         },
         { rel: 'apple-touch-icon', href: '/logo.svg' },
-        ...locales.map((loc) => ({
-          rel: 'alternate',
-          hrefLang: loc,
-          href: localizeUrl(`${appUrl}/`, { locale: loc }).href,
-        })),
       ],
     };
   },
@@ -94,7 +100,15 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const analytics = Route.useLoaderData();
+  const { analytics } = Route.useLoaderData();
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: envConfigs.app_name,
+    url: envConfigs.app_url,
+    description: envConfigs.app_description,
+    inLanguage: siteLocales,
+  };
 
   return (
     <QueryClientProvider client={getQueryClient()}>
@@ -104,6 +118,7 @@ function RootComponent() {
         enableSystem
         disableTransitionOnChange
       >
+        <JsonLd data={websiteSchema} />
         <Outlet />
         <SandboxPreviewBridge />
         <Toaster position="top-center" richColors />
@@ -129,8 +144,9 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: ReactNode }) {
+  const { documentLocale } = Route.useLoaderData();
   return (
-    <html lang={getLocale()} suppressHydrationWarning>
+    <html lang={documentLocale} suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

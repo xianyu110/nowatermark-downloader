@@ -352,6 +352,52 @@ export const credit = table(
   ]
 );
 
+export const anonymousUsage = table(
+  'anonymous_usage',
+  {
+    id: text('id').primaryKey(),
+    usageDate: text('usage_date').notNull(),
+    successfulParses: integer('successful_parses').notNull().default(0),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .default(sqliteNowMs)
+      .notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+      .default(sqliteNowMs)
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index('idx_anonymous_usage_date').on(table.usageDate)]
+);
+
+export const parseHistory = table(
+  'parse_history',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    sourceUrl: text('source_url').notNull(),
+    platform: text('platform').notNull().default(''),
+    title: text('title').notNull().default(''),
+    mediaType: text('media_type').notNull(),
+    requestedMode: text('requested_mode').notNull(),
+    requestedQuality: text('requested_quality').notNull(),
+    provider: text('provider').notNull().default(''),
+    mediaUrl: text('media_url').notNull(),
+    videoUrl: text('video_url'),
+    coverUrl: text('cover_url'),
+    filename: text('filename'),
+    duration: integer('duration'),
+    resultJson: text('result_json').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .default(sqliteNowMs)
+      .notNull(),
+  },
+  (table) => [
+    index('idx_parse_history_user_created').on(table.userId, table.createdAt),
+  ]
+);
+
 export const apikey = table(
   'apikey',
   {
@@ -586,6 +632,8 @@ export type Subscription = typeof subscription.$inferSelect;
 export type NewSubscription = typeof subscription.$inferInsert;
 export type Credit = typeof credit.$inferSelect;
 export type NewCredit = typeof credit.$inferInsert;
+export type ParseHistory = typeof parseHistory.$inferSelect;
+export type NewParseHistory = typeof parseHistory.$inferInsert;
 export type Apikey = typeof apikey.$inferSelect;
 export type NewApikey = typeof apikey.$inferInsert;
 export type Role = typeof role.$inferSelect;

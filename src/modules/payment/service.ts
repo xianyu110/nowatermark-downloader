@@ -5,6 +5,7 @@ import {
   AlipayProvider,
   CreemProvider,
   PaymentManager,
+  PayPalProvider,
   StripeProvider,
   WechatPayProvider,
 } from '@/core/payment';
@@ -49,11 +50,22 @@ async function getPaymentManager(): Promise<PaymentManager> {
 
   // Rebuild manager if provider configs changed
   const hash = JSON.stringify([
+    c('stripe_enabled'),
     c('stripe_secret_key') || c('stripe_api_key'),
     c('creem_enabled'),
     c('creem_api_key'),
+    c('creem_signing_secret'),
+    c('paypal_enabled'),
+    c('paypal_client_id'),
+    c('paypal_client_secret'),
+    c('paypal_webhook_id'),
+    c('paypal_environment'),
+    c('alipay_enabled'),
     c('alipay_app_id'),
+    c('alipay_private_key'),
+    c('wechat_enabled'),
     c('wechat_mch_id'),
+    c('wechat_private_key'),
     c('default_payment_provider'),
   ]);
   if (manager && hash === managerConfigHash) return manager;
@@ -62,7 +74,7 @@ async function getPaymentManager(): Promise<PaymentManager> {
   managerConfigHash = hash;
 
   const stripeKey = c('stripe_secret_key') || c('stripe_api_key');
-  if (stripeKey) {
+  if (c('stripe_enabled') === 'true' && stripeKey) {
     const isDefault =
       !c('default_payment_provider') ||
       c('default_payment_provider') === 'stripe';
@@ -92,7 +104,32 @@ async function getPaymentManager(): Promise<PaymentManager> {
     );
   }
 
-  if (c('alipay_app_id') && c('alipay_private_key')) {
+  if (
+    c('paypal_enabled') === 'true' &&
+    c('paypal_client_id') &&
+    c('paypal_client_secret')
+  ) {
+    const isDefault = c('default_payment_provider') === 'paypal';
+    manager.addProvider(
+      new PayPalProvider({
+        clientId: c('paypal_client_id'),
+        clientSecret: c('paypal_client_secret'),
+        webhookId: c('paypal_webhook_id') || undefined,
+        environment:
+          c('paypal_environment') === 'production' ||
+          c('paypal_environment') === 'live'
+            ? 'production'
+            : 'sandbox',
+      }),
+      isDefault
+    );
+  }
+
+  if (
+    c('alipay_enabled') === 'true' &&
+    c('alipay_app_id') &&
+    c('alipay_private_key')
+  ) {
     const isDefault = c('default_payment_provider') === 'alipay';
     manager.addProvider(
       new AlipayProvider({
@@ -105,7 +142,11 @@ async function getPaymentManager(): Promise<PaymentManager> {
     );
   }
 
-  if (c('wechat_mch_id') && c('wechat_private_key')) {
+  if (
+    c('wechat_enabled') === 'true' &&
+    c('wechat_mch_id') &&
+    c('wechat_private_key')
+  ) {
     const isDefault = c('default_payment_provider') === 'wechat';
     manager.addProvider(
       new WechatPayProvider({
@@ -122,6 +163,11 @@ async function getPaymentManager(): Promise<PaymentManager> {
   }
 
   return manager;
+}
+
+export async function getAvailablePaymentProviders(): Promise<string[]> {
+  const pm = await getPaymentManager();
+  return pm.getProviderNames();
 }
 
 // --- Checkout ---

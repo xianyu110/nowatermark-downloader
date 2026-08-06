@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { ArrowRight, LogIn, Menu, X } from 'lucide-react';
 
 import { useSession } from '@/core/auth/client';
-import { Link } from '@/core/i18n/navigation';
+import { Link, usePathname } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
+import { normalizeLocale } from '@/config/locale';
 import { cn } from '@/lib/utils';
+import { getLocale } from '@/paraglide/runtime.js';
 import { LocaleSelector } from '@/components/locale-selector';
 import { SiteUserMenu } from '@/components/site-user-menu';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -26,6 +28,37 @@ export function SiteHeader({ navLinks }: { navLinks?: NavLink[] }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: session } = useSession();
   const user = session?.user;
+  const locale = normalizeLocale(getLocale());
+  const pathname = usePathname();
+  const signInHref = `/sign-in?callbackUrl=${encodeURIComponent(pathname || '/')}`;
+  const signInLabels = {
+    en: 'Sign in / Sign up',
+    zh: '登录 / 注册',
+    es: 'Iniciar sesión / Registrarse',
+    pt: 'Entrar / Criar conta',
+    fr: 'Se connecter / S’inscrire',
+    de: 'Anmelden / Registrieren',
+    it: 'Accedi / Registrati',
+    id: 'Masuk / Daftar',
+    ja: 'ログイン / 登録',
+    ko: '로그인 / 회원가입',
+  } as const;
+  const signInLabel =
+    signInLabels[locale as keyof typeof signInLabels] || signInLabels.en;
+  const menuLabelMap = {
+    en: { open: 'Open menu', close: 'Close menu' },
+    zh: { open: '打开菜单', close: '关闭菜单' },
+    es: { open: 'Abrir menú', close: 'Cerrar menú' },
+    pt: { open: 'Abrir menu', close: 'Fechar menu' },
+    fr: { open: 'Ouvrir le menu', close: 'Fermer le menu' },
+    de: { open: 'Menü öffnen', close: 'Menü schließen' },
+    it: { open: 'Apri menu', close: 'Chiudi menu' },
+    id: { open: 'Buka menu', close: 'Tutup menu' },
+    ja: { open: 'メニューを開く', close: 'メニューを閉じる' },
+    ko: { open: '메뉴 열기', close: '메뉴 닫기' },
+  } as const;
+  const menuLabels =
+    menuLabelMap[locale as keyof typeof menuLabelMap] || menuLabelMap.en;
 
   return (
     <header className="bg-background/86 sticky top-0 z-50 w-full border-b border-[#d8e8e1] backdrop-blur-md">
@@ -40,7 +73,7 @@ export function SiteHeader({ navLinks }: { navLinks?: NavLink[] }) {
               {envConfigs.app_name}
             </span>
             <span className="block text-[10px] font-medium tracking-[0.18em] text-[#7f9a91] uppercase">
-              VIDEO CHANNEL TOOL
+              VIDEO DOWNLOADER
             </span>
           </span>
         </Link>
@@ -83,14 +116,14 @@ export function SiteHeader({ navLinks }: { navLinks?: NavLink[] }) {
             />
           ) : (
             <Link
-              href="/sign-in?callbackUrl=%2Fpricing"
+              href={signInHref}
               className={cn(
                 buttonVariants({ variant: 'outline' }),
                 'gap-1.5 border-[#b9ded0] bg-white text-[#107b59] hover:bg-[#eff9f5] hover:text-[#107b59]'
               )}
             >
               <LogIn className="size-4" />
-              登录 / 注册
+              {signInLabel}
               <ArrowRight className="size-3.5" />
             </Link>
           )}
@@ -100,7 +133,7 @@ export function SiteHeader({ navLinks }: { navLinks?: NavLink[] }) {
         <button
           className="p-2 md:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+          aria-label={mobileOpen ? menuLabels.close : menuLabels.open}
           aria-expanded={mobileOpen}
         >
           {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -148,7 +181,7 @@ export function SiteHeader({ navLinks }: { navLinks?: NavLink[] }) {
               />
             ) : (
               <Link
-                href="/sign-in?callbackUrl=%2Fpricing"
+                href={signInHref}
                 className={cn(
                   buttonVariants({ variant: 'outline' }),
                   'gap-1.5 border-[#b9ded0] bg-white text-[#107b59] hover:bg-[#eff9f5] hover:text-[#107b59]'
@@ -156,7 +189,7 @@ export function SiteHeader({ navLinks }: { navLinks?: NavLink[] }) {
                 onClick={() => setMobileOpen(false)}
               >
                 <LogIn className="size-4" />
-                登录 / 注册
+                {signInLabel}
                 <ArrowRight className="size-3.5" />
               </Link>
             )}

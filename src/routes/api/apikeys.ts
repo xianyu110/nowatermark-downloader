@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { getAuth } from '@/core/auth';
 import * as apikeys from '@/modules/apikeys/service';
+import { hasActivePaidMembership } from '@/modules/subscriptions/service';
 import { respData, respErr, respOk, respPage } from '@/lib/resp';
 
 async function GET({ request }: { request: Request }) {
@@ -40,6 +41,12 @@ async function POST({ request }: { request: Request }) {
 
     if (!session?.user) {
       return respErr('Unauthorized');
+    }
+
+    if (!(await hasActivePaidMembership(session.user.id))) {
+      return respErr('API access requires an active paid membership.', {
+        status: 403,
+      });
     }
 
     const body = await request.json();
