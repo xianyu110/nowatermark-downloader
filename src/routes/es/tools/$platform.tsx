@@ -3,6 +3,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import { localizedPageHead } from '@/lib/seo';
 import {
   getPlatformCopy,
+  getPlatformSeoKeywords,
   isPlatformSlug,
   PlatformDownloader,
   type SeoLocale,
@@ -21,6 +22,7 @@ export const Route = createFileRoute('/es/tools/$platform')({
       path: `/tools/${params.platform}`,
       title: `${item.name} | NoWatermark`,
       description: item.description,
+      keywords: getPlatformSeoKeywords(params.platform, item),
     });
   },
   component: SpanishToolPlatformPage,

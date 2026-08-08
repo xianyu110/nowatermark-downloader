@@ -1385,6 +1385,58 @@ for (const [locale, labels] of Object.entries(translatedPlatformLabels)) {
 
 export const platformSlugs = Object.keys(platforms);
 
+const musicToolSlugs = new Set([
+  'netease-music-downloader',
+  'kuwo-music-downloader',
+  'music-downloader',
+  'qq-music-downloader',
+  'qishui-music-downloader',
+]);
+
+const movieToolSlugs = new Set(['movie-video-parser']);
+
+function platformKind(slug: string) {
+  if (musicToolSlugs.has(slug)) return 'music' as const;
+  if (movieToolSlugs.has(slug)) return 'movie' as const;
+  return 'video' as const;
+}
+
+export function getPlatformSeoKeywords(
+  slug: string,
+  item: PlatformCopy
+): string[] {
+  const kind = platformKind(slug);
+  const base =
+    kind === 'music'
+      ? ['music parser', 'music downloader', 'audio link extractor']
+      : kind === 'movie'
+        ? ['movie parser', 'video parser', 'streaming video parser']
+        : [
+            'video downloader',
+            'no watermark downloader',
+            'public video parser',
+          ];
+
+  return Array.from(
+    new Set([
+      item.keyword,
+      item.name,
+      ...base,
+      'NoWatermark Downloader',
+      'download public media',
+    ])
+  );
+}
+
+function relatedPlatformSlugs(slug: string) {
+  const kind = platformKind(slug);
+  const sameKind = platformSlugs.filter(
+    (other) => other !== slug && platformKind(other) === kind
+  );
+
+  return sameKind.slice(0, kind === 'video' ? 14 : 8);
+}
+
 export function isPlatformSlug(value: string) {
   return Object.prototype.hasOwnProperty.call(platforms, value);
 }
@@ -1421,26 +1473,110 @@ export function PlatformDownloader({
   const homePath = localizedHomePath(locale);
   const resourcePath = (path: string) =>
     locale === 'en' ? path : `/${locale}${path}`;
+  const toolKind = platformKind(slug);
+  const relatedSlugs = relatedPlatformSlugs(slug);
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!url.trim()) return;
     window.location.assign(`${homePath}?url=${encodeURIComponent(url.trim())}`);
   };
+  const featureList =
+    toolKind === 'music'
+      ? [
+          'Public music link parsing',
+          'Song metadata extraction',
+          'Cover and lyric metadata',
+          'Direct audio URL when available',
+        ]
+      : toolKind === 'movie'
+        ? [
+            'Public movie page parsing',
+            'Streaming page metadata extraction',
+            'Direct media URL when available',
+            'Public video workflow support',
+          ]
+        : [
+            'Public video link parsing',
+            'Standard video downloads with member-only audio and mute output',
+            'Direct media URL',
+            'Paid-member video transcription',
+          ];
   const schema = {
     '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: item.name,
-    applicationCategory: 'MultimediaApplication',
-    operatingSystem: 'Web',
-    url: canonical,
-    description: item.description,
-    inLanguage: locale,
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    featureList: [
-      'Public video link parsing',
-      'Standard video downloads with member-only audio and mute output',
-      'Direct media URL',
-      'Paid-member video transcription',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${canonical}#webpage`,
+        url: canonical,
+        name: item.name,
+        description: item.description,
+        inLanguage: locale,
+        isPartOf: {
+          '@type': 'WebSite',
+          name: envConfigs.app_name,
+          url: appUrl,
+        },
+        primaryImageOfPage: {
+          '@type': 'ImageObject',
+          url: `${appUrl}/logo.svg`,
+        },
+      },
+      {
+        '@type': 'SoftwareApplication',
+        '@id': `${canonical}#app`,
+        name: item.name,
+        applicationCategory:
+          toolKind === 'music'
+            ? 'MusicApplication'
+            : toolKind === 'movie'
+              ? 'MultimediaApplication'
+              : 'VideoApplication',
+        operatingSystem: 'Web',
+        browserRequirements: 'Requires JavaScript and a modern web browser',
+        url: canonical,
+        image: `${appUrl}/logo.svg`,
+        description: item.description,
+        inLanguage: locale,
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        featureList,
+        mainEntityOfPage: { '@id': `${canonical}#webpage` },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${canonical}#breadcrumb`,
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'NoWatermark',
+            item: `${appUrl}${homePath}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: t.navHome,
+            item: `${appUrl}${resourcePath('/tools/tiktok-downloader')}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: item.name,
+            item: canonical,
+          },
+        ],
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': `${canonical}#faq`,
+        mainEntity: item.faq.map((faq) => ({
+          '@type': 'Question',
+          name: faq.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: faq.answer,
+          },
+        })),
+      },
     ],
   };
 
@@ -1564,18 +1700,16 @@ export function PlatformDownloader({
         <section className="mt-16 border-t border-slate-200 pt-10">
           <h2 className="text-xl font-extrabold">{t.relatedTitle}</h2>
           <div className="mt-5 flex flex-wrap gap-3">
-            {platformSlugs
-              .filter((other) => other !== slug)
-              .map((other) => (
-                <a
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold hover:border-blue-500 hover:text-blue-700"
-                  href={platformPath(locale, other)}
-                  key={other}
-                >
-                  <CheckCircle2 size={16} />
-                  {(platforms[other][locale] || platforms[other].en).name}
-                </a>
-              ))}
+            {relatedSlugs.map((other) => (
+              <a
+                className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold hover:border-blue-500 hover:text-blue-700"
+                href={platformPath(locale, other)}
+                key={other}
+              >
+                <CheckCircle2 size={16} />
+                {(platforms[other][locale] || platforms[other].en).name}
+              </a>
+            ))}
           </div>
         </section>
       </article>

@@ -61,6 +61,21 @@ const TOOL_SLUGS = [
   'qq-music-downloader',
   'qishui-music-downloader',
 ];
+const HIGH_PRIORITY_TOOL_SLUGS = new Set([
+  'tiktok-downloader',
+  'instagram-downloader',
+  'youtube-downloader',
+  'short-video-downloader',
+  'music-downloader',
+]);
+const MID_PRIORITY_TOOL_SLUGS = new Set([
+  'douyin-downloader',
+  'kuaishou-downloader',
+  'xiaohongshu-downloader',
+  'bilibili-downloader',
+  'qq-music-downloader',
+  'netease-music-downloader',
+]);
 
 type Entry = {
   path: string;
@@ -128,8 +143,14 @@ export const Route = createFileRoute('/sitemap.xml')({
         for (const slug of TOOL_SLUGS) {
           entries.push({
             path: `/tools/${slug}`,
-            changeFrequency: 'weekly',
-            priority: 0.85,
+            changeFrequency: HIGH_PRIORITY_TOOL_SLUGS.has(slug)
+              ? 'daily'
+              : 'weekly',
+            priority: HIGH_PRIORITY_TOOL_SLUGS.has(slug)
+              ? 0.95
+              : MID_PRIORITY_TOOL_SLUGS.has(slug)
+                ? 0.9
+                : 0.82,
             locales: SEO_LOCALES,
           });
         }

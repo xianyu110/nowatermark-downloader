@@ -109,6 +109,11 @@ function RootComponent() {
     url: envConfigs.app_url,
     description: envConfigs.app_description,
     inLanguage: hreflangForLocale(documentLocale),
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${envConfigs.app_url.replace(/\/$/, '')}/?url={url}`,
+      'query-input': 'required name=url',
+    },
   };
 
   return (

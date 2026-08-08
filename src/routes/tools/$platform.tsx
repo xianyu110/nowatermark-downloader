@@ -5,6 +5,7 @@ import { localizedPageHead } from '@/lib/seo';
 import { getLocale } from '@/paraglide/runtime.js';
 import {
   getPlatformCopy,
+  getPlatformSeoKeywords,
   isPlatformSlug,
   PlatformDownloader,
   type SeoLocale,
@@ -26,6 +27,7 @@ export const Route = createFileRoute('/tools/$platform')({
       path: `/tools/${params.platform}`,
       title: `${item.name} | NoWatermark`,
       description: item.description,
+      keywords: getPlatformSeoKeywords(params.platform, item),
     });
   },
   component: ToolPlatformPage,
