@@ -79,8 +79,51 @@ type CobaltAuth = {
 type ParseError = Error & {
   authRequired?: boolean;
   retryable?: boolean;
+  retryAfterMs?: number;
   youtubeLoginRequired?: boolean;
 };
+
+const BUGPK_API_BASE = 'https://api.bugpk.com/api';
+const BUGPK_AGGREGATE_VIDEO_ENDPOINTS = ['short_videos', 'svparse'] as const;
+const BUGPK_MUSIC_ENDPOINTS = [
+  '163_music',
+  'qqmusic',
+  'qsmusic',
+  'kuwo',
+  'music',
+] as const;
+
+const BUGPK_PLATFORM_ENDPOINTS = [
+  { hosts: ['douyin.com', 'iesdouyin.com'], paths: ['douyin', 'dyzy'] },
+  { hosts: ['kuaishou.com', 'gifshow.com'], paths: ['ksjx', 'kuaishou'] },
+  {
+    hosts: ['xiaohongshu.com', 'xhslink.com'],
+    paths: ['xhsjx', 'xhs', 'xhsimg'],
+  },
+  { hosts: ['bilibili.com', 'b23.tv'], path: 'bilibili' },
+  { hosts: ['weibo.com', 'weibo.cn'], paths: ['weibo', 'weibo_v'] },
+  { hosts: ['toutiao.com', 'ixigua.com'], path: 'toutiao' },
+  { hosts: ['doubao.com'], paths: ['dbvideos', 'dbduihua'] },
+  { hosts: ['jimeng.jianying.com'], path: 'jimengai' },
+  { hosts: ['pipix.com'], path: 'pipixia' },
+  { hosts: ['pipigx.com'], path: 'pipigx' },
+  { hosts: ['qianwen.com'], path: 'qianwenimg' },
+  { hosts: ['xiaochuankeji.cn'], path: 'zuiyou' },
+  {
+    hosts: ['v.qq.com', 'iqiyi.com', 'youku.com', 'mgtv.com', '1905.com'],
+    path: 'videosjx',
+  },
+] as const;
+
+const BUGPK_MUSIC_PLATFORM_ENDPOINTS = [
+  {
+    hosts: ['music.163.com', 'y.music.163.com'],
+    paths: ['163_music', 'music'],
+  },
+  { hosts: ['y.qq.com', 'i.y.qq.com'], paths: ['qqmusic', 'music'] },
+  { hosts: ['qishui.douyin.com'], path: 'qsmusic' },
+  { hosts: ['kuwo.cn'], path: 'kuwo' },
+] as const;
 
 function extractUrl(value: string) {
   const match = value.match(/https?:\/\/[^\s]+/i);
@@ -170,6 +213,10 @@ function detectPlatform(value: string) {
       return 'Facebook';
     if (host.includes('reddit.com') || host.includes('redd.it'))
       return 'Reddit';
+    if (host.includes('music.163.com')) return 'NetEase Cloud Music';
+    if (host.includes('y.qq.com')) return 'QQ Music';
+    if (host.includes('qishui.douyin.com')) return 'Qishui Music';
+    if (host.includes('kuwo.cn')) return 'Kuwo Music';
     return host.replace(/^www\./i, '');
   } catch {
     return 'Public source';
@@ -178,6 +225,95 @@ function detectPlatform(value: string) {
 
 function serviceLabelFromSource(sourceUrl: string) {
   return detectPlatform(sourceUrl);
+}
+
+function hostnameMatches(hostname: string, domain: string) {
+  return hostname === domain || hostname.endsWith(`.${domain}`);
+}
+
+function bugpkApiUrl(path: string) {
+  return `${BUGPK_API_BASE}/${path}`;
+}
+
+function getBugpkPlatformUrls(sourceUrl: string) {
+  try {
+    const hostname = new URL(sourceUrl).hostname.toLowerCase();
+    const matched = [
+      ...BUGPK_PLATFORM_ENDPOINTS,
+      ...BUGPK_MUSIC_PLATFORM_ENDPOINTS,
+    ].flatMap((item) => {
+      if (!item.hosts.some((host) => hostnameMatches(hostname, host))) {
+        return [];
+      }
+      return 'paths' in item ? item.paths : [item.path];
+    });
+    return matched.map(bugpkApiUrl);
+  } catch {
+    return [];
+  }
+}
+
+function getBugpkEndpointName(providerUrl: string) {
+  try {
+    return new URL(providerUrl).pathname.split('/').filter(Boolean).pop() || '';
+  } catch {
+    return '';
+  }
+}
+
+function isBugpkMusicEndpoint(providerUrl: string) {
+  const endpoint = getBugpkEndpointName(providerUrl);
+  return (BUGPK_MUSIC_ENDPOINTS as readonly string[]).includes(endpoint);
+}
+
+function extractNeteaseSongId(sourceUrl: string) {
+  try {
+    const parsed = new URL(sourceUrl);
+    return (
+      parsed.searchParams.get('id') ||
+      parsed.pathname.match(/\/song\/(\d+)/)?.[1] ||
+      ''
+    );
+  } catch {
+    return '';
+  }
+}
+
+function extractQqMusicId(sourceUrl: string) {
+  try {
+    const parsed = new URL(sourceUrl);
+    return (
+      parsed.pathname.match(/\/songDetail\/([A-Za-z0-9]+)/)?.[1] ||
+      parsed.searchParams.get('songmid') ||
+      parsed.searchParams.get('mid') ||
+      ''
+    );
+  } catch {
+    return '';
+  }
+}
+
+function applyBugpkMusicParams(endpoint: URL, sourceUrl: string) {
+  const endpointName = getBugpkEndpointName(endpoint.toString());
+  if (endpointName !== 'music') return;
+
+  const platform = detectPlatform(sourceUrl).toLowerCase();
+  if (platform.includes('qq')) {
+    const id = extractQqMusicId(sourceUrl);
+    if (id) endpoint.searchParams.set('id', id);
+    endpoint.searchParams.set('media', 'tencent');
+    endpoint.searchParams.set('type', 'song');
+    endpoint.searchParams.delete('url');
+    return;
+  }
+
+  if (platform.includes('163') || platform.includes('netease')) {
+    const id = extractNeteaseSongId(sourceUrl);
+    if (id) endpoint.searchParams.set('id', id);
+    endpoint.searchParams.set('media', 'netease');
+    endpoint.searchParams.set('type', 'song');
+    endpoint.searchParams.delete('url');
+  }
 }
 
 function detectProviderPlatform(value: string): ProviderPlatform {
@@ -258,14 +394,17 @@ function buildProviderChain(sourceUrl: string): ParseProvider[] {
   const fallbackUrls = splitProviderUrls(process.env.VIDEO_PARSE_FALLBACK_URLS);
   const cobaltFallback = process.env.COBALT_API_URL?.trim();
   const legacyBugpk = process.env.BUGPK_WXSPH_API_URL?.trim();
+  const bugpkPlatformUrls = getBugpkPlatformUrls(sourceUrl);
 
   for (const url of [
+    ...bugpkPlatformUrls,
     platformConfig.primary,
     ...platformConfig.fallbacks,
     ...DEFAULT_COBALT_API_URLS[platform],
     primary,
     ...fallbackUrls,
     cobaltFallback,
+    ...BUGPK_AGGREGATE_VIDEO_ENDPOINTS.map(bugpkApiUrl),
     legacyBugpk,
   ]) {
     if (!url || providers.some((provider) => provider.url === url)) continue;
@@ -308,34 +447,148 @@ function buildCobaltAuth(): CobaltAuth {
   return null;
 }
 
-function normalizeBugpkResult(payload: any, sourceUrl: string) {
-  const data = payload?.data ?? payload;
-  const videoUrl = firstHttpUrl(
-    data?.url,
-    data?.video,
-    data?.video_url,
-    data?.play_url,
-    data?.download_url
-  );
+type BugpkMediaCandidate = {
+  label: string;
+  type: 'audio' | 'image' | 'video';
+  url: string;
+  thumb?: string;
+};
 
-  if (!videoUrl) return null;
+function normalizeBugpkResult(
+  payload: any,
+  sourceUrl: string,
+  providerUrl: string
+) {
+  const data = payload?.data ?? payload;
+  const isMusic = isBugpkMusicEndpoint(providerUrl);
+  const candidates: BugpkMediaCandidate[] = [];
+  const seen = new Set<string>();
+  const addCandidate = (
+    value: unknown,
+    type: BugpkMediaCandidate['type'],
+    label: string,
+    thumb?: unknown
+  ) => {
+    const url =
+      typeof value === 'string'
+        ? firstHttpUrl(value)
+        : firstHttpUrl(
+            (value as any)?.url,
+            (value as any)?.audio,
+            (value as any)?.music,
+            (value as any)?.video,
+            (value as any)?.image,
+            (value as any)?.pic,
+            (value as any)?.play_url,
+            (value as any)?.download_url,
+            (value as any)?.music_url
+          );
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    candidates.push({
+      label: firstString((value as any)?.label, (value as any)?.quality, label),
+      type,
+      url,
+      thumb: firstHttpUrl(
+        (value as any)?.thumb,
+        (value as any)?.cover,
+        (value as any)?.pic,
+        thumb
+      ),
+    });
+  };
+  const addArray = (
+    value: unknown,
+    type: BugpkMediaCandidate['type'],
+    label: string
+  ) => {
+    if (!Array.isArray(value)) return;
+    value.forEach((item, index) =>
+      addCandidate(item, type, `${label} ${index + 1}`)
+    );
+  };
+
+  addCandidate(
+    firstHttpUrl(
+      data?.url,
+      data?.audio,
+      data?.music_url,
+      data?.video,
+      data?.video_url,
+      data?.play_url,
+      data?.download_url
+    ),
+    isMusic ? 'audio' : 'video',
+    isMusic ? 'Audio' : 'Video',
+    data?.pic || data?.cover
+  );
+  addArray(data?.video_backup, 'video', 'Video');
+  addArray(data?.videos, 'video', 'Video');
+  addArray(data?.video_list, 'video', 'Video');
+  addArray(
+    data?.data,
+    isMusic ? 'audio' : 'video',
+    isMusic ? 'Audio' : 'Video'
+  );
+  addArray(data?.images, 'image', 'Image');
+  addArray(data?.pics, 'image', 'Image');
+  addArray(data?.image_list, 'image', 'Image');
+  addArray(data?.live_photo, 'video', 'Live photo');
+  if (Array.isArray(data?.live_photo)) {
+    data.live_photo.forEach((item: any, index: number) =>
+      addCandidate(item?.image, 'image', `Live photo image ${index + 1}`)
+    );
+  }
+  addCandidate(data?.music?.url, 'audio', 'Audio', data?.music?.cover);
+
+  const preferred =
+    (isMusic ? candidates.find((item) => item.type === 'audio') : null) ||
+    candidates.find((item) => item.type === 'video') ||
+    candidates.find((item) => item.type === 'image') ||
+    candidates.find((item) => item.type === 'audio');
+  if (!preferred) return null;
 
   return {
     provider: 'BugPk',
     platform: serviceLabelFromSource(sourceUrl),
-    title: firstString(data?.title, data?.name),
-    desc: firstString(data?.desc, data?.description, data?.content),
+    title: firstString(data?.title, data?.name, data?.song_name),
+    desc: firstString(
+      data?.desc,
+      data?.description,
+      data?.content,
+      data?.al_name,
+      data?.album
+    ),
     author: {
-      name: firstString(data?.author?.name, data?.author, data?.nickname),
+      name: firstString(
+        data?.author?.name,
+        data?.author,
+        data?.nickname,
+        data?.ar_name,
+        data?.singer
+      ),
       avatar: firstString(data?.author?.avatar, data?.avatar),
     },
-    coverUrl: firstHttpUrl(data?.cover, data?.cover_url, data?.thumbnail),
-    filename: firstString(data?.filename, data?.name),
-    mediaType: 'video' as const,
-    videoUrl,
-    mediaUrl: videoUrl,
+    coverUrl: firstHttpUrl(
+      data?.pic,
+      data?.cover,
+      data?.cover_url,
+      data?.thumbnail,
+      preferred.thumb,
+      candidates.find((item) => item.type === 'image')?.url
+    ),
+    filename: firstString(data?.filename, data?.name, data?.song_name),
+    mediaType: preferred.type,
+    videoUrl: preferred.type === 'video' ? preferred.url : undefined,
+    mediaUrl: preferred.url,
     duration: normalizeDuration(data?.duration),
     sourceUrl,
+    alternates: candidates.map((item) => ({
+      label: item.label,
+      type: item.type,
+      url: item.url,
+      thumb: item.thumb,
+    })),
   };
 }
 
@@ -450,7 +703,10 @@ async function fetchWithRetry<T>(
       lastError = error;
       if ((error as ParseError)?.retryable === false) break;
       if (index < retries) {
-        await new Promise((resolve) => setTimeout(resolve, 250 * (index + 1)));
+        const retryAfterMs = (error as ParseError)?.retryAfterMs;
+        await new Promise((resolve) =>
+          setTimeout(resolve, retryAfterMs || 250 * (index + 1))
+        );
       }
     }
   }
@@ -474,6 +730,7 @@ async function requestProvider(
     }
     const endpoint = new URL(provider.url);
     endpoint.searchParams.set('url', sourceUrl);
+    applyBugpkMusicParams(endpoint, sourceUrl);
     const apiKey = process.env.BUGPK_API_KEY || '';
     if (apiKey) endpoint.searchParams.set('key', apiKey);
 
@@ -494,11 +751,15 @@ async function requestProvider(
       const error = new Error(
         payload?.msg || payload?.message || 'BugPk parsing failed'
       ) as ParseError;
-      error.retryable = false;
+      error.retryable = code === 429 || code >= 500;
+      const retryAfter = Number(payload?.data?.retry_after);
+      if (Number.isFinite(retryAfter) && retryAfter > 0) {
+        error.retryAfterMs = Math.min(retryAfter * 1000, 3000);
+      }
       throw error;
     }
 
-    const parsed = normalizeBugpkResult(payload, sourceUrl);
+    const parsed = normalizeBugpkResult(payload, sourceUrl, provider.url);
     if (!parsed) {
       throw new Error('BugPk returned no media URL');
     }

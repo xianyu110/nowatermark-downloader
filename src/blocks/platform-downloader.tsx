@@ -255,6 +255,186 @@ const common: Partial<Record<SeoLocale, CommonCopy>> & { en: CommonCopy } = {
   },
 };
 
+type GenericPlatformLocale = 'en' | 'es' | 'pt' | 'zh';
+
+function genericPlatformCopy(
+  locale: GenericPlatformLocale,
+  name: string
+): PlatformCopy {
+  const templates: Record<GenericPlatformLocale, Omit<PlatformCopy, 'name'>> = {
+    en: {
+      keyword: `${name} video downloader`,
+      description: `Download available media from public ${name} links without platform watermarks.`,
+      intro: `Paste a public ${name} share link to retrieve the video, image gallery, cover, author, and direct media options returned by the available parsers.`,
+      detail: `Use the complete public post URL. Short links are supported when the upstream service can resolve them. Private, deleted, login-only, and region-restricted posts cannot be accessed.`,
+      faq: [
+        {
+          question: `Can I download private ${name} posts?`,
+          answer:
+            'No. Only public links available to the configured parsing services are supported.',
+        },
+        {
+          question: `Does the ${name} downloader support galleries?`,
+          answer:
+            'When the source and parser return multiple videos or images, the available items are shown as separate download options.',
+        },
+      ],
+    },
+    zh: {
+      keyword: `${name} 视频下载器`,
+      description: `解析公开 ${name} 链接，下载可用的无平台水印视频、图片和媒体直链。`,
+      intro: `粘贴公开 ${name} 分享链接，即可获取解析服务返回的视频、图集、封面、作者和媒体下载选项。`,
+      detail: `请使用完整的公开作品链接；上游服务可正常跳转时也支持分享短链。私密、已删除、仅登录可见或区域限制内容无法访问。`,
+      faq: [
+        {
+          question: `可以下载私密 ${name} 作品吗？`,
+          answer: '不可以，仅支持配置的解析服务能够访问的公开链接。',
+        },
+        {
+          question: `${name} 下载器支持图集吗？`,
+          answer:
+            '来源和解析器返回多个视频或图片时，页面会将可用内容显示为独立下载选项。',
+        },
+      ],
+    },
+    es: {
+      keyword: `descargador de videos ${name}`,
+      description: `Descarga los medios disponibles de enlaces públicos de ${name} sin marcas de agua de la plataforma.`,
+      intro: `Pega un enlace público de ${name} para obtener videos, galerías, portada, autor y opciones directas disponibles.`,
+      detail: `Usa la URL pública completa. Los enlaces cortos funcionan cuando el servicio puede resolverlos. No se puede acceder a contenido privado, eliminado, con inicio de sesión o limitado por región.`,
+      faq: [
+        {
+          question: `¿Puedo descargar publicaciones privadas de ${name}?`,
+          answer:
+            'No. Solo se admiten enlaces públicos accesibles para los servicios configurados.',
+        },
+        {
+          question: `¿El descargador de ${name} admite galerías?`,
+          answer:
+            'Si la fuente devuelve varios videos o imágenes, se muestran como opciones de descarga separadas.',
+        },
+      ],
+    },
+    pt: {
+      keyword: `baixador de vídeos ${name}`,
+      description: `Baixe as mídias disponíveis de links públicos do ${name} sem marcas d'água da plataforma.`,
+      intro: `Cole um link público do ${name} para obter vídeos, galerias, capa, autor e opções diretas disponíveis.`,
+      detail: `Use a URL pública completa. Links curtos funcionam quando o serviço consegue resolvê-los. Conteúdo privado, removido, restrito por login ou região não pode ser acessado.`,
+      faq: [
+        {
+          question: `Posso baixar posts privados do ${name}?`,
+          answer:
+            'Não. Somente links públicos acessíveis aos serviços configurados são compatíveis.',
+        },
+        {
+          question: `O baixador do ${name} aceita galerias?`,
+          answer:
+            'Quando a origem retorna vários vídeos ou imagens, eles aparecem como opções de download separadas.',
+        },
+      ],
+    },
+  };
+
+  return { name, ...templates[locale] };
+}
+
+function genericPlatform(
+  names: Record<GenericPlatformLocale, string>
+): Partial<Record<SeoLocale, PlatformCopy>> & { en: PlatformCopy } {
+  return {
+    en: genericPlatformCopy('en', names.en),
+    zh: genericPlatformCopy('zh', names.zh),
+    es: genericPlatformCopy('es', names.es),
+    pt: genericPlatformCopy('pt', names.pt),
+  };
+}
+
+function genericMusicPlatform(
+  names: Record<GenericPlatformLocale, string>
+): Partial<Record<SeoLocale, PlatformCopy>> & { en: PlatformCopy } {
+  return {
+    en: {
+      name: names.en,
+      keyword: `${names.en} music parser`,
+      description: `Parse public ${names.en} links and retrieve available song metadata, cover art, lyrics, and direct audio URLs when supported.`,
+      intro: `Paste a public ${names.en} share link to check the available music data returned by the configured parsers.`,
+      detail:
+        'Music output depends on the upstream account and platform availability. Private, deleted, restricted, and unavailable songs cannot be resolved.',
+      faq: [
+        {
+          question: `Can ${names.en} parse every song?`,
+          answer:
+            'No. Availability depends on the upstream parser, regional rights, and whether the song URL is public.',
+        },
+        {
+          question: 'Does the result include lyrics?',
+          answer:
+            'When the upstream parser returns lyrics, they are preserved in the parsed metadata response.',
+        },
+      ],
+    },
+    zh: {
+      name: names.zh,
+      keyword: `${names.zh} 音乐解析`,
+      description: `解析公开 ${names.zh} 链接，获取可用歌曲信息、封面、歌词和音频直链。`,
+      intro: `粘贴公开 ${names.zh} 分享链接，即可检查解析服务返回的音乐数据。`,
+      detail:
+        '音乐输出取决于上游账号、平台版权和接口可用性。私密、已删除、受限或不可播放歌曲无法解析。',
+      faq: [
+        {
+          question: `${names.zh} 能解析所有歌曲吗？`,
+          answer:
+            '不能。结果取决于上游解析器、地区版权和歌曲链接是否公开可访问。',
+        },
+        {
+          question: '结果会包含歌词吗？',
+          answer: '如果上游接口返回歌词，解析结果会保留对应歌词字段。',
+        },
+      ],
+    },
+    es: {
+      name: names.es,
+      keyword: `analizador de música ${names.es}`,
+      description: `Analiza enlaces públicos de ${names.es} y obtiene metadatos, portada, letra y URL de audio cuando estén disponibles.`,
+      intro: `Pega un enlace público de ${names.es} para revisar los datos musicales devueltos por los analizadores configurados.`,
+      detail:
+        'La salida depende del proveedor, los derechos regionales y la disponibilidad de la canción. No se resuelve contenido privado, eliminado o restringido.',
+      faq: [
+        {
+          question: `¿${names.es} puede analizar cualquier canción?`,
+          answer:
+            'No. La disponibilidad depende del analizador, los derechos regionales y que el enlace sea público.',
+        },
+        {
+          question: '¿Incluye letras?',
+          answer:
+            'Si el proveedor devuelve letras, se conservan en la respuesta analizada.',
+        },
+      ],
+    },
+    pt: {
+      name: names.pt,
+      keyword: `analisador de música ${names.pt}`,
+      description: `Analise links públicos do ${names.pt} e obtenha metadados, capa, letra e URL de áudio quando disponíveis.`,
+      intro: `Cole um link público do ${names.pt} para verificar os dados musicais retornados pelos analisadores configurados.`,
+      detail:
+        'A saída depende do provedor, dos direitos regionais e da disponibilidade da música. Conteúdo privado, removido ou restrito não é resolvido.',
+      faq: [
+        {
+          question: `${names.pt} analisa qualquer música?`,
+          answer:
+            'Não. A disponibilidade depende do analisador, dos direitos regionais e de o link ser público.',
+        },
+        {
+          question: 'Inclui letras?',
+          answer:
+            'Quando o provedor retorna letras, elas são preservadas na resposta analisada.',
+        },
+      ],
+    },
+  };
+}
+
 const platforms: Record<
   string,
   Partial<Record<SeoLocale, PlatformCopy>> & { en: PlatformCopy }
@@ -700,6 +880,198 @@ const platforms: Record<
       ],
     },
   },
+  'douyin-downloader': genericPlatform({
+    en: 'Douyin Downloader',
+    zh: '抖音无水印下载器',
+    es: 'Descargador de Douyin',
+    pt: 'Baixador do Douyin',
+  }),
+  'kuaishou-downloader': genericPlatform({
+    en: 'Kuaishou Downloader',
+    zh: '快手视频下载器',
+    es: 'Descargador de Kuaishou',
+    pt: 'Baixador do Kuaishou',
+  }),
+  'xiaohongshu-downloader': genericPlatform({
+    en: 'Xiaohongshu Downloader',
+    zh: '小红书视频与图集下载器',
+    es: 'Descargador de Xiaohongshu',
+    pt: 'Baixador do Xiaohongshu',
+  }),
+  'bilibili-downloader': genericPlatform({
+    en: 'Bilibili Downloader',
+    zh: 'Bilibili 视频下载器',
+    es: 'Descargador de Bilibili',
+    pt: 'Baixador do Bilibili',
+  }),
+  'weibo-video-downloader': genericPlatform({
+    en: 'Weibo Video Downloader',
+    zh: '微博视频下载器',
+    es: 'Descargador de videos de Weibo',
+    pt: 'Baixador de vídeos do Weibo',
+  }),
+  'toutiao-video-downloader': genericPlatform({
+    en: 'Toutiao Video Downloader',
+    zh: '今日头条与西瓜视频下载器',
+    es: 'Descargador de videos de Toutiao',
+    pt: 'Baixador de vídeos do Toutiao',
+  }),
+  'doubao-video-downloader': genericPlatform({
+    en: 'Doubao Video Downloader',
+    zh: '豆包视频下载器',
+    es: 'Descargador de videos de Doubao',
+    pt: 'Baixador de vídeos do Doubao',
+  }),
+  'jimeng-video-downloader': genericPlatform({
+    en: 'Jimeng AI Video Downloader',
+    zh: '即梦 AI 视频下载器',
+    es: 'Descargador de videos de Jimeng AI',
+    pt: 'Baixador de vídeos do Jimeng AI',
+  }),
+  'pipixia-video-downloader': genericPlatform({
+    en: 'Pipixia Video Downloader',
+    zh: '皮皮虾视频下载器',
+    es: 'Descargador de videos de Pipixia',
+    pt: 'Baixador de vídeos do Pipixia',
+  }),
+  'pipigaoxiao-video-downloader': genericPlatform({
+    en: 'Pipigaoxiao Video Downloader',
+    zh: '皮皮搞笑视频下载器',
+    es: 'Descargador de videos de Pipigaoxiao',
+    pt: 'Baixador de vídeos do Pipigaoxiao',
+  }),
+  'qianwen-media-downloader': genericPlatform({
+    en: 'Qianwen Media Downloader',
+    zh: '千问图片与视频下载器',
+    es: 'Descargador multimedia de Qianwen',
+    pt: 'Baixador de mídia do Qianwen',
+  }),
+  'zuiyou-video-downloader': genericPlatform({
+    en: 'Zuiyou Video Downloader',
+    zh: '最右视频下载器',
+    es: 'Descargador de videos de Zuiyou',
+    pt: 'Baixador de vídeos do Zuiyou',
+  }),
+  'xigua-video-downloader': genericPlatform({
+    en: 'Xigua Video Downloader',
+    zh: '西瓜视频下载器',
+    es: 'Descargador de videos de Xigua',
+    pt: 'Baixador de vídeos do Xigua',
+  }),
+  'acfun-video-downloader': genericPlatform({
+    en: 'AcFun Video Downloader',
+    zh: 'AcFun 视频下载器',
+    es: 'Descargador de videos de AcFun',
+    pt: 'Baixador de vídeos do AcFun',
+  }),
+  'zhihu-video-downloader': genericPlatform({
+    en: 'Zhihu Video Downloader',
+    zh: '知乎视频下载器',
+    es: 'Descargador de videos de Zhihu',
+    pt: 'Baixador de vídeos do Zhihu',
+  }),
+  'meipai-video-downloader': genericPlatform({
+    en: 'Meipai Video Downloader',
+    zh: '美拍视频下载器',
+    es: 'Descargador de videos de Meipai',
+    pt: 'Baixador de vídeos do Meipai',
+  }),
+  'huya-video-downloader': genericPlatform({
+    en: 'Huya Video Downloader',
+    zh: '虎牙视频下载器',
+    es: 'Descargador de videos de Huya',
+    pt: 'Baixador de vídeos do Huya',
+  }),
+  'weishi-video-downloader': genericPlatform({
+    en: 'Weishi Video Downloader',
+    zh: '微视视频下载器',
+    es: 'Descargador de videos de Weishi',
+    pt: 'Baixador de vídeos do Weishi',
+  }),
+  'doubao-image-downloader': genericPlatform({
+    en: 'Doubao Image Downloader',
+    zh: '豆包图片去水印下载器',
+    es: 'Descargador de imágenes de Doubao',
+    pt: 'Baixador de imagens do Doubao',
+  }),
+  'douyin-profile-downloader': genericPlatform({
+    en: 'Douyin Profile Parser',
+    zh: '抖音主页解析器',
+    es: 'Analizador de perfil de Douyin',
+    pt: 'Analisador de perfil do Douyin',
+  }),
+  'kuaishou-video-downloader': genericPlatform({
+    en: 'Kuaishou Video Downloader',
+    zh: '快手解析下载器',
+    es: 'Descargador de videos de Kuaishou',
+    pt: 'Baixador de vídeos do Kuaishou',
+  }),
+  'short-video-downloader': genericPlatform({
+    en: 'Short Video Downloader',
+    zh: '短视频聚合解析器',
+    es: 'Descargador de videos cortos',
+    pt: 'Baixador de vídeos curtos',
+  }),
+  'short-video-parser-2': genericPlatform({
+    en: 'Short Video Parser 2',
+    zh: '短视频聚合解析器 2',
+    es: 'Analizador de videos cortos 2',
+    pt: 'Analisador de vídeos curtos 2',
+  }),
+  'weibo-watermark-downloader': genericPlatform({
+    en: 'Weibo Watermark Downloader',
+    zh: '微博去水印下载器',
+    es: 'Descargador sin marca de agua de Weibo',
+    pt: 'Baixador sem marca d’água do Weibo',
+  }),
+  'xiaohongshu-note-downloader': genericPlatform({
+    en: 'Xiaohongshu Note Downloader',
+    zh: '小红书解析下载器',
+    es: 'Descargador de notas de Xiaohongshu',
+    pt: 'Baixador de notas do Xiaohongshu',
+  }),
+  'xiaohongshu-image-downloader': genericPlatform({
+    en: 'Xiaohongshu Image Downloader',
+    zh: '小红书图文下载器',
+    es: 'Descargador de imágenes de Xiaohongshu',
+    pt: 'Baixador de imagens do Xiaohongshu',
+  }),
+  'movie-video-parser': genericPlatform({
+    en: 'Movie Video Parser',
+    zh: '影视解析器',
+    es: 'Analizador de video de películas',
+    pt: 'Analisador de vídeo de filmes',
+  }),
+  'netease-music-downloader': genericMusicPlatform({
+    en: 'NetEase Cloud Music',
+    zh: '网易云音乐 SVIP',
+    es: 'NetEase Cloud Music',
+    pt: 'NetEase Cloud Music',
+  }),
+  'kuwo-music-downloader': genericMusicPlatform({
+    en: 'Kuwo Music',
+    zh: '酷我音乐',
+    es: 'Kuwo Music',
+    pt: 'Kuwo Music',
+  }),
+  'music-downloader': genericMusicPlatform({
+    en: 'Music Downloader',
+    zh: '音乐解析聚合',
+    es: 'Descargador de música',
+    pt: 'Baixador de música',
+  }),
+  'qq-music-downloader': genericMusicPlatform({
+    en: 'QQ Music',
+    zh: 'QQ 音乐',
+    es: 'QQ Music',
+    pt: 'QQ Music',
+  }),
+  'qishui-music-downloader': genericMusicPlatform({
+    en: 'Qishui Music',
+    zh: '汽水音乐',
+    es: 'Qishui Music',
+    pt: 'Qishui Music',
+  }),
 };
 
 // Keep the platform-specific pages complete for every public locale without duplicating
@@ -711,6 +1083,24 @@ const translatedPlatformLabels: Record<string, Record<string, string>> = {
     'youtube-downloader': 'Téléchargeur YouTube',
     'facebook-video-downloader': 'Téléchargeur vidéo Facebook',
     'twitter-video-downloader': 'Téléchargeur vidéo X (Twitter)',
+    'douyin-downloader': 'Téléchargeur Douyin',
+    'kuaishou-downloader': 'Téléchargeur Kuaishou',
+    'xiaohongshu-downloader': 'Téléchargeur Xiaohongshu',
+    'bilibili-downloader': 'Téléchargeur Bilibili',
+    'weibo-video-downloader': 'Téléchargeur vidéo Weibo',
+    'toutiao-video-downloader': 'Téléchargeur vidéo Toutiao',
+    'doubao-video-downloader': 'Téléchargeur vidéo Doubao',
+    'jimeng-video-downloader': 'Téléchargeur vidéo Jimeng AI',
+    'pipixia-video-downloader': 'Téléchargeur vidéo Pipixia',
+    'pipigaoxiao-video-downloader': 'Téléchargeur vidéo Pipigaoxiao',
+    'qianwen-media-downloader': 'Téléchargeur multimédia Qianwen',
+    'zuiyou-video-downloader': 'Téléchargeur vidéo Zuiyou',
+    'xigua-video-downloader': 'Téléchargeur vidéo Xigua',
+    'acfun-video-downloader': 'Téléchargeur vidéo AcFun',
+    'zhihu-video-downloader': 'Téléchargeur vidéo Zhihu',
+    'meipai-video-downloader': 'Téléchargeur vidéo Meipai',
+    'huya-video-downloader': 'Téléchargeur vidéo Huya',
+    'weishi-video-downloader': 'Téléchargeur vidéo Weishi',
   },
   de: {
     'tiktok-downloader': 'TikTok-Downloader',
@@ -718,6 +1108,24 @@ const translatedPlatformLabels: Record<string, Record<string, string>> = {
     'youtube-downloader': 'YouTube-Downloader',
     'facebook-video-downloader': 'Facebook-Video-Downloader',
     'twitter-video-downloader': 'X-(Twitter)-Video-Downloader',
+    'douyin-downloader': 'Douyin-Downloader',
+    'kuaishou-downloader': 'Kuaishou-Downloader',
+    'xiaohongshu-downloader': 'Xiaohongshu-Downloader',
+    'bilibili-downloader': 'Bilibili-Downloader',
+    'weibo-video-downloader': 'Weibo-Video-Downloader',
+    'toutiao-video-downloader': 'Toutiao-Video-Downloader',
+    'doubao-video-downloader': 'Doubao-Video-Downloader',
+    'jimeng-video-downloader': 'Jimeng-AI-Video-Downloader',
+    'pipixia-video-downloader': 'Pipixia-Video-Downloader',
+    'pipigaoxiao-video-downloader': 'Pipigaoxiao-Video-Downloader',
+    'qianwen-media-downloader': 'Qianwen-Medien-Downloader',
+    'zuiyou-video-downloader': 'Zuiyou-Video-Downloader',
+    'xigua-video-downloader': 'Xigua-Video-Downloader',
+    'acfun-video-downloader': 'AcFun-Video-Downloader',
+    'zhihu-video-downloader': 'Zhihu-Video-Downloader',
+    'meipai-video-downloader': 'Meipai-Video-Downloader',
+    'huya-video-downloader': 'Huya-Video-Downloader',
+    'weishi-video-downloader': 'Weishi-Video-Downloader',
   },
   it: {
     'tiktok-downloader': 'Downloader TikTok',
@@ -725,6 +1133,24 @@ const translatedPlatformLabels: Record<string, Record<string, string>> = {
     'youtube-downloader': 'Downloader YouTube',
     'facebook-video-downloader': 'Downloader video Facebook',
     'twitter-video-downloader': 'Downloader video X (Twitter)',
+    'douyin-downloader': 'Downloader Douyin',
+    'kuaishou-downloader': 'Downloader Kuaishou',
+    'xiaohongshu-downloader': 'Downloader Xiaohongshu',
+    'bilibili-downloader': 'Downloader Bilibili',
+    'weibo-video-downloader': 'Downloader video Weibo',
+    'toutiao-video-downloader': 'Downloader video Toutiao',
+    'doubao-video-downloader': 'Downloader video Doubao',
+    'jimeng-video-downloader': 'Downloader video Jimeng AI',
+    'pipixia-video-downloader': 'Downloader video Pipixia',
+    'pipigaoxiao-video-downloader': 'Downloader video Pipigaoxiao',
+    'qianwen-media-downloader': 'Downloader multimediale Qianwen',
+    'zuiyou-video-downloader': 'Downloader video Zuiyou',
+    'xigua-video-downloader': 'Downloader video Xigua',
+    'acfun-video-downloader': 'Downloader video AcFun',
+    'zhihu-video-downloader': 'Downloader video Zhihu',
+    'meipai-video-downloader': 'Downloader video Meipai',
+    'huya-video-downloader': 'Downloader video Huya',
+    'weishi-video-downloader': 'Downloader video Weishi',
   },
   id: {
     'tiktok-downloader': 'Pengunduh TikTok',
@@ -732,6 +1158,24 @@ const translatedPlatformLabels: Record<string, Record<string, string>> = {
     'youtube-downloader': 'Pengunduh YouTube',
     'facebook-video-downloader': 'Pengunduh video Facebook',
     'twitter-video-downloader': 'Pengunduh video X (Twitter)',
+    'douyin-downloader': 'Pengunduh Douyin',
+    'kuaishou-downloader': 'Pengunduh Kuaishou',
+    'xiaohongshu-downloader': 'Pengunduh Xiaohongshu',
+    'bilibili-downloader': 'Pengunduh Bilibili',
+    'weibo-video-downloader': 'Pengunduh video Weibo',
+    'toutiao-video-downloader': 'Pengunduh video Toutiao',
+    'doubao-video-downloader': 'Pengunduh video Doubao',
+    'jimeng-video-downloader': 'Pengunduh video Jimeng AI',
+    'pipixia-video-downloader': 'Pengunduh video Pipixia',
+    'pipigaoxiao-video-downloader': 'Pengunduh video Pipigaoxiao',
+    'qianwen-media-downloader': 'Pengunduh media Qianwen',
+    'zuiyou-video-downloader': 'Pengunduh video Zuiyou',
+    'xigua-video-downloader': 'Pengunduh video Xigua',
+    'acfun-video-downloader': 'Pengunduh video AcFun',
+    'zhihu-video-downloader': 'Pengunduh video Zhihu',
+    'meipai-video-downloader': 'Pengunduh video Meipai',
+    'huya-video-downloader': 'Pengunduh video Huya',
+    'weishi-video-downloader': 'Pengunduh video Weishi',
   },
   ja: {
     'tiktok-downloader': 'TikTok ダウンローダー',
@@ -739,6 +1183,24 @@ const translatedPlatformLabels: Record<string, Record<string, string>> = {
     'youtube-downloader': 'YouTube ダウンローダー',
     'facebook-video-downloader': 'Facebook 動画ダウンローダー',
     'twitter-video-downloader': 'X（Twitter）動画ダウンローダー',
+    'douyin-downloader': 'Douyin ダウンローダー',
+    'kuaishou-downloader': 'Kuaishou ダウンローダー',
+    'xiaohongshu-downloader': 'Xiaohongshu ダウンローダー',
+    'bilibili-downloader': 'Bilibili ダウンローダー',
+    'weibo-video-downloader': 'Weibo 動画ダウンローダー',
+    'toutiao-video-downloader': 'Toutiao 動画ダウンローダー',
+    'doubao-video-downloader': 'Doubao 動画ダウンローダー',
+    'jimeng-video-downloader': 'Jimeng AI 動画ダウンローダー',
+    'pipixia-video-downloader': 'Pipixia 動画ダウンローダー',
+    'pipigaoxiao-video-downloader': 'Pipigaoxiao 動画ダウンローダー',
+    'qianwen-media-downloader': 'Qianwen メディアダウンローダー',
+    'zuiyou-video-downloader': 'Zuiyou 動画ダウンローダー',
+    'xigua-video-downloader': 'Xigua 動画ダウンローダー',
+    'acfun-video-downloader': 'AcFun 動画ダウンローダー',
+    'zhihu-video-downloader': 'Zhihu 動画ダウンローダー',
+    'meipai-video-downloader': 'Meipai 動画ダウンローダー',
+    'huya-video-downloader': 'Huya 動画ダウンローダー',
+    'weishi-video-downloader': 'Weishi 動画ダウンローダー',
   },
   ko: {
     'tiktok-downloader': 'TikTok 다운로더',
@@ -746,6 +1208,24 @@ const translatedPlatformLabels: Record<string, Record<string, string>> = {
     'youtube-downloader': 'YouTube 다운로더',
     'facebook-video-downloader': 'Facebook 동영상 다운로더',
     'twitter-video-downloader': 'X(Twitter) 동영상 다운로더',
+    'douyin-downloader': 'Douyin 다운로더',
+    'kuaishou-downloader': 'Kuaishou 다운로더',
+    'xiaohongshu-downloader': 'Xiaohongshu 다운로더',
+    'bilibili-downloader': 'Bilibili 다운로더',
+    'weibo-video-downloader': 'Weibo 동영상 다운로더',
+    'toutiao-video-downloader': 'Toutiao 동영상 다운로더',
+    'doubao-video-downloader': 'Doubao 동영상 다운로더',
+    'jimeng-video-downloader': 'Jimeng AI 동영상 다운로더',
+    'pipixia-video-downloader': 'Pipixia 동영상 다운로더',
+    'pipigaoxiao-video-downloader': 'Pipigaoxiao 동영상 다운로더',
+    'qianwen-media-downloader': 'Qianwen 미디어 다운로더',
+    'zuiyou-video-downloader': 'Zuiyou 동영상 다운로더',
+    'xigua-video-downloader': 'Xigua 동영상 다운로더',
+    'acfun-video-downloader': 'AcFun 동영상 다운로더',
+    'zhihu-video-downloader': 'Zhihu 동영상 다운로더',
+    'meipai-video-downloader': 'Meipai 동영상 다운로더',
+    'huya-video-downloader': 'Huya 동영상 다운로더',
+    'weishi-video-downloader': 'Weishi 동영상 다운로더',
   },
 };
 
