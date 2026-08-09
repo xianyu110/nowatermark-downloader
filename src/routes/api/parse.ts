@@ -741,11 +741,15 @@ async function requestProvider(
   provider: ParseProvider,
   sourceUrl: string,
   cobaltAuth: CobaltAuth,
-  options: { mode: DownloadMode; quality: VideoQuality },
+  options: {
+    mode: DownloadMode;
+    quality: VideoQuality;
+    allowMediaFallback: boolean;
+  },
   timeoutMs: number
 ) {
   if (provider.kind === 'bugpk') {
-    if (options.mode !== 'auto') {
+    if (options.mode !== 'auto' && !options.allowMediaFallback) {
       const error = new Error(
         'BugPk does not support this download mode'
       ) as ParseError;
@@ -943,6 +947,7 @@ async function POST({ request }: { request: Request }) {
   const requestedMode = modeValue as DownloadMode;
   const requestedQuality = qualityValue as VideoQuality;
   const batchRequested = body?.batch === true;
+  const allowMediaFallback = body?.allowMediaFallback === true;
 
   const configs = await getAllConfigs();
   const apiKeyHeader = getApiKeyHeader(request);
@@ -1033,7 +1038,11 @@ async function POST({ request }: { request: Request }) {
             provider,
             sourceUrl,
             cobaltAuth,
-            { mode: requestedMode, quality: requestedQuality },
+            {
+              mode: requestedMode,
+              quality: requestedQuality,
+              allowMediaFallback,
+            },
             timeoutMs
           ),
         requestDeadline,

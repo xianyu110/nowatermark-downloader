@@ -737,13 +737,21 @@ export function VideoTranscriber({
     const response = await fetch('/api/parse', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: 'audio', quality: '720', url: sourceUrl }),
+      body: JSON.stringify({
+        mode: 'audio',
+        quality: '720',
+        url: sourceUrl,
+        allowMediaFallback: true,
+      }),
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok || payload?.code !== 0) {
       throw new Error(payload?.message || t.parseFailed);
     }
-    const mediaUrl = payload?.data?.mediaUrl || payload?.data?.videoUrl;
+    const mediaUrl =
+      payload?.data?.audioUrl ||
+      payload?.data?.mediaUrl ||
+      payload?.data?.videoUrl;
     if (!mediaUrl) throw new Error(t.parseFailed);
     setResolvedMediaUrl(mediaUrl);
     return mediaUrl as string;

@@ -276,14 +276,21 @@ export function SongRecognizer({
       const parsedResponse = await fetch('/api/parse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, mode: 'audio', quality: '720' }),
+        body: JSON.stringify({
+          url,
+          mode: 'audio',
+          quality: '720',
+          allowMediaFallback: true,
+        }),
       });
       const parsedPayload = await parsedResponse.json().catch(() => null);
       if (!parsedResponse.ok || parsedPayload?.code !== 0) {
         throw new Error(parsedPayload?.message || t.parseFailed);
       }
       const mediaUrl =
-        parsedPayload?.data?.mediaUrl || parsedPayload?.data?.videoUrl;
+        parsedPayload?.data?.audioUrl ||
+        parsedPayload?.data?.mediaUrl ||
+        parsedPayload?.data?.videoUrl;
       if (!mediaUrl) throw new Error(t.parseFailed);
 
       const recognitionResponse = await fetch('/api/song-recognition', {
