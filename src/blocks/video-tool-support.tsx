@@ -1,5 +1,10 @@
+'use client';
+
+import { usePathname } from '@/core/i18n/navigation';
+import { envConfigs } from '@/config';
 import { localePath, normalizeLocale, type SiteLocale } from '@/config/locale';
 import { getLocale } from '@/paraglide/runtime.js';
+import { JsonLd } from '@/components/json-ld';
 
 type SupportTool = 'summary' | 'audio' | 'frames' | 'song';
 
@@ -1396,79 +1401,146 @@ export function VideoToolSupportSection({
   const locale = currentLocale(localeOverride);
   const supportLocale = copy[locale] || copy.en;
   const support = supportLocale[tool] || copy.en[tool];
+  const pathname = usePathname();
+  const appUrl = envConfigs.app_url.replace(/\/$/, '');
+  const canonical = `${appUrl}${localePath(locale, pathname || '/')}`;
+  const applicationCategory =
+    tool === 'song'
+      ? 'MusicApplication'
+      : tool === 'summary'
+        ? 'BusinessApplication'
+        : 'MultimediaApplication';
+  const schema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${canonical}#webpage`,
+        url: canonical,
+        name: support.guideTitle,
+        description: support.guideDescription,
+        inLanguage: locale,
+        isPartOf: {
+          '@type': 'WebSite',
+          name: envConfigs.app_name,
+          url: appUrl,
+        },
+      },
+      {
+        '@type': 'SoftwareApplication',
+        '@id': `${canonical}#app`,
+        name: support.guideTitle,
+        applicationCategory,
+        operatingSystem: 'Web',
+        browserRequirements: 'Requires JavaScript and a modern web browser',
+        url: canonical,
+        description: support.guideDescription,
+        inLanguage: locale,
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        featureList: support.steps,
+        mainEntityOfPage: { '@id': `${canonical}#webpage` },
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': `${canonical}#faq`,
+        mainEntity: support.faqs.map((faq) => ({
+          '@type': 'Question',
+          name: faq.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: faq.answer,
+          },
+        })),
+      },
+      {
+        '@type': 'HowTo',
+        '@id': `${canonical}#howto`,
+        name: support.guideTitle,
+        description: support.guideDescription,
+        totalTime: 'PT5M',
+        step: support.steps.map((step) => ({
+          '@type': 'HowToStep',
+          text: step,
+        })),
+      },
+    ],
+  };
 
   return (
-    <section className="mt-10 rounded-2xl border border-[#dbe8e3] bg-white p-6">
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div>
-          <p className="text-sm font-semibold tracking-[0.18em] text-[#107b59] uppercase">
-            {support.guideEyebrow}
-          </p>
-          <h2 className="mt-2 text-2xl font-bold">{support.guideTitle}</h2>
-          <p className="mt-3 text-sm leading-6 text-[#536861]">
-            {support.guideDescription}
-          </p>
-          <ol className="mt-5 space-y-3">
-            {support.steps.map((step, index) => (
-              <li
-                key={step}
-                className="flex gap-3 rounded-2xl border border-[#dbe8e3] bg-[#fbfdfc] p-4 text-sm leading-6 text-[#3e514b]"
-              >
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#e9f6f1] text-xs font-bold text-[#107b59]">
-                  {index + 1}
-                </span>
-                <span>{step}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
+    <>
+      <JsonLd data={schema} />
+      <section className="mt-10 rounded-2xl border border-[#dbe8e3] bg-white p-6">
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div>
+            <p className="text-sm font-semibold tracking-[0.18em] text-[#107b59] uppercase">
+              {support.guideEyebrow}
+            </p>
+            <h2 className="mt-2 text-2xl font-bold">{support.guideTitle}</h2>
+            <p className="mt-3 text-sm leading-6 text-[#536861]">
+              {support.guideDescription}
+            </p>
+            <ol className="mt-5 space-y-3">
+              {support.steps.map((step, index) => (
+                <li
+                  key={step}
+                  className="flex gap-3 rounded-2xl border border-[#dbe8e3] bg-[#fbfdfc] p-4 text-sm leading-6 text-[#3e514b]"
+                >
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#e9f6f1] text-xs font-bold text-[#107b59]">
+                    {index + 1}
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
 
-        <div>
-          <p className="text-sm font-semibold tracking-[0.18em] text-[#107b59] uppercase">
-            {support.faqEyebrow}
-          </p>
-          <h2 className="mt-2 text-2xl font-bold">{support.faqTitle}</h2>
-          <p className="mt-3 text-sm leading-6 text-[#536861]">
-            {support.faqDescription}
-          </p>
-          <div className="mt-5 space-y-4">
-            {support.faqs.map((faq) => (
-              <div
-                key={faq.question}
-                className="rounded-2xl border border-[#dbe8e3] bg-[#fbfdfc] p-4"
-              >
-                <h3 className="text-sm font-semibold text-[#10231d]">
-                  {faq.question}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-[#536861]">
-                  {faq.answer}
-                </p>
-              </div>
-            ))}
+          <div>
+            <p className="text-sm font-semibold tracking-[0.18em] text-[#107b59] uppercase">
+              {support.faqEyebrow}
+            </p>
+            <h2 className="mt-2 text-2xl font-bold">{support.faqTitle}</h2>
+            <p className="mt-3 text-sm leading-6 text-[#536861]">
+              {support.faqDescription}
+            </p>
+            <div className="mt-5 space-y-4">
+              {support.faqs.map((faq) => (
+                <div
+                  key={faq.question}
+                  className="rounded-2xl border border-[#dbe8e3] bg-[#fbfdfc] p-4"
+                >
+                  <h3 className="text-sm font-semibold text-[#10231d]">
+                    {faq.question}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-[#536861]">
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-8 flex flex-wrap gap-3">
-        <a
-          href={localePath(locale, '/transcribe')}
-          className="inline-flex items-center rounded-full bg-[#107b59] px-4 py-2 text-sm font-semibold text-white"
-        >
-          {support.ctaGuide}
-        </a>
-        <a
-          href={localePath(locale, '/pricing')}
-          className="inline-flex items-center rounded-full border border-[#cde2db] bg-[#f8fcfa] px-4 py-2 text-sm font-semibold text-[#107b59]"
-        >
-          {support.ctaPricing}
-        </a>
-        <a
-          href={localePath(locale, '/tools')}
-          className="inline-flex items-center rounded-full border border-[#cde2db] bg-[#f8fcfa] px-4 py-2 text-sm font-semibold text-[#107b59]"
-        >
-          {support.ctaTools}
-        </a>
-      </div>
-    </section>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <a
+            href={localePath(locale, '/transcribe')}
+            className="inline-flex items-center rounded-full bg-[#107b59] px-4 py-2 text-sm font-semibold text-white"
+          >
+            {support.ctaGuide}
+          </a>
+          <a
+            href={localePath(locale, '/pricing')}
+            className="inline-flex items-center rounded-full border border-[#cde2db] bg-[#f8fcfa] px-4 py-2 text-sm font-semibold text-[#107b59]"
+          >
+            {support.ctaPricing}
+          </a>
+          <a
+            href={localePath(locale, '/tools')}
+            className="inline-flex items-center rounded-full border border-[#cde2db] bg-[#f8fcfa] px-4 py-2 text-sm font-semibold text-[#107b59]"
+          >
+            {support.ctaTools}
+          </a>
+        </div>
+      </section>
+    </>
   );
 }
