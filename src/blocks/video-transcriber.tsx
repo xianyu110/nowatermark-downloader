@@ -763,20 +763,20 @@ export function VideoTranscriber({
       setNotice(t.invalidUrl);
       return;
     }
-    if (!session?.user) {
-      setNotice(t.accountRequired);
-      return;
-    }
-    if (membershipLoading) return;
-    if (!isPaidMember) {
-      setNotice(t.membershipRequired);
-      return;
-    }
 
     setNotice('');
     setResult(null);
     try {
       const mediaUrl = await resolveAudioUrl(sourceUrl);
+      if (!session?.user) {
+        setNotice(t.accountRequired);
+        return;
+      }
+      if (membershipLoading) return;
+      if (!isPaidMember) {
+        setNotice(t.membershipRequired);
+        return;
+      }
       setProgress('transcribing');
       const response = await fetch('/api/transcribe', {
         method: 'POST',
