@@ -1518,7 +1518,9 @@ export function PlatformDownloader({
         },
         primaryImageOfPage: {
           '@type': 'ImageObject',
-          url: `${appUrl}/logo.svg`,
+          url: `${appUrl}/og-image.png`,
+          width: 1200,
+          height: 630,
         },
       },
       {
@@ -1534,7 +1536,7 @@ export function PlatformDownloader({
         operatingSystem: 'Web',
         browserRequirements: 'Requires JavaScript and a modern web browser',
         url: canonical,
-        image: `${appUrl}/logo.svg`,
+        image: `${appUrl}/og-image.png`,
         description: item.description,
         inLanguage: locale,
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },

@@ -59,7 +59,7 @@ export function localizedPageHead({
   image?: string;
 }) {
   const canonical = localizedUrl(locale, path);
-  const ogImage = image || `${appUrl()}/logo.svg`;
+  const ogImage = image || `${appUrl()}/og-image.png`;
   return {
     meta: [
       { title },
@@ -79,6 +79,9 @@ export function localizedPageHead({
       { property: 'og:url', content: canonical },
       { property: 'og:locale', content: openGraphLocale(locale) },
       { property: 'og:image', content: ogImage },
+      { property: 'og:image:width', content: '1200' },
+      { property: 'og:image:height', content: '630' },
+      { property: 'og:image:type', content: 'image/png' },
       { property: 'og:image:alt', content: title },
       ...siteLocales
         .filter((alternateLocale) => alternateLocale !== locale)
@@ -90,6 +93,7 @@ export function localizedPageHead({
       { name: 'twitter:title', content: title },
       { name: 'twitter:description', content: description },
       { name: 'twitter:image', content: ogImage },
+      { name: 'twitter:image:alt', content: title },
     ],
     links: [
       { rel: 'canonical', href: canonical },
