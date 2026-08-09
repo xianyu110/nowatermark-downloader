@@ -293,26 +293,48 @@ function extractQqMusicId(sourceUrl: string) {
   }
 }
 
+function getBugpkMusicSource(sourceUrl: string) {
+  try {
+    const hostname = new URL(sourceUrl).hostname.toLowerCase();
+    if (hostname.includes('music.163.com')) {
+      return {
+        id: extractNeteaseSongId(sourceUrl),
+        media: 'netease' as const,
+      };
+    }
+    if (hostname.includes('y.qq.com')) {
+      return {
+        id: extractQqMusicId(sourceUrl),
+        media: 'tencent' as const,
+      };
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 function applyBugpkMusicParams(endpoint: URL, sourceUrl: string) {
   const endpointName = getBugpkEndpointName(endpoint.toString());
-  if (endpointName !== 'music') return;
+  const source = getBugpkMusicSource(sourceUrl);
+  if (!source) return;
 
-  const platform = detectPlatform(sourceUrl).toLowerCase();
-  if (platform.includes('qq')) {
-    const id = extractQqMusicId(sourceUrl);
-    if (id) endpoint.searchParams.set('id', id);
-    endpoint.searchParams.set('media', 'tencent');
-    endpoint.searchParams.set('type', 'song');
-    endpoint.searchParams.delete('url');
+  if (endpointName === '163_music') {
+    endpoint.searchParams.set('type', 'music');
+    if (source.id) {
+      endpoint.searchParams.set('id', source.id);
+      endpoint.searchParams.set('ids', source.id);
+    }
     return;
   }
 
-  if (platform.includes('163') || platform.includes('netease')) {
-    const id = extractNeteaseSongId(sourceUrl);
-    if (id) endpoint.searchParams.set('id', id);
-    endpoint.searchParams.set('media', 'netease');
+  if (endpointName === 'music') {
     endpoint.searchParams.set('type', 'song');
-    endpoint.searchParams.delete('url');
+    endpoint.searchParams.set('media', source.media);
+    if (source.id) {
+      endpoint.searchParams.set('id', source.id);
+      endpoint.searchParams.set('ids', source.id);
+    }
   }
 }
 
@@ -460,6 +482,7 @@ function normalizeBugpkResult(
   providerUrl: string
 ) {
   const data = payload?.data ?? payload;
+  const root = Array.isArray(data) ? (data[0] ?? {}) : data;
   const isMusic = isBugpkMusicEndpoint(providerUrl);
   const candidates: BugpkMediaCandidate[] = [];
   const seen = new Set<string>();
@@ -510,36 +533,37 @@ function normalizeBugpkResult(
 
   addCandidate(
     firstHttpUrl(
-      data?.url,
-      data?.audio,
-      data?.music_url,
-      data?.video,
-      data?.video_url,
-      data?.play_url,
-      data?.download_url
+      root?.url,
+      root?.audio,
+      root?.music_url,
+      root?.video,
+      root?.video_url,
+      root?.play_url,
+      root?.download_url
     ),
     isMusic ? 'audio' : 'video',
     isMusic ? 'Audio' : 'Video',
-    data?.pic || data?.cover
+    root?.pic || root?.cover
   );
-  addArray(data?.video_backup, 'video', 'Video');
-  addArray(data?.videos, 'video', 'Video');
-  addArray(data?.video_list, 'video', 'Video');
+  addArray(root?.video_backup, 'video', 'Video');
+  addArray(root?.videos, 'video', 'Video');
+  addArray(root?.video_list, 'video', 'Video');
   addArray(
-    data?.data,
+    root?.data,
     isMusic ? 'audio' : 'video',
     isMusic ? 'Audio' : 'Video'
   );
-  addArray(data?.images, 'image', 'Image');
-  addArray(data?.pics, 'image', 'Image');
-  addArray(data?.image_list, 'image', 'Image');
-  addArray(data?.live_photo, 'video', 'Live photo');
-  if (Array.isArray(data?.live_photo)) {
-    data.live_photo.forEach((item: any, index: number) =>
+  addArray(data, isMusic ? 'audio' : 'video', isMusic ? 'Audio' : 'Video');
+  addArray(root?.images, 'image', 'Image');
+  addArray(root?.pics, 'image', 'Image');
+  addArray(root?.image_list, 'image', 'Image');
+  addArray(root?.live_photo, 'video', 'Live photo');
+  if (Array.isArray(root?.live_photo)) {
+    root.live_photo.forEach((item: any, index: number) =>
       addCandidate(item?.image, 'image', `Live photo image ${index + 1}`)
     );
   }
-  addCandidate(data?.music?.url, 'audio', 'Audio', data?.music?.cover);
+  addCandidate(root?.music?.url, 'audio', 'Audio', root?.music?.cover);
 
   const preferred =
     (isMusic ? candidates.find((item) => item.type === 'audio') : null) ||
@@ -551,37 +575,37 @@ function normalizeBugpkResult(
   return {
     provider: 'BugPk',
     platform: serviceLabelFromSource(sourceUrl),
-    title: firstString(data?.title, data?.name, data?.song_name),
+    title: firstString(root?.title, root?.name, root?.song_name),
     desc: firstString(
-      data?.desc,
-      data?.description,
-      data?.content,
-      data?.al_name,
-      data?.album
+      root?.desc,
+      root?.description,
+      root?.content,
+      root?.al_name,
+      root?.album
     ),
     author: {
       name: firstString(
-        data?.author?.name,
-        data?.author,
-        data?.nickname,
-        data?.ar_name,
-        data?.singer
+        root?.author?.name,
+        root?.author,
+        root?.nickname,
+        root?.ar_name,
+        root?.singer
       ),
-      avatar: firstString(data?.author?.avatar, data?.avatar),
+      avatar: firstString(root?.author?.avatar, root?.avatar),
     },
     coverUrl: firstHttpUrl(
-      data?.pic,
-      data?.cover,
-      data?.cover_url,
-      data?.thumbnail,
+      root?.pic,
+      root?.cover,
+      root?.cover_url,
+      root?.thumbnail,
       preferred.thumb,
       candidates.find((item) => item.type === 'image')?.url
     ),
-    filename: firstString(data?.filename, data?.name, data?.song_name),
+    filename: firstString(root?.filename, root?.name, root?.song_name),
     mediaType: preferred.type,
     videoUrl: preferred.type === 'video' ? preferred.url : undefined,
     mediaUrl: preferred.url,
-    duration: normalizeDuration(data?.duration),
+    duration: normalizeDuration(root?.duration),
     sourceUrl,
     alternates: candidates.map((item) => ({
       label: item.label,
@@ -746,7 +770,7 @@ async function requestProvider(
       throw error;
     }
 
-    const code = Number(payload?.code);
+    const code = Number(payload?.code ?? payload?.status);
     if (code !== 0 && code !== 200) {
       const error = new Error(
         payload?.msg || payload?.message || 'BugPk parsing failed'
