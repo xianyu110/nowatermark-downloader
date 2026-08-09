@@ -93,7 +93,7 @@ export function Header({
   const navLinks = [
     { href: '/', label: t.downloader },
     { href: '/transcribe', label: t.transcribe },
-    { href: '/tools/tiktok-downloader', label: t.tools },
+    { href: '/tools', label: t.tools },
     { href: '/api-docs', label: t.api },
     { href: '/pricing', label: t.pricing },
     { href: '/faq', label: t.faq },

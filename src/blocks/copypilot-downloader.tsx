@@ -2753,6 +2753,7 @@ export function CopypilotDownloader() {
   const accountHref = localizedPath(locale, '/settings');
   const homeHref = localizedPath(locale, '/');
   const apiDocsHref = localizedPath(locale, '/api-docs');
+  const toolsHref = localizedPath(locale, '/tools');
   const signInHref = `${localizedPath(locale, '/sign-in')}?callbackUrl=${encodeURIComponent(homeHref)}`;
   const localizedResourceHref = (path: string) => localizedPath(locale, path);
 
@@ -3025,7 +3026,7 @@ export function CopypilotDownloader() {
         <nav className="cp-desktop-nav" aria-label={t.navigation.primaryLabel}>
           <a href="#top">{t.navigation.home}</a>
           <a href={transcribeHref}>{t.navigation.transcribe}</a>
-          <a href="#features">{t.navigation.platforms}</a>
+          <a href={toolsHref}>{t.navigation.platforms}</a>
           <a href={apiDocsHref}>{t.navigation.apiDocs}</a>
           <a href="#steps">{t.navigation.howItWorks}</a>
           <a href="#faq">{t.navigation.faq}</a>
@@ -3048,7 +3049,7 @@ export function CopypilotDownloader() {
       <nav className="cp-mobile-nav" aria-label={t.navigation.mobileLabel}>
         <a href="#top">{t.navigation.home}</a>
         <a href={transcribeHref}>{t.navigation.transcribe}</a>
-        <a href="#features">{t.navigation.platforms}</a>
+        <a href={toolsHref}>{t.navigation.platforms}</a>
         <a href={apiDocsHref}>{t.navigation.apiDocs}</a>
         <a href="#steps">{t.navigation.howItWorks}</a>
         <a href="#faq">{t.navigation.faq}</a>
@@ -3604,36 +3605,47 @@ export function CopypilotDownloader() {
           <h2>{t.toolsTitle}</h2>
         </div>
         <div className="cp-tool-groups">
-          {t.toolGroups.map((group) => (
+          {t.toolGroups.map((group, groupIndex) => (
             <article key={group.title}>
               <h3>{group.title}</h3>
               <div>
-                {group.items.map((item) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => {
-                      if (item.action === 'faq') {
-                        document
-                          .querySelector('#faq')
-                          ?.scrollIntoView({ behavior: 'smooth' });
-                      } else if (item.action === 'privacy') {
-                        window.location.href =
-                          localizedResourceHref('/privacy-policy');
-                      } else if (item.action === 'terms') {
-                        window.location.href =
-                          localizedResourceHref('/terms-of-service');
-                      } else {
-                        document
-                          .querySelector('#top')
-                          ?.scrollIntoView({ behavior: 'smooth' });
-                        inputRef.current?.focus();
-                      }
-                    }}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+                {group.items.map((item, itemIndex) => {
+                  const isToolsDirectory =
+                    groupIndex === t.toolGroups.length - 1 && itemIndex === 0;
+                  if (isToolsDirectory) {
+                    return (
+                      <a key={item.label} href={toolsHref}>
+                        {item.label}
+                      </a>
+                    );
+                  }
+                  return (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => {
+                        if (item.action === 'faq') {
+                          document
+                            .querySelector('#faq')
+                            ?.scrollIntoView({ behavior: 'smooth' });
+                        } else if (item.action === 'privacy') {
+                          window.location.href =
+                            localizedResourceHref('/privacy-policy');
+                        } else if (item.action === 'terms') {
+                          window.location.href =
+                            localizedResourceHref('/terms-of-service');
+                        } else {
+                          document
+                            .querySelector('#top')
+                            ?.scrollIntoView({ behavior: 'smooth' });
+                          inputRef.current?.focus();
+                        }
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
               </div>
             </article>
           ))}
@@ -3648,7 +3660,7 @@ export function CopypilotDownloader() {
         <div>
           <strong>{t.footer.core}</strong>
           <a href="#top">{t.footer.downloader}</a>
-          <a href="#features">{t.navigation.platforms}</a>
+          <a href={toolsHref}>{t.navigation.platforms}</a>
           <a href="#steps">{t.navigation.howItWorks}</a>
           <a href="#faq">{t.navigation.faq}</a>
           <a href={pricingHref}>{t.footer.pricing}</a>

@@ -17,6 +17,7 @@ const EDITORIAL_PATHS = [
 ];
 const SEO_LOCALES = siteLocales;
 const SEO_PATHS = [
+  '/tools',
   '/faq',
   '/how-to-download-videos',
   '/api-docs',
@@ -136,7 +137,7 @@ export const Route = createFileRoute('/sitemap.xml')({
           entries.push({
             path,
             changeFrequency: path === '/api-docs' ? 'weekly' : 'monthly',
-            priority: path === '/faq' ? 0.8 : 0.7,
+            priority: path === '/tools' ? 0.95 : path === '/faq' ? 0.8 : 0.7,
             locales: SEO_LOCALES,
           });
         }
