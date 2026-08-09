@@ -153,6 +153,314 @@ const featuredCopy: Partial<
       },
     ],
   },
+  es: {
+    eyebrow: 'Suite de video con IA',
+    title: 'Empieza con video a texto',
+    description:
+      'Usa la transcripción como primera entrada de pago y luego amplía con resúmenes, fotogramas, extracción de audio y reconocimiento de canciones.',
+    open: 'Abrir herramienta',
+    cards: [
+      {
+        title: 'Video a texto',
+        description:
+          'Convierte enlaces públicos en transcripciones editables con exportación TXT y SRT.',
+        href: '/transcribe',
+      },
+      {
+        title: 'Resumen de video',
+        description:
+          'Convierte transcripciones en resúmenes breves, esquemas y borradores.',
+        href: '/video-summary',
+      },
+      {
+        title: 'Extracción de audio',
+        description:
+          'Extrae la pista de audio de un video público y copia o previsualiza la URL directa.',
+        href: '/audio-extractor',
+      },
+      {
+        title: 'Extracción de fotogramas',
+        description:
+          'Extrae tomas clave y miniaturas de videos públicos para reutilizar o revisar.',
+        href: '/frame-extractor',
+      },
+      {
+        title: 'Reconocimiento de canciones',
+        description:
+          'Identifica la música de fondo y los metadatos de la pista en clips públicos.',
+        href: '/song-recognizer',
+      },
+    ],
+  },
+  pt: {
+    eyebrow: 'Suite de vídeo com IA',
+    title: 'Comece com vídeo para texto',
+    description:
+      'Use a transcrição como primeira entrada paga e depois expanda para resumos, quadros, extração de áudio e reconhecimento de músicas.',
+    open: 'Abrir ferramenta',
+    cards: [
+      {
+        title: 'Vídeo para texto',
+        description:
+          'Transforme links públicos em transcrições editáveis com exportação TXT e SRT.',
+        href: '/transcribe',
+      },
+      {
+        title: 'Resumo de vídeo',
+        description:
+          'Transforme transcrições em resumos curtos, roteiros e rascunhos.',
+        href: '/video-summary',
+      },
+      {
+        title: 'Extração de áudio',
+        description:
+          'Extraia a faixa de áudio de um vídeo público e copie ou visualize a URL direta.',
+        href: '/audio-extractor',
+      },
+      {
+        title: 'Extração de quadros',
+        description:
+          'Extraia cenas-chave e miniaturas de vídeos públicos para reutilizar ou revisar.',
+        href: '/frame-extractor',
+      },
+      {
+        title: 'Reconhecimento de músicas',
+        description:
+          'Identifique a música de fundo e os metadados da faixa em clipes públicos.',
+        href: '/song-recognizer',
+      },
+    ],
+  },
+  fr: {
+    eyebrow: 'Suite vidéo IA',
+    title: 'Commencez par la vidéo en texte',
+    description:
+      'Utilisez la transcription comme première porte payante, puis développez des résumés, images clés, extraction audio et reconnaissance musicale.',
+    open: 'Ouvrir l’outil',
+    cards: [
+      {
+        title: 'Vidéo en texte',
+        description:
+          'Transformez des liens publics en transcriptions modifiables avec export TXT et SRT.',
+        href: '/transcribe',
+      },
+      {
+        title: 'Résumé vidéo',
+        description:
+          'Transformez les transcriptions en résumés courts, plans et brouillons.',
+        href: '/video-summary',
+      },
+      {
+        title: 'Extraction audio',
+        description:
+          'Extrayez la piste audio d’une vidéo publique et copiez ou prévisualisez l’URL directe.',
+        href: '/audio-extractor',
+      },
+      {
+        title: 'Extraction d’images clés',
+        description:
+          'Extrayez des plans clés et des miniatures depuis des vidéos publiques pour réutilisation ou relecture.',
+        href: '/frame-extractor',
+      },
+      {
+        title: 'Reconnaissance musicale',
+        description:
+          'Identifiez la musique de fond et les métadonnées de piste dans les clips publics.',
+        href: '/song-recognizer',
+      },
+    ],
+  },
+  de: {
+    eyebrow: 'KI-Video-Suite',
+    title: 'Starte mit Video zu Text',
+    description:
+      'Nutze die Transkription als ersten kostenpflichtigen Einstieg und erweitere dann um Zusammenfassungen, Frames, Audio-Extraktion und Musikerkennung.',
+    open: 'Tool öffnen',
+    cards: [
+      {
+        title: 'Video zu Text',
+        description:
+          'Wandle öffentliche Links in bearbeitbare Transkripte mit TXT- und SRT-Export um.',
+        href: '/transcribe',
+      },
+      {
+        title: 'Videozusammenfassung',
+        description:
+          'Wandle Transkripte in kurze Zusammenfassungen, Gliederungen und Entwürfe um.',
+        href: '/video-summary',
+      },
+      {
+        title: 'Audio-Extraktion',
+        description:
+          'Extrahiere die Audiospur aus einem öffentlichen Video und kopiere oder prüfe die direkte URL.',
+        href: '/audio-extractor',
+      },
+      {
+        title: 'Frame-Extraktion',
+        description:
+          'Extrahiere Schlüsselszenen und Thumbnails aus öffentlichen Videos zur Wiederverwendung oder Prüfung.',
+        href: '/frame-extractor',
+      },
+      {
+        title: 'Musikerkennung',
+        description:
+          'Erkenne Hintergrundmusik und Track-Metadaten aus öffentlichen Clips.',
+        href: '/song-recognizer',
+      },
+    ],
+  },
+  it: {
+    eyebrow: 'Suite video IA',
+    title: 'Inizia con video in testo',
+    description:
+      'Usa la trascrizione come primo ingresso a pagamento e poi espandi con riepiloghi, fotogrammi, estrazione audio e riconoscimento musicale.',
+    open: 'Apri strumento',
+    cards: [
+      {
+        title: 'Video in testo',
+        description:
+          'Converti link pubblici in trascrizioni modificabili con export TXT e SRT.',
+        href: '/transcribe',
+      },
+      {
+        title: 'Riepilogo video',
+        description:
+          'Trasforma le trascrizioni in riepiloghi brevi, schemi e bozze.',
+        href: '/video-summary',
+      },
+      {
+        title: 'Estrazione audio',
+        description:
+          'Estrai la traccia audio da un video pubblico e copia o visualizza l’URL diretto.',
+        href: '/audio-extractor',
+      },
+      {
+        title: 'Estrazione fotogrammi',
+        description:
+          'Estrai scene chiave e miniature da video pubblici per riuso o revisione.',
+        href: '/frame-extractor',
+      },
+      {
+        title: 'Riconoscimento brani',
+        description:
+          'Identifica la musica di sottofondo e i metadati della traccia nei clip pubblici.',
+        href: '/song-recognizer',
+      },
+    ],
+  },
+  id: {
+    eyebrow: 'Paket video AI',
+    title: 'Mulai dengan video ke teks',
+    description:
+      'Gunakan transkripsi sebagai pintu masuk berbayar pertama lalu perluas ke ringkasan, frame, ekstraksi audio, dan pengenalan lagu.',
+    open: 'Buka alat',
+    cards: [
+      {
+        title: 'Video ke teks',
+        description:
+          'Ubah tautan publik menjadi transkrip yang bisa diedit dengan ekspor TXT dan SRT.',
+        href: '/transcribe',
+      },
+      {
+        title: 'Ringkasan video',
+        description:
+          'Ubah transkrip menjadi ringkasan singkat, kerangka, dan draf.',
+        href: '/video-summary',
+      },
+      {
+        title: 'Ekstraksi audio',
+        description:
+          'Ekstrak trek audio dari video publik dan salin atau pratinjau URL langsung.',
+        href: '/audio-extractor',
+      },
+      {
+        title: 'Ekstraksi frame',
+        description:
+          'Ekstrak adegan penting dan thumbnail dari video publik untuk dipakai ulang atau ditinjau.',
+        href: '/frame-extractor',
+      },
+      {
+        title: 'Pengenalan lagu',
+        description:
+          'Identifikasi musik latar dan metadata trek dari klip publik.',
+        href: '/song-recognizer',
+      },
+    ],
+  },
+  ja: {
+    eyebrow: 'AI 動画スイート',
+    title: 'まずは動画をテキスト化',
+    description:
+      '文字起こしを最初の有料導線にして、要約、フレーム、音声抽出、楽曲認識へ広げます。',
+    open: 'ツールを開く',
+    cards: [
+      {
+        title: '動画をテキスト化',
+        description:
+          '公開リンクを TXT / SRT 出力付きの編集可能な文字起こしに変換します。',
+        href: '/transcribe',
+      },
+      {
+        title: '動画要約',
+        description: '文字起こしを短い要約、構成案、下書きに変換します。',
+        href: '/video-summary',
+      },
+      {
+        title: '音声抽出',
+        description:
+          '公開動画から音声トラックを抽出し、直接 URL をコピーまたはプレビューします。',
+        href: '/audio-extractor',
+      },
+      {
+        title: 'フレーム抽出',
+        description:
+          '公開動画から主要シーンやサムネイルを抽出して再利用や確認に使えます。',
+        href: '/frame-extractor',
+      },
+      {
+        title: '楽曲認識',
+        description: '公開クリップの背景音楽とトラック情報を識別します。',
+        href: '/song-recognizer',
+      },
+    ],
+  },
+  ko: {
+    eyebrow: 'AI 동영상 패키지',
+    title: '동영상 텍스트 변환부터 시작',
+    description:
+      '전사를 첫 유료 진입점으로 두고, 요약·프레임·오디오 추출·음악 인식으로 확장하세요.',
+    open: '도구 열기',
+    cards: [
+      {
+        title: '동영상 텍스트 변환',
+        description:
+          '공개 링크를 TXT / SRT 내보내기가 가능한 편집형 전사로 변환합니다.',
+        href: '/transcribe',
+      },
+      {
+        title: '동영상 요약',
+        description: '전사를 간단한 요약, 개요, 초안으로 변환합니다.',
+        href: '/video-summary',
+      },
+      {
+        title: '오디오 추출',
+        description:
+          '공개 동영상에서 오디오 트랙을 추출하고 직접 URL을 복사하거나 미리 봅니다.',
+        href: '/audio-extractor',
+      },
+      {
+        title: '프레임 추출',
+        description:
+          '공개 동영상의 핵심 장면과 썸네일을 추출해 재사용하거나 검토할 수 있습니다.',
+        href: '/frame-extractor',
+      },
+      {
+        title: '음악 인식',
+        description: '공개 클립의 배경 음악과 트랙 메타데이터를 식별합니다.',
+        href: '/song-recognizer',
+      },
+    ],
+  },
 };
 
 const copy: Record<
