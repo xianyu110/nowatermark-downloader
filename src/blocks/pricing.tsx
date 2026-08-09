@@ -22,6 +22,7 @@ import { useRouter } from '@/core/i18n/navigation';
 import { normalizeLocale, type SiteLocale } from '@/config/locale';
 import { apiPost } from '@/lib/api-client';
 import { currentPathWithQuery } from '@/lib/redirect';
+import { VIDEO_SUITE_FEATURE_LABELS } from '@/lib/video-suite-copy';
 import { getLocale } from '@/paraglide/runtime.js';
 import { usePublicConfig } from '@/hooks/use-public-config';
 import {
@@ -364,20 +365,13 @@ export function Pricing({
     { icon: History, label: t.history },
     { icon: ReceiptText, label: t.packLimit },
   ];
-  const suiteFeatures =
-    locale === 'zh'
-      ? [
-          { icon: Zap, label: '视频总结' },
-          { icon: Download, label: '音频提取' },
-          { icon: Files, label: '视频抽帧' },
-          { icon: AudioLines, label: '歌曲识别' },
-        ]
-      : [
-          { icon: Zap, label: 'Video summary' },
-          { icon: Download, label: 'Audio extraction' },
-          { icon: Files, label: 'Frame extraction' },
-          { icon: AudioLines, label: 'Song recognition' },
-        ];
+  const suiteLabels = VIDEO_SUITE_FEATURE_LABELS[locale];
+  const suiteFeatures = [
+    { icon: Zap, label: suiteLabels[0] },
+    { icon: Download, label: suiteLabels[1] },
+    { icon: Files, label: suiteLabels[2] },
+    { icon: AudioLines, label: suiteLabels[3] },
+  ];
   const creatorFeatures = [
     { icon: Coins, label: '600 credits' },
     { icon: Captions, label: t.transcription },

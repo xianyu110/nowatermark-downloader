@@ -17,6 +17,10 @@ import {
 
 import { useSession } from '@/core/auth/client';
 import { normalizeLocale, type SiteLocale } from '@/config/locale';
+import {
+  VIDEO_SUITE_FEATURE_LABELS,
+  VIDEO_SUITE_ROADMAP_COPY,
+} from '@/lib/video-suite-copy';
 import { getLocale } from '@/paraglide/runtime.js';
 import { usePaidMembership } from '@/hooks/use-paid-membership';
 import { LocaleSelector } from '@/components/locale-selector';
@@ -42,13 +46,6 @@ type TranscriptionResult = {
 };
 
 type Progress = 'idle' | 'parsing' | 'transcribing';
-
-type RoadmapCopy = {
-  eyebrow: string;
-  title: string;
-  description: string;
-  items: string[];
-};
 
 const copy = {
   en: {
@@ -662,35 +659,6 @@ function localizedPath(locale: SiteLocale, path: string) {
   return `/${locale}${path}`;
 }
 
-const roadmapCopy: Partial<Record<SiteLocale, RoadmapCopy>> & {
-  en: RoadmapCopy;
-} = {
-  en: {
-    eyebrow: 'Member suite',
-    title: 'More paid tools are live',
-    description:
-      'The same parser chain now powers video summary, audio extraction, frame extraction, and song recognition for paid members.',
-    items: [
-      'Video summary — turn transcripts into concise highlights and article outlines.',
-      'Audio extraction — export the audio track for reuse or editing.',
-      'Frame extraction — grab key shots and thumbnails from public videos.',
-      'Song recognition — identify background music and track metadata.',
-    ],
-  },
-  zh: {
-    eyebrow: '会员工具',
-    title: '更多付费工具已上线',
-    description:
-      '同一套解析链路已经支持视频总结、音频提取、视频抽帧和歌曲识别。',
-    items: [
-      '视频总结 — 将转写结果整理成要点、摘要和文章大纲。',
-      '音频提取 — 导出音轨，便于复用或二次编辑。',
-      '视频抽帧 — 从公开视频中提取关键画面和缩略图。',
-      '歌曲识别 — 识别背景音乐和曲目信息。',
-    ],
-  },
-};
-
 export function VideoTranscriber({
   initialMediaUrl = '',
   initialSourceUrl = '',
@@ -743,16 +711,8 @@ export function VideoTranscriber({
     ],
     [t]
   );
-  const roadmap = roadmapCopy[locale] || roadmapCopy.en;
-  const suiteHighlights =
-    locale === 'zh'
-      ? ['视频总结', '音频提取', '视频抽帧', '歌曲识别']
-      : [
-          'Video summary',
-          'Audio extraction',
-          'Frame extraction',
-          'Song recognition',
-        ];
+  const roadmap = VIDEO_SUITE_ROADMAP_COPY[locale];
+  const suiteHighlights = VIDEO_SUITE_FEATURE_LABELS[locale];
 
   useEffect(() => {
     setInput(initialSourceUrl || initialMediaUrl);
