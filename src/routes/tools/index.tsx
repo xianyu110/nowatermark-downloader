@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 import { envConfigs } from '@/config';
-import { normalizeLocale, type SiteLocale } from '@/config/locale';
+import { localePath, normalizeLocale, type SiteLocale } from '@/config/locale';
 import { localizedPageHead } from '@/lib/seo';
 import { getLocale } from '@/paraglide/runtime.js';
 import { Footer } from '@/blocks/footer';
@@ -49,6 +49,111 @@ const musicSlugs = new Set([
   'qq-music-downloader',
   'qishui-music-downloader',
 ]);
+
+const featuredCopy: Partial<
+  Record<
+    SiteLocale,
+    {
+      eyebrow: string;
+      title: string;
+      description: string;
+      open: string;
+      cards: {
+        title: string;
+        description: string;
+        status?: string;
+        href?: string;
+      }[];
+    }
+  >
+> & {
+  en: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    open: string;
+    cards: {
+      title: string;
+      description: string;
+      status?: string;
+      href?: string;
+    }[];
+  };
+} = {
+  en: {
+    eyebrow: 'Video AI suite',
+    title: 'Start with video to text',
+    description:
+      'Use the transcription flow as the first paid entry point, then expand into summaries, frames, audio extraction, and song recognition.',
+    open: 'Open tool',
+    cards: [
+      {
+        title: 'Video to text',
+        description:
+          'Turn public video links into editable transcripts with TXT and SRT export.',
+        href: '/transcribe',
+      },
+      {
+        title: 'Video summary',
+        description:
+          'Convert transcripts into highlight summaries, outlines, and article drafts.',
+        href: '/video-summary',
+      },
+      {
+        title: 'Audio extraction',
+        description:
+          'Extract the audio track from a public video and copy or preview the direct URL.',
+        href: '/audio-extractor',
+      },
+      {
+        title: 'Frame extraction',
+        description:
+          'Extract key shots and thumbnails from public videos for reuse or review.',
+        href: '/frame-extractor',
+      },
+      {
+        title: 'Song recognition',
+        description:
+          'Identify background music and track metadata from public clips.',
+        href: '/song-recognizer',
+      },
+    ],
+  },
+  zh: {
+    eyebrow: '视频 AI 套件',
+    title: '先从视频转文字开始',
+    description:
+      '把转写流程作为第一个付费入口，再继续扩展到总结、抽帧、音频提取和歌曲识别。',
+    open: '打开工具',
+    cards: [
+      {
+        title: '视频转文字',
+        description: '将公开视频链接转换为可编辑文本，并支持 TXT / SRT 导出。',
+        href: '/transcribe',
+      },
+      {
+        title: '视频总结',
+        description: '把转写结果整理成要点总结、文章大纲和长文草稿。',
+        href: '/video-summary',
+      },
+      {
+        title: '音频提取',
+        description: '从公开视频中提取音轨，并复制或预览音频直链。',
+        href: '/audio-extractor',
+      },
+      {
+        title: '视频抽帧',
+        description: '从公开视频中提取关键画面和缩略图，方便复用和审阅。',
+        href: '/frame-extractor',
+      },
+      {
+        title: '歌曲识别',
+        description: '识别公开视频片段中的背景音乐和曲目信息。',
+        href: '/song-recognizer',
+      },
+    ],
+  },
+};
 
 const copy: Record<
   SiteLocale,
@@ -247,7 +352,10 @@ export const Route = createFileRoute('/tools/')({
 function ToolsDirectoryPage() {
   const locale = currentLocale();
   const t = copy[locale];
+  const featured = featuredCopy[locale] || featuredCopy.en;
+  const comingSoonLabel = locale === 'zh' ? '即将上线' : 'Coming soon';
   const appUrl = envConfigs.app_url.replace(/\/$/, '');
+  const transcribeHref = localePath(locale, '/transcribe');
   const items = platformSlugs.map((slug) => {
     const item = getPlatformCopy(slug, locale)!;
     return { slug, item, group: groupForSlug(slug) };
@@ -284,6 +392,90 @@ function ToolsDirectoryPage() {
         </section>
 
         <div className="mx-auto max-w-6xl space-y-14 px-5 py-14 sm:px-8 sm:py-16">
+          <section aria-labelledby="tools-video-suite">
+            <div className="mb-6 flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-md bg-[#e9f6f1] text-[#107b59]">
+                <Sparkles size={20} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold tracking-[0.18em] text-[#107b59] uppercase">
+                  {featured.eyebrow}
+                </p>
+                <h2 id="tools-video-suite" className="text-2xl font-bold">
+                  {featured.title}
+                </h2>
+              </div>
+            </div>
+            <p className="mb-6 max-w-3xl text-base leading-7 text-[#536861]">
+              {featured.description}
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <a
+                href={transcribeHref}
+                className="group flex min-h-36 flex-col justify-between rounded-md border border-[#d6e4df] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#91c8b5] hover:shadow-[0_10px_28px_rgba(16,77,57,0.08)]"
+              >
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    {featured.cards[0].title}
+                  </h3>
+                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#63756f]">
+                    {featured.cards[0].description}
+                  </p>
+                </div>
+                <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#107b59]">
+                  {featured.open}
+                  <ArrowRight
+                    size={16}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                </span>
+              </a>
+              {featured.cards.slice(1).map((card) =>
+                card.href ? (
+                  <a
+                    key={card.title}
+                    href={localePath(locale, card.href)}
+                    className="group flex min-h-36 flex-col justify-between rounded-md border border-[#d6e4df] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#91c8b5] hover:shadow-[0_10px_28px_rgba(16,77,57,0.08)]"
+                  >
+                    <div>
+                      <h3 className="text-lg font-semibold">{card.title}</h3>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#63756f]">
+                        {card.description}
+                      </p>
+                    </div>
+                    <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#107b59]">
+                      {featured.open}
+                      <ArrowRight
+                        size={16}
+                        className="transition-transform group-hover:translate-x-1"
+                      />
+                    </span>
+                  </a>
+                ) : (
+                  <div
+                    key={card.title}
+                    className="flex min-h-36 flex-col justify-between rounded-md border border-dashed border-[#d6e4df] bg-[#fbfdfc] p-5"
+                  >
+                    <div>
+                      <div className="text-sm font-semibold tracking-[0.16em] text-[#6f867f] uppercase">
+                        {comingSoonLabel}
+                      </div>
+                      <h3 className="mt-2 text-lg font-semibold">
+                        {card.title}
+                      </h3>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#63756f]">
+                        {card.description}
+                      </p>
+                    </div>
+                    <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#6f867f]">
+                      {card.status || comingSoonLabel}
+                    </span>
+                  </div>
+                )
+              )}
+            </div>
+          </section>
+
           {groupOrder.map(({ key, icon: Icon }) => {
             const groupItems = items.filter((entry) => entry.group === key);
             return (

@@ -43,6 +43,13 @@ type TranscriptionResult = {
 
 type Progress = 'idle' | 'parsing' | 'transcribing';
 
+type RoadmapCopy = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  items: string[];
+};
+
 const copy = {
   en: {
     home: 'Downloader',
@@ -655,13 +662,44 @@ function localizedPath(locale: SiteLocale, path: string) {
   return `/${locale}${path}`;
 }
 
+const roadmapCopy: Partial<Record<SiteLocale, RoadmapCopy>> & {
+  en: RoadmapCopy;
+} = {
+  en: {
+    eyebrow: 'Member suite',
+    title: 'More paid tools are live',
+    description:
+      'The same parser chain now powers video summary, audio extraction, frame extraction, and song recognition for paid members.',
+    items: [
+      'Video summary — turn transcripts into concise highlights and article outlines.',
+      'Audio extraction — export the audio track for reuse or editing.',
+      'Frame extraction — grab key shots and thumbnails from public videos.',
+      'Song recognition — identify background music and track metadata.',
+    ],
+  },
+  zh: {
+    eyebrow: '会员工具',
+    title: '更多付费工具已上线',
+    description:
+      '同一套解析链路已经支持视频总结、音频提取、视频抽帧和歌曲识别。',
+    items: [
+      '视频总结 — 将转写结果整理成要点、摘要和文章大纲。',
+      '音频提取 — 导出音轨，便于复用或二次编辑。',
+      '视频抽帧 — 从公开视频中提取关键画面和缩略图。',
+      '歌曲识别 — 识别背景音乐和曲目信息。',
+    ],
+  },
+};
+
 export function VideoTranscriber({
   initialMediaUrl = '',
   initialSourceUrl = '',
+  pagePath = '/transcribe',
   locale: localeOverride,
 }: {
   initialMediaUrl?: string;
   initialSourceUrl?: string;
+  pagePath?: string;
   locale?: SiteLocale;
 }) {
   const locale = localeOverride || normalizeLocale(getLocale());
@@ -682,7 +720,7 @@ export function VideoTranscriber({
   const homeHref = localizedPath(locale, '/');
   const pricingHref = localizedPath(locale, '/pricing');
   const accountHref = localizedPath(locale, '/settings');
-  const transcribeHref = localizedPath(locale, '/transcribe');
+  const transcribeHref = localizedPath(locale, pagePath);
   const signInHref = `${localizedPath(locale, '/sign-in')}?callbackUrl=${encodeURIComponent(
     transcribeHref
   )}`;
@@ -705,6 +743,16 @@ export function VideoTranscriber({
     ],
     [t]
   );
+  const roadmap = roadmapCopy[locale] || roadmapCopy.en;
+  const suiteHighlights =
+    locale === 'zh'
+      ? ['视频总结', '音频提取', '视频抽帧', '歌曲识别']
+      : [
+          'Video summary',
+          'Audio extraction',
+          'Frame extraction',
+          'Song recognition',
+        ];
 
   useEffect(() => {
     setInput(initialSourceUrl || initialMediaUrl);
@@ -841,6 +889,16 @@ export function VideoTranscriber({
                 {isPaidMember ? t.membershipActive : t.membershipTitle}
               </strong>
               <span>{t.membershipDescription}</span>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {suiteHighlights.map((item) => (
+                  <span
+                    key={item}
+                    className="inline-flex items-center rounded-full bg-[#e9f6f1] px-3 py-1 text-xs font-medium text-[#107b59]"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
             </div>
             {!isPaidMember ? <a href={pricingHref}>{t.membershipCta}</a> : null}
           </div>
@@ -971,6 +1029,24 @@ export function VideoTranscriber({
         <h2>{t.workflowTitle}</h2>
         <ol>
           {t.workflow.map((item, index) => (
+            <li key={item}>
+              <span>{index + 1}</span>
+              {item}
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="cp-transcriber-workflow">
+        <p className="text-sm font-semibold tracking-[0.18em] text-[#107b59] uppercase">
+          {roadmap.eyebrow}
+        </p>
+        <h2>{roadmap.title}</h2>
+        <p className="mb-6 max-w-3xl text-sm leading-6 text-[#63756f]">
+          {roadmap.description}
+        </p>
+        <ol>
+          {roadmap.items.map((item, index) => (
             <li key={item}>
               <span>{index + 1}</span>
               {item}

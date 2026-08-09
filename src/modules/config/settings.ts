@@ -178,6 +178,12 @@ export function getSettingGroups(): SettingGroup[] {
       tab: 'ai',
     },
     { name: 'fal', title: 'Fal', description: 'Fal AI API', tab: 'ai' },
+    {
+      name: 'audd',
+      title: 'AudD',
+      description: 'Music recognition API',
+      tab: 'ai',
+    },
 
     // Analytics
     {
@@ -823,6 +829,60 @@ export function getSettings(): Setting[] {
       placeholder: '26214400',
       tip: 'Maximum media size fetched by the Worker; 26214400 equals 25 MB',
       group: 'transcription',
+      tab: 'ai',
+    },
+    {
+      name: 'video_summary_model',
+      title: 'Summary Model',
+      type: 'text',
+      placeholder: 'gpt-4o-mini',
+      tip: 'Model accepted by the configured OpenAI-compatible /chat/completions endpoint',
+      group: 'transcription',
+      tab: 'ai',
+    },
+    {
+      name: 'video_summary_credit_cost',
+      title: 'Credits Per Summary',
+      type: 'number',
+      placeholder: '1',
+      tip: 'Credits are refunded automatically when summarization fails',
+      group: 'transcription',
+      tab: 'ai',
+    },
+    {
+      name: 'video_summary_max_chars',
+      title: 'Maximum Transcript Characters',
+      type: 'number',
+      placeholder: '40000',
+      tip: 'Maximum transcript length sent to the summary model',
+      group: 'transcription',
+      tab: 'ai',
+    },
+
+    // ─── AI / Music recognition ────────────────────────────────────
+    {
+      name: 'audd_base_url',
+      title: 'Base URL',
+      type: 'text',
+      placeholder: 'https://api.audd.io',
+      group: 'audd',
+      tab: 'ai',
+    },
+    {
+      name: 'audd_api_token',
+      title: 'API Token',
+      type: 'password',
+      placeholder: 'token_xxx',
+      group: 'audd',
+      tab: 'ai',
+    },
+    {
+      name: 'song_recognition_credit_cost',
+      title: 'Credits Per Recognition',
+      type: 'number',
+      placeholder: '1',
+      tip: 'Credits are refunded automatically when recognition fails',
+      group: 'audd',
       tab: 'ai',
     },
 

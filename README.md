@@ -24,6 +24,10 @@ pnpm dev
 - **RBAC** — Roles, permissions, wildcard matching, admin panel management
 - **Member API Keys** — CRUD + validation for active monthly subscribers
 - **Member video transcription** — Turn parsed public video media into editable text and SRT subtitles
+- **Member video summary** — Turn transcripts into structured summaries, bullets, and keywords
+- **Member audio extraction** — Extract audio tracks from public video links and copy direct URLs
+- **Member frame extraction** — Capture thumbnails and key frames from public video links
+- **Member song recognition** — Identify background music from public video clips
 - **Invite Codes** — Trial activation, batch generation, usage tracking
 - **CMS** — Categories and posts with full CRUD
 - **Image Upload** — Drop / paste / click uploader; uses S3/R2 if configured, falls back to inline base64 (size-capped) stored in DB
@@ -80,6 +84,37 @@ Configure `openai_api_key` and `openai_base_url` in Admin → Settings → AI.
 `video_transcription_max_bytes` defaults to `26214400` (25 MB). Never expose
 the transcription provider key in browser code or client-side environment
 variables.
+
+## Video Summary
+
+Active monthly members can open `/video-summary`, paste a transcript from the
+transcription tool, and generate a structured summary, key bullets, and
+keywords. The API is also available to member API-key clients:
+
+```bash
+curl -X POST https://nowatermarkdownloader.com/api/video-summary \
+  -H 'Authorization: Bearer sk_your_api_key' \
+  -H 'Content-Type: application/json' \
+  -d '{"transcript":"...","locale":"zh"}'
+```
+
+Configure `video_summary_model` and `video_summary_credit_cost` in
+Admin → Settings → AI. `video_summary_model` defaults to `gpt-4o-mini`.
+
+## Audio Extraction
+
+Active monthly members can open `/audio-extractor`, paste a public video link,
+and extract the direct audio URL with a built-in preview player.
+
+## Frame Extraction
+
+Active monthly members can open `/frame-extractor`, paste a public video link,
+and capture key frames or thumbnails at fixed intervals.
+
+## Song Recognition
+
+Active monthly members can open `/song-recognizer`, paste a public video link,
+and identify the background song using the parsed audio track.
 
 ## Tech Stack
 

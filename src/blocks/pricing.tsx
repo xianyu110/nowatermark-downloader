@@ -364,6 +364,20 @@ export function Pricing({
     { icon: History, label: t.history },
     { icon: ReceiptText, label: t.packLimit },
   ];
+  const suiteFeatures =
+    locale === 'zh'
+      ? [
+          { icon: Zap, label: '视频总结' },
+          { icon: Download, label: '音频提取' },
+          { icon: Files, label: '视频抽帧' },
+          { icon: AudioLines, label: '歌曲识别' },
+        ]
+      : [
+          { icon: Zap, label: 'Video summary' },
+          { icon: Download, label: 'Audio extraction' },
+          { icon: Files, label: 'Frame extraction' },
+          { icon: AudioLines, label: 'Song recognition' },
+        ];
   const creatorFeatures = [
     { icon: Coins, label: '600 credits' },
     { icon: Captions, label: t.transcription },
@@ -371,6 +385,7 @@ export function Pricing({
     { icon: AudioLines, label: t.advancedFormats },
     { icon: Download, label: t.bestQuality },
     { icon: KeyRound, label: t.apiAccess },
+    ...suiteFeatures,
   ];
   const studioFeatures = [
     { icon: Zap, label: '2,400 credits' },
@@ -380,6 +395,7 @@ export function Pricing({
     { icon: AudioLines, label: t.advancedFormats },
     { icon: Download, label: t.bestQuality },
     { icon: KeyRound, label: t.apiAccess },
+    ...suiteFeatures,
   ];
 
   const groups: PricingGroup[] = [

@@ -15,6 +15,26 @@ export const AI_DISCOVERY_PAGES = [
     description: 'Turn public video into editable text and SRT subtitles',
   },
   {
+    path: '/video-summary',
+    title: 'Video Summary',
+    description: 'Turn video transcripts into structured summaries and notes',
+  },
+  {
+    path: '/audio-extractor',
+    title: 'Audio Extractor',
+    description: 'Extract the audio track from public video links',
+  },
+  {
+    path: '/frame-extractor',
+    title: 'Frame Extractor',
+    description: 'Capture key frames from public video links',
+  },
+  {
+    path: '/song-recognizer',
+    title: 'Song Recognizer',
+    description: 'Recognize background songs from public clips',
+  },
+  {
     path: '/faq',
     title: 'FAQ',
     description: 'Answers about public video parsing, credits, and copyright',

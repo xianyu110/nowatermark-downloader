@@ -21,6 +21,10 @@ const SEO_PATHS = [
   '/faq',
   '/how-to-download-videos',
   '/api-docs',
+  '/video-summary',
+  '/audio-extractor',
+  '/frame-extractor',
+  '/song-recognizer',
   '/data-deletion',
 ];
 const TOOL_SLUGS = [
