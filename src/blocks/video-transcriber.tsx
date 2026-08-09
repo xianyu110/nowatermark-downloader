@@ -611,6 +611,71 @@ const copy = {
   },
 };
 
+const guestParseCopy: Record<
+  SiteLocale,
+  { description: string; parsed: string }
+> = {
+  en: {
+    description:
+      'You can test whether a public link is parseable first. Sign in with an active membership to generate the transcript and export files.',
+    parsed:
+      'The public video link was parsed. Sign in to continue with AI transcription.',
+  },
+  zh: {
+    description:
+      '未登录也可以先测试公开视频链接是否可解析；生成转写文本和导出文件需要登录并开通会员。',
+    parsed: '公开视频链接已解析，请登录后继续生成 AI 转写文本。',
+  },
+  es: {
+    description:
+      'Puedes probar primero si el enlace público se puede analizar. Inicia sesión con una membresía activa para generar la transcripción.',
+    parsed:
+      'El enlace público fue analizado. Inicia sesión para continuar con la transcripción IA.',
+  },
+  pt: {
+    description:
+      'Você pode testar primeiro se o link público pode ser analisado. Entre com uma assinatura ativa para gerar a transcrição.',
+    parsed:
+      'O link público foi analisado. Entre para continuar com a transcrição por IA.',
+  },
+  fr: {
+    description:
+      'Vous pouvez d’abord tester si le lien public est analysable. Connectez-vous avec un abonnement actif pour générer la transcription.',
+    parsed:
+      'Le lien public a été analysé. Connectez-vous pour continuer la transcription IA.',
+  },
+  de: {
+    description:
+      'Du kannst zuerst testen, ob der öffentliche Link analysierbar ist. Melde dich mit aktiver Mitgliedschaft an, um das Transkript zu erstellen.',
+    parsed:
+      'Der öffentliche Link wurde analysiert. Melde dich an, um mit der KI-Transkription fortzufahren.',
+  },
+  it: {
+    description:
+      'Puoi prima verificare se il link pubblico è analizzabile. Accedi con un abbonamento attivo per generare la trascrizione.',
+    parsed:
+      'Il link pubblico è stato analizzato. Accedi per continuare con la trascrizione AI.',
+  },
+  id: {
+    description:
+      'Anda bisa menguji dulu apakah tautan publik dapat diparse. Masuk dengan keanggotaan aktif untuk membuat transkrip.',
+    parsed:
+      'Tautan video publik berhasil diparse. Masuk untuk melanjutkan transkripsi AI.',
+  },
+  ja: {
+    description:
+      '公開リンクが解析可能かを先にテストできます。文字起こしと書き出しには、有効なメンバーシップでログインしてください。',
+    parsed:
+      '公開動画リンクを解析しました。AI文字起こしを続けるにはログインしてください。',
+  },
+  ko: {
+    description:
+      '공개 링크가 파싱 가능한지 먼저 테스트할 수 있습니다. 전사와 내보내기는 활성 멤버십으로 로그인해야 합니다.',
+    parsed:
+      '공개 동영상 링크가 파싱되었습니다. AI 전사를 계속하려면 로그인하세요.',
+  },
+};
+
 function formatTimestamp(value: number) {
   const safeValue = Math.max(0, value || 0);
   const hours = Math.floor(safeValue / 3600);
@@ -673,6 +738,7 @@ export function VideoTranscriber({
   const locale = localeOverride || normalizeLocale(getLocale());
   const t =
     (copy as unknown as Record<string, (typeof copy)['en']>)[locale] || copy.en;
+  const guestCopy = guestParseCopy[locale] || guestParseCopy.en;
   const { data: session } = useSession();
   const membershipQuery = usePaidMembership(Boolean(session?.user));
   const isPaidMember = Boolean(membershipQuery.data);
@@ -769,7 +835,7 @@ export function VideoTranscriber({
     try {
       const mediaUrl = await resolveAudioUrl(sourceUrl);
       if (!session?.user) {
-        setNotice(t.accountRequired);
+        setNotice(guestCopy.parsed);
         return;
       }
       if (membershipLoading) return;
@@ -856,7 +922,11 @@ export function VideoTranscriber({
               <strong>
                 {isPaidMember ? t.membershipActive : t.membershipTitle}
               </strong>
-              <span>{t.membershipDescription}</span>
+              <span>
+                {session?.user
+                  ? t.membershipDescription
+                  : guestCopy.description}
+              </span>
               <div className="mt-3 flex flex-wrap gap-2">
                 {suiteHighlights.map((item) => (
                   <span
@@ -868,7 +938,11 @@ export function VideoTranscriber({
                 ))}
               </div>
             </div>
-            {!isPaidMember ? <a href={pricingHref}>{t.membershipCta}</a> : null}
+            {!isPaidMember ? (
+              <a href={session?.user ? pricingHref : signInHref}>
+                {session?.user ? t.membershipCta : t.signIn}
+              </a>
+            ) : null}
           </div>
           <label htmlFor="transcription-url">{t.inputLabel}</label>
           <div className="cp-transcriber-input-row">
