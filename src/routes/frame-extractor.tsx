@@ -37,6 +37,13 @@ export const Route = createFileRoute('/frame-extractor')({
       path: '/frame-extractor',
       title: titles[locale],
       description: descriptions[locale],
+      keywords: [
+        'frame extractor',
+        'video frame extractor',
+        'thumbnail extractor',
+        'public video screenshot',
+        'key frame extraction',
+      ],
     });
   },
   component: FrameExtractorPage,

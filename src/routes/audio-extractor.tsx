@@ -37,6 +37,13 @@ export const Route = createFileRoute('/audio-extractor')({
       path: '/audio-extractor',
       title: titles[locale],
       description: descriptions[locale],
+      keywords: [
+        'audio extractor',
+        'video to audio',
+        'extract audio from video',
+        'public video audio URL',
+        'mp3 extractor from video',
+      ],
     });
   },
   component: AudioExtractorPage,

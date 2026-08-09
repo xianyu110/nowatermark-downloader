@@ -39,6 +39,13 @@ export const Route = createFileRoute('/video-summary')({
       path: '/video-summary',
       title,
       description,
+      keywords: [
+        'video summary',
+        'video to text summary',
+        'AI video summary',
+        'public video transcript summary',
+        'YouTube transcript summary',
+      ],
     });
   },
   component: VideoSummaryPage,

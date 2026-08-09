@@ -37,6 +37,13 @@ export const Route = createFileRoute('/song-recognizer')({
       path: '/song-recognizer',
       title: titles[locale],
       description: descriptions[locale],
+      keywords: [
+        'song recognition',
+        'music recognition',
+        'identify song from video',
+        'background music finder',
+        'audio track recognition',
+      ],
     });
   },
   component: SongRecognizerPage,
