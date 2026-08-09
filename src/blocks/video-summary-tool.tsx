@@ -16,6 +16,7 @@ import { getLocale } from '@/paraglide/runtime.js';
 import { usePaidMembership } from '@/hooks/use-paid-membership';
 import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
+import { VideoToolSupportSection } from '@/blocks/video-tool-support';
 
 type SummaryResult = {
   title: string;
@@ -517,6 +518,8 @@ export function VideoSummaryTool({
             ))}
           </ol>
         </section>
+
+        <VideoToolSupportSection locale={locale} tool="summary" />
       </main>
       <Footer locale={locale} />
     </div>

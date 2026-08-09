@@ -18,6 +18,7 @@ import { getLocale } from '@/paraglide/runtime.js';
 import { usePaidMembership } from '@/hooks/use-paid-membership';
 import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
+import { VideoToolSupportSection } from '@/blocks/video-tool-support';
 
 type RecognizedSong = {
   artist?: string;
@@ -649,6 +650,8 @@ export function SongRecognizer({
             ))}
           </ol>
         </section>
+
+        <VideoToolSupportSection locale={locale} tool="song" />
       </main>
       <Footer locale={locale} />
     </div>

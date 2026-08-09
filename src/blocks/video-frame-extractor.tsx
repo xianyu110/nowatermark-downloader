@@ -17,6 +17,7 @@ import { getLocale } from '@/paraglide/runtime.js';
 import { usePaidMembership } from '@/hooks/use-paid-membership';
 import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
+import { VideoToolSupportSection } from '@/blocks/video-tool-support';
 
 type ParsedMedia = {
   provider: string;
@@ -701,6 +702,8 @@ export function VideoFrameExtractor({
             ))}
           </ol>
         </section>
+
+        <VideoToolSupportSection locale={locale} tool="frames" />
       </main>
       <Footer locale={locale} />
     </div>
