@@ -6,7 +6,7 @@ import { ArrowRight, LogIn, Menu, X } from 'lucide-react';
 import { useSession } from '@/core/auth/client';
 import { Link, usePathname } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
-import { normalizeLocale } from '@/config/locale';
+import { localePath, normalizeLocale, type SiteLocale } from '@/config/locale';
 import { cn } from '@/lib/utils';
 import { getLocale } from '@/paraglide/runtime.js';
 import { LocaleSelector } from '@/components/locale-selector';
@@ -24,11 +24,17 @@ export interface NavLink {
 /** Off-site URLs render as plain <a>; internal paths use the locale-aware Link. */
 const isExternalHref = (href: string) => /^https?:\/\//.test(href);
 
-export function SiteHeader({ navLinks }: { navLinks?: NavLink[] }) {
+export function SiteHeader({
+  navLinks,
+  locale: localeOverride,
+}: {
+  navLinks?: NavLink[];
+  locale?: SiteLocale;
+}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: session } = useSession();
   const user = session?.user;
-  const locale = normalizeLocale(getLocale());
+  const locale = localeOverride || normalizeLocale(getLocale());
   const pathname = usePathname();
   const signInHref = `/sign-in?callbackUrl=${encodeURIComponent(pathname || '/')}`;
   const signInLabels = {
@@ -64,7 +70,10 @@ export function SiteHeader({ navLinks }: { navLinks?: NavLink[] }) {
     <header className="bg-background/86 sticky top-0 z-50 w-full border-b border-[#d8e8e1] backdrop-blur-md">
       <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* Brand */}
-        <Link href="/" className="flex items-center gap-3">
+        <Link
+          href={localePath(locale, '/')}
+          className="flex items-center gap-3"
+        >
           <span className="flex size-10 items-center justify-center rounded-[12px] bg-[#107b59] shadow-[0_8px_20px_rgba(16,123,89,0.18)]">
             <img src={envConfigs.app_logo} alt="" className="size-6" />
           </span>
@@ -106,7 +115,7 @@ export function SiteHeader({ navLinks }: { navLinks?: NavLink[] }) {
 
         {/* Desktop actions */}
         <div className="hidden items-center gap-3 md:flex">
-          <LocaleSelector />
+          <LocaleSelector locale={locale} />
           <ThemeToggle />
           {user ? (
             <SiteUserMenu
@@ -170,7 +179,7 @@ export function SiteHeader({ navLinks }: { navLinks?: NavLink[] }) {
             )}
           </nav>
           <div className="border-border mt-3 flex items-center gap-2 border-t pt-3">
-            <LocaleSelector />
+            <LocaleSelector locale={locale} />
             <ThemeToggle />
             <div className="flex-1" />
             {user ? (

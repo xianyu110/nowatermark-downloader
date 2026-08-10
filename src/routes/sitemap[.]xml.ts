@@ -138,7 +138,7 @@ export const Route = createFileRoute('/sitemap.xml')({
             path,
             changeFrequency: path === '/blog' ? 'daily' : 'weekly',
             priority: path === '/blog' ? 0.8 : 0.5,
-            locales: ['en', 'zh'],
+            locales: path === '/blog' ? ['en', 'zh', 'es', 'pt'] : ['en', 'zh'],
           });
         }
         for (const path of SEO_PATHS) {
@@ -185,7 +185,7 @@ export const Route = createFileRoute('/sitemap.xml')({
               lastModified: post.createdAt,
               changeFrequency: 'monthly',
               priority: 0.6,
-              locales: ['en', 'zh'],
+              locales: ['en', 'zh', 'es', 'pt'],
             });
           }
         } catch {
@@ -196,7 +196,7 @@ export const Route = createFileRoute('/sitemap.xml')({
               lastModified: post.createdAt,
               changeFrequency: 'monthly',
               priority: 0.6,
-              locales: ['en', 'zh'],
+              locales: ['en', 'zh', 'es', 'pt'],
             });
           }
         }

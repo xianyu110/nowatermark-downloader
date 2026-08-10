@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
-import { normalizeLocale } from '@/config/locale';
+import { localePath, normalizeLocale } from '@/config/locale';
 import { localizedPageHead } from '@/lib/seo';
 import { m } from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
@@ -41,11 +41,12 @@ export function BlogListPage({
   locale: string;
   posts: BlogPost[];
 }) {
-  const eyebrow = normalizeLocale(locale) === 'zh' ? '使用指南' : 'Guides';
+  const normalizedLocale = normalizeLocale(locale);
+  const eyebrow = normalizedLocale === 'zh' ? '使用指南' : 'Guides';
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f3fbf7] text-[#193d32]">
-      <Header />
+      <Header locale={normalizedLocale} />
       <main className="flex-1 px-4 py-16 sm:py-24">
         <div className="mx-auto max-w-5xl">
           <div className="mb-16 text-center">
@@ -53,22 +54,22 @@ export function BlogListPage({
               {eyebrow}
             </p>
             <h1 className="text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
-              {m['blog.title']()}
+              {m['blog.title']({}, { locale: normalizedLocale })}
             </h1>
             <p className="mx-auto mt-5 max-w-lg text-[#5f7b71]">
-              {m['blog.description']()}
+              {m['blog.description']({}, { locale: normalizedLocale })}
             </p>
           </div>
           {posts.length === 0 ? (
             <p className="rounded-[24px] border border-[#d8e8e1] bg-white/75 px-6 py-12 text-center text-[#5f7b71]">
-              {m['blog.no_posts']()}
+              {m['blog.no_posts']({}, { locale: normalizedLocale })}
             </p>
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((post) => (
                 <BlogCard
                   key={post.slug}
-                  href={`/blog/${post.slug}`}
+                  href={localePath(normalizedLocale, `/blog/${post.slug}`)}
                   title={post.title}
                   description={post.description}
                   image={post.image}
@@ -81,7 +82,7 @@ export function BlogListPage({
           )}
         </div>
       </main>
-      <Footer />
+      <Footer locale={normalizedLocale} />
     </div>
   );
 }

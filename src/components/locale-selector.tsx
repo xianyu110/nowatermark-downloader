@@ -29,11 +29,13 @@ const localeDetails: Record<
 export function LocaleSelector({
   variant = 'icon',
   className,
+  locale: localeOverride,
 }: {
   variant?: 'icon' | 'pill';
   className?: string;
+  locale?: SiteLocale;
 }) {
-  const locale = normalizeLocale(getLocale());
+  const locale = localeOverride || normalizeLocale(getLocale());
   const current = localeDetails[locale];
 
   function handleSwitch(newLocale: string) {

@@ -4,7 +4,7 @@ import { ArrowLeft, Calendar } from 'lucide-react';
 
 import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
-import { normalizeLocale } from '@/config/locale';
+import { localePath, normalizeLocale } from '@/config/locale';
 import { localizedPageHead } from '@/lib/seo';
 import { m } from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
@@ -54,8 +54,9 @@ export function BlogPostContent({
   locale: string;
   post: BlogPostDetail;
 }) {
+  const normalizedLocale = normalizeLocale(locale);
   const siteUrl = envConfigs.app_url.replace(/\/$/, '');
-  const canonicalUrl = `${siteUrl}${locale === 'en' ? '' : `/${locale}`}/blog/${post.slug}`;
+  const canonicalUrl = `${siteUrl}${localePath(normalizedLocale, `/blog/${post.slug}`)}`;
   const blogPostingSchema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -63,7 +64,7 @@ export function BlogPostContent({
     description: post.description,
     datePublished: post.createdAt,
     dateModified: post.createdAt,
-    inLanguage: locale === 'zh' ? 'zh-CN' : locale,
+    inLanguage: normalizedLocale === 'zh' ? 'zh-CN' : normalizedLocale,
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': canonicalUrl,
@@ -99,15 +100,15 @@ export function BlogPostContent({
   return (
     <div className="flex min-h-screen flex-col bg-[#f3fbf7] text-[#193d32]">
       <JsonLd data={blogPostingSchema} />
-      <Header />
+      <Header locale={normalizedLocale} />
       <main className="flex-1 px-6 py-12 md:px-8 md:py-16">
         <article className="mx-auto max-w-3xl">
           <Link
-            href="/blog"
+            href={localePath(normalizedLocale, '/blog')}
             className="inline-flex items-center gap-2 rounded-full border border-[#d8e8e1] bg-white/80 px-4 py-2 text-sm font-medium text-[#107b59] transition-colors hover:border-[#9ed4bf] hover:bg-white"
           >
             <ArrowLeft className="size-4" />
-            {m['blog.back_to_blog']()}
+            {m['blog.back_to_blog']({}, { locale: normalizedLocale })}
           </Link>
 
           <header className="mt-8 mb-6 rounded-[28px] border border-[#d8e8e1] bg-white/82 p-6 shadow-[0_18px_50px_rgba(26,74,58,0.08)] md:p-8">
@@ -161,7 +162,7 @@ export function BlogPostContent({
           )}
         </article>
       </main>
-      <Footer />
+      <Footer locale={normalizedLocale} />
     </div>
   );
 }

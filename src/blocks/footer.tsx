@@ -1,4 +1,4 @@
-import { normalizeLocale, type SiteLocale } from '@/config/locale';
+import { localePath, normalizeLocale, type SiteLocale } from '@/config/locale';
 import { getLocale } from '@/paraglide/runtime.js';
 import { SiteFooter, type FooterColumn } from '@/components/site-footer';
 
@@ -269,20 +269,21 @@ export function Footer({
   } as const;
   const t =
     (copy as unknown as Record<string, (typeof copy)['en']>)[locale] || copy.en;
+  const localizedHref = (path: string) => localePath(locale, path);
   const columns: FooterColumn[] = [
     {
       title: t.product,
       links: [
-        { label: t.downloader, href: '/' },
-        { label: t.transcribe, href: '/transcribe' },
+        { label: t.downloader, href: localizedHref('/') },
+        { label: t.transcribe, href: localizedHref('/transcribe') },
         {
           label: t.tools,
           href: '/tools',
         },
-        { label: t.blog, href: '/blog' },
-        { label: t.api, href: '/api-docs' },
-        { label: t.pricing, href: '/pricing' },
-        { label: t.faq, href: '/faq' },
+        { label: t.blog, href: localizedHref('/blog') },
+        { label: t.api, href: localizedHref('/api-docs') },
+        { label: t.pricing, href: localizedHref('/pricing') },
+        { label: t.faq, href: localizedHref('/faq') },
       ],
     },
     {
@@ -298,27 +299,27 @@ export function Footer({
       links: [
         {
           label: t.userAgreement,
-          href: '/user-agreement',
+          href: localizedHref('/user-agreement'),
         },
         {
           label: t.privacyPolicy,
-          href: '/privacy-policy',
+          href: localizedHref('/privacy-policy'),
         },
         {
           label: t.termsOfService,
-          href: '/terms-of-service',
+          href: localizedHref('/terms-of-service'),
         },
         {
           label: t.refundPolicy,
-          href: '/refund-policy',
+          href: localizedHref('/refund-policy'),
         },
         {
           label: t.copyright,
-          href: '/copyright-policy',
+          href: localizedHref('/copyright-policy'),
         },
         {
           label: t.deletion,
-          href: '/data-deletion',
+          href: localizedHref('/data-deletion'),
         },
       ],
     },
@@ -339,5 +340,12 @@ export function Footer({
     },
   ];
 
-  return <SiteFooter tagline={t.tagline} columns={columns} socials={[]} />;
+  return (
+    <SiteFooter
+      tagline={t.tagline}
+      columns={columns}
+      socials={[]}
+      locale={locale}
+    />
+  );
 }

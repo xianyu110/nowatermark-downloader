@@ -1,4 +1,4 @@
-import { normalizeLocale, type SiteLocale } from '@/config/locale';
+import { localePath, normalizeLocale, type SiteLocale } from '@/config/locale';
 import { getLocale } from '@/paraglide/runtime.js';
 import { SiteHeader } from '@/components/site-header';
 
@@ -101,14 +101,14 @@ export function Header({
   const t =
     (copy as unknown as Record<string, (typeof copy)['en']>)[locale] || copy.en;
   const navLinks = [
-    { href: '/', label: t.downloader },
-    { href: '/transcribe', label: t.transcribe },
+    { href: localePath(locale, '/'), label: t.downloader },
+    { href: localePath(locale, '/transcribe'), label: t.transcribe },
     { href: '/tools', label: t.tools },
-    { href: '/blog', label: t.blog },
-    { href: '/api-docs', label: t.api },
-    { href: '/pricing', label: t.pricing },
-    { href: '/faq', label: t.faq },
+    { href: localePath(locale, '/blog'), label: t.blog },
+    { href: localePath(locale, '/api-docs'), label: t.api },
+    { href: localePath(locale, '/pricing'), label: t.pricing },
+    { href: localePath(locale, '/faq'), label: t.faq },
   ];
 
-  return <SiteHeader navLinks={navLinks} />;
+  return <SiteHeader navLinks={navLinks} locale={locale} />;
 }

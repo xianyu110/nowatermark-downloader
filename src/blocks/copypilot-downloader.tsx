@@ -2998,6 +2998,74 @@ export function CopypilotDownloader() {
           },
         ],
       },
+      es: {
+        eyebrow: 'Guías para creadores',
+        title: 'Aprende mejores flujos para descargar y transcribir videos',
+        description:
+          'Guías prácticas sobre descarga de videos públicos, análisis sin marca de agua, video a texto y operaciones con API.',
+        action: 'Leer guía',
+        viewAll: 'Ver todas las guías',
+        posts: [
+          {
+            title: 'Cómo descargar videos de TikTok sin marca de agua',
+            description:
+              'Usa enlaces públicos de TikTok, reintenta con seguridad y entiende por qué algunos videos fallan.',
+            slug: 'how-to-download-tiktok-videos-without-watermark',
+          },
+          {
+            title: 'Guía para descargar videos de Instagram',
+            description:
+              'Descarga Reels y publicaciones públicas manteniendo enlaces fuente y permisos organizados.',
+            slug: 'instagram-video-downloader-guide',
+          },
+          {
+            title: 'Flujo de video a texto para creadores',
+            description:
+              'Convierte videos públicos en transcripciones, subtítulos, resúmenes y notas reutilizables.',
+            slug: 'video-to-text-workflow-for-creators',
+          },
+          {
+            title: 'Guía de API para descargar videos públicos',
+            description:
+              'Cuándo pasar de descargas manuales a una API con cuotas, reintentos y fallback.',
+            slug: 'public-video-downloader-api-guide',
+          },
+        ],
+      },
+      pt: {
+        eyebrow: 'Guias para criadores',
+        title: 'Aprenda fluxos melhores para baixar e transcrever vídeos',
+        description:
+          'Guias práticos sobre download de vídeos públicos, análise sem marca d’água, vídeo para texto e operações com API.',
+        action: 'Ler guia',
+        viewAll: 'Ver todos os guias',
+        posts: [
+          {
+            title: 'Como baixar vídeos do TikTok sem marca d’água',
+            description:
+              'Use links públicos do TikTok, tente novamente com segurança e entenda por que alguns vídeos falham.',
+            slug: 'how-to-download-tiktok-videos-without-watermark',
+          },
+          {
+            title: 'Guia para baixar vídeos do Instagram',
+            description:
+              'Baixe Reels e posts públicos mantendo links de origem e permissões organizados.',
+            slug: 'instagram-video-downloader-guide',
+          },
+          {
+            title: 'Fluxo de vídeo para texto para criadores',
+            description:
+              'Transforme vídeos públicos em transcrições, legendas, resumos e notas reutilizáveis.',
+            slug: 'video-to-text-workflow-for-creators',
+          },
+          {
+            title: 'Guia de API para baixar vídeos públicos',
+            description:
+              'Quando migrar de downloads manuais para uma API com cotas, retentativas e fallback.',
+            slug: 'public-video-downloader-api-guide',
+          },
+        ],
+      },
     } as Partial<
       Record<
         SiteLocale,

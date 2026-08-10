@@ -2,6 +2,7 @@ import type { ComponentType, SVGProps } from 'react';
 
 import { Link } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
+import type { SiteLocale } from '@/config/locale';
 import { cn } from '@/lib/utils';
 import { LocaleSelector } from '@/components/locale-selector';
 
@@ -25,11 +26,13 @@ export function SiteFooter({
   columns,
   socials,
   copyright,
+  locale,
 }: {
   tagline?: string;
   columns?: FooterColumn[];
   socials?: FooterSocial[];
   copyright?: string;
+  locale?: SiteLocale;
 }) {
   const year = new Date().getFullYear();
 
@@ -108,6 +111,7 @@ export function SiteFooter({
             <div />
           )}
           <LocaleSelector
+            locale={locale}
             variant="pill"
             className="border-neutral-700 text-neutral-200 hover:bg-white/5 hover:text-neutral-50"
           />
