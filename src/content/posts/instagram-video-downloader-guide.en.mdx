@@ -1,0 +1,52 @@
+export const meta = {
+  title: 'Instagram Video Downloader Guide for Reels and Public Posts',
+  description:
+    'Learn how to download public Instagram videos and Reels, what limits to expect, and how to organize source links for creator workflows.',
+  created_at: '2026-08-09',
+  author_name: 'NoWatermark Team',
+  author_image: '/logo.svg',
+};
+
+Instagram Reels and public video posts are useful for trend research, creator collaboration, and content archives. The important rule is to separate technical downloading from usage rights: a parser can help you retrieve public media, but you still need permission to reuse it.
+
+NoWatermark Downloader supports public Instagram links through a provider chain. When one provider is unavailable, the request can fall back to another node.
+
+## Supported Instagram links
+
+Use public links such as:
+
+```text
+https://www.instagram.com/reel/...
+https://www.instagram.com/p/...
+```
+
+Private accounts, removed posts, login-only content, and region-restricted media may not be available to public parsers.
+
+## Recommended workflow
+
+Start with the original Instagram URL. Paste it into the downloader, wait for the parser result, then check the returned media type. Some Instagram posts contain one video, while carousel posts may contain multiple images or clips depending on what the provider exposes.
+
+For content teams, store the following fields with each download:
+
+- Original Instagram URL
+- Creator handle
+- Caption or internal note
+- Download date
+- License or permission status
+- Final campaign or archive folder
+
+This makes takedown requests, duplicate checks, and later reuse much easier.
+
+## Why Instagram parsing can be unstable
+
+Instagram changes page responses often. Public parsers may also see regional differences, rate limits, or temporary blocks. If a public Reel fails, retry after a short delay and test another public link. If several links fail at the same time, the provider chain may need to rotate to a healthier node.
+
+## When to use batch parsing
+
+Batch parsing is useful when you collect multiple public links from a research session. Instead of downloading one by one, paste a list, let the system process each item, and review the success and failure states together.
+
+Batch workflows are best for members because they consume more provider capacity and need clearer usage limits.
+
+## Responsible use
+
+Only download Instagram media you are allowed to process. Keep attribution and respect removal requests. For brand accounts and agencies, build an approval step before publishing downloaded material anywhere else.

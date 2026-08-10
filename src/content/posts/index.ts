@@ -12,9 +12,16 @@ import { baseLocale } from '@/paraglide/runtime.js';
  * local posts via the pure helpers below.
  */
 export const BLOG_POST_SLUGS = [
+  'how-to-download-tiktok-videos-without-watermark',
+  'instagram-video-downloader-guide',
+  'video-to-text-workflow-for-creators',
+  'public-video-downloader-api-guide',
+] as const;
+
+export const HIDDEN_BLOG_POST_SLUGS = new Set([
   'what-is-shipany',
   'blocks-vs-components',
-] as const;
+]);
 
 export type BlogPostMeta = {
   title: string;

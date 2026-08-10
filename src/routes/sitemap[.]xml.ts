@@ -4,7 +4,11 @@ import { envConfigs } from '@/config';
 import { localePath, siteLocales } from '@/config/locale';
 import { hreflangForLocale } from '@/lib/seo';
 import { baseLocale, locales } from '@/paraglide/runtime.js';
-import { getLocalPosts, mergePosts } from '@/content/posts';
+import {
+  getLocalPosts,
+  HIDDEN_BLOG_POST_SLUGS,
+  mergePosts,
+} from '@/content/posts';
 
 const ALL_LOCALE_STATIC_PATHS = ['', '/pricing', '/transcribe'];
 const EDITORIAL_PATHS = [
@@ -165,13 +169,15 @@ export const Route = createFileRoute('/sitemap.xml')({
           const { listPublishedArticles } =
             await import('@/modules/posts/service');
           const rows = await listPublishedArticles().catch(() => []);
-          const dbPosts = rows.map((row) => ({
-            slug: row.slug,
-            title: row.title || row.slug,
-            description: row.description || '',
-            createdAt: new Date(row.createdAt).toISOString(),
-            source: 'db' as const,
-          }));
+          const dbPosts = rows
+            .filter((row) => !HIDDEN_BLOG_POST_SLUGS.has(row.slug))
+            .map((row) => ({
+              slug: row.slug,
+              title: row.title || row.slug,
+              description: row.description || '',
+              createdAt: new Date(row.createdAt).toISOString(),
+              source: 'db' as const,
+            }));
           const posts = mergePosts(dbPosts, getLocalPosts(baseLocale));
           for (const post of posts) {
             entries.push({
@@ -179,7 +185,7 @@ export const Route = createFileRoute('/sitemap.xml')({
               lastModified: post.createdAt,
               changeFrequency: 'monthly',
               priority: 0.6,
-              locales: [baseLocale],
+              locales: ['en', 'zh'],
             });
           }
         } catch {
@@ -190,7 +196,7 @@ export const Route = createFileRoute('/sitemap.xml')({
               lastModified: post.createdAt,
               changeFrequency: 'monthly',
               priority: 0.6,
-              locales: [baseLocale],
+              locales: ['en', 'zh'],
             });
           }
         }

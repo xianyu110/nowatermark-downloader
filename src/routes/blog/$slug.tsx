@@ -10,9 +10,14 @@ import { m } from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
 import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
+import { JsonLd } from '@/components/json-ld';
 import { MarkdownContent } from '@/components/markdown-content';
 import { mdxComponents } from '@/components/mdx-components';
-import { formatPostDate, loadLocalPost } from '@/content/posts';
+import {
+  formatPostDate,
+  loadLocalPost,
+  type BlogPostDetail,
+} from '@/content/posts';
 import { getBlogPostFn } from '@/content/posts/server';
 
 export const Route = createFileRoute('/blog/$slug')({
@@ -39,6 +44,52 @@ export const Route = createFileRoute('/blog/$slug')({
 
 function BlogPostPage() {
   const { locale, post } = Route.useLoaderData();
+  return <BlogPostContent locale={locale} post={post} />;
+}
+
+export function BlogPostContent({
+  locale,
+  post,
+}: {
+  locale: string;
+  post: BlogPostDetail;
+}) {
+  const siteUrl = envConfigs.app_url.replace(/\/$/, '');
+  const canonicalUrl = `${siteUrl}${locale === 'en' ? '' : `/${locale}`}/blog/${post.slug}`;
+  const blogPostingSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.description,
+    datePublished: post.createdAt,
+    dateModified: post.createdAt,
+    inLanguage: locale === 'zh' ? 'zh-CN' : locale,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonicalUrl,
+    },
+    url: canonicalUrl,
+    author: {
+      '@type': 'Organization',
+      name: post.authorName || envConfigs.app_name,
+      url: siteUrl,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: envConfigs.app_name,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteUrl}/logo.svg`,
+      },
+    },
+    ...(post.image
+      ? {
+          image: post.image.startsWith('http')
+            ? post.image
+            : `${siteUrl}${post.image}`,
+        }
+      : {}),
+  };
 
   // Local posts render their bundled MDX component; database posts render
   // raw markdown through MarkdownContent.
@@ -47,6 +98,7 @@ function BlogPostPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f3fbf7] text-[#193d32]">
+      <JsonLd data={blogPostingSchema} />
       <Header />
       <main className="flex-1 px-6 py-12 md:px-8 md:py-16">
         <article className="mx-auto max-w-3xl">

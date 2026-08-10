@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 
 import {
   getLocalPosts,
+  HIDDEN_BLOG_POST_SLUGS,
   loadLocalPost,
   mergePosts,
   type BlogPost,
@@ -15,16 +16,18 @@ async function getDbPosts(): Promise<BlogPost[]> {
   try {
     const { listPublishedArticles } = await import('@/modules/posts/service');
     const rows = await listPublishedArticles();
-    return rows.map((row) => ({
-      slug: row.slug,
-      title: row.title || row.slug,
-      description: row.description || '',
-      image: row.image || undefined,
-      createdAt: new Date(row.createdAt).toISOString(),
-      authorName: row.authorName || undefined,
-      authorImage: row.authorImage || undefined,
-      source: 'db' as const,
-    }));
+    return rows
+      .filter((row) => !HIDDEN_BLOG_POST_SLUGS.has(row.slug))
+      .map((row) => ({
+        slug: row.slug,
+        title: row.title || row.slug,
+        description: row.description || '',
+        image: row.image || undefined,
+        createdAt: new Date(row.createdAt).toISOString(),
+        authorName: row.authorName || undefined,
+        authorImage: row.authorImage || undefined,
+        source: 'db' as const,
+      }));
   } catch {
     // Database not configured/reachable — local posts still render.
     return [];
@@ -54,6 +57,9 @@ export const getBlogPostFn = createServerFn()
   .handler(async ({ data }): Promise<BlogPostDetail | null> => {
     try {
       const { findPublishedBySlug } = await import('@/modules/posts/service');
+      if (HIDDEN_BLOG_POST_SLUGS.has(data.slug)) {
+        return null;
+      }
       const row = await findPublishedBySlug(data.slug);
       if (row) {
         return {

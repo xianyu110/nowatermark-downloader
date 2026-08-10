@@ -3,7 +3,11 @@ import { createFileRoute } from '@tanstack/react-router';
 import { envConfigs } from '@/config';
 import { AI_DISCOVERY_PAGES } from '@/lib/ai-discovery';
 import { baseLocale } from '@/paraglide/runtime.js';
-import { getLocalPosts, mergePosts } from '@/content/posts';
+import {
+  getLocalPosts,
+  HIDDEN_BLOG_POST_SLUGS,
+  mergePosts,
+} from '@/content/posts';
 
 export const Route = createFileRoute('/llms-full.txt')({
   server: {
@@ -28,13 +32,15 @@ export const Route = createFileRoute('/llms-full.txt')({
           const { listPublishedArticles, findPublishedBySlug } =
             await import('@/modules/posts/service');
           const rows = await listPublishedArticles().catch(() => []);
-          const dbPosts = rows.map((row) => ({
-            slug: row.slug,
-            title: row.title || row.slug,
-            description: row.description || '',
-            createdAt: new Date(row.createdAt).toISOString(),
-            source: 'db' as const,
-          }));
+          const dbPosts = rows
+            .filter((row) => !HIDDEN_BLOG_POST_SLUGS.has(row.slug))
+            .map((row) => ({
+              slug: row.slug,
+              title: row.title || row.slug,
+              description: row.description || '',
+              createdAt: new Date(row.createdAt).toISOString(),
+              source: 'db' as const,
+            }));
           posts = mergePosts(dbPosts, posts);
 
           if (posts.length > 0) {
@@ -47,7 +53,10 @@ export const Route = createFileRoute('/llms-full.txt')({
                 lines.push(`Description: ${post.description}`);
               lines.push('');
 
-              if (post.source === 'db') {
+              if (
+                post.source === 'db' &&
+                !HIDDEN_BLOG_POST_SLUGS.has(post.slug)
+              ) {
                 const detail = await findPublishedBySlug(post.slug).catch(
                   () => null
                 );

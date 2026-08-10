@@ -8,7 +8,7 @@ import { getLocale } from '@/paraglide/runtime.js';
 import { Footer } from '@/blocks/footer';
 import { Header } from '@/blocks/header';
 import { BlogCard } from '@/components/blog-card';
-import { formatPostDate } from '@/content/posts';
+import { formatPostDate, type BlogPost } from '@/content/posts';
 import { getBlogPostsFn } from '@/content/posts/server';
 
 export const Route = createFileRoute('/blog/')({
@@ -31,6 +31,17 @@ export const Route = createFileRoute('/blog/')({
 
 function BlogPage() {
   const { locale, posts } = Route.useLoaderData();
+  return <BlogListPage locale={locale} posts={posts} />;
+}
+
+export function BlogListPage({
+  locale,
+  posts,
+}: {
+  locale: string;
+  posts: BlogPost[];
+}) {
+  const eyebrow = normalizeLocale(locale) === 'zh' ? '使用指南' : 'Guides';
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f3fbf7] text-[#193d32]">
@@ -39,7 +50,7 @@ function BlogPage() {
         <div className="mx-auto max-w-5xl">
           <div className="mb-16 text-center">
             <p className="mb-4 text-xs font-semibold tracking-[0.24em] text-[#107b59] uppercase">
-              使用指南
+              {eyebrow}
             </p>
             <h1 className="text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
               {m['blog.title']()}
