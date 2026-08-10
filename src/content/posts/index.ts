@@ -2,22 +2,6 @@ import type { ComponentType } from 'react';
 
 import { baseLocale } from '@/paraglide/runtime.js';
 
-/**
- * Local blog posts written as MDX files in this directory.
- * File naming: `<slug>.<locale>.mdx` (falls back to the base locale).
- * Register every local post slug here — it drives loading and the sitemap.
- *
- * This module is isomorphic (safe in client bundles). Database posts are
- * fetched through the server functions in ./server.ts and merged with the
- * local posts via the pure helpers below.
- */
-export const BLOG_POST_SLUGS = [
-  'how-to-download-tiktok-videos-without-watermark',
-  'instagram-video-downloader-guide',
-  'video-to-text-workflow-for-creators',
-  'public-video-downloader-api-guide',
-] as const;
-
 export const HIDDEN_BLOG_POST_SLUGS = new Set([
   'what-is-shipany',
   'blocks-vs-components',
@@ -60,8 +44,29 @@ const postModules = import.meta.glob<PostModule>('/src/content/posts/*.mdx', {
   eager: true,
 });
 
+/**
+ * Local blog posts written as MDX files in this directory.
+ * File naming: `<slug>.<locale>.mdx` (falls back to the base locale).
+ *
+ * Slugs are discovered from the bundled MDX files so publishing many SEO posts
+ * does not require keeping a second manual registry in sync.
+ */
+export const BLOG_POST_SLUGS = Array.from(
+  new Set(
+    Object.keys(postModules)
+      .map((path) =>
+        path
+          .split('/')
+          .pop()
+          ?.replace(/\.[^.]+\.mdx$/, '')
+      )
+      .filter((slug): slug is string => Boolean(slug))
+      .filter((slug) => !HIDDEN_BLOG_POST_SLUGS.has(slug))
+  )
+).sort();
+
 export function loadLocalPost(slug: string, locale: string): PostModule | null {
-  if (!BLOG_POST_SLUGS.includes(slug as (typeof BLOG_POST_SLUGS)[number])) {
+  if (!BLOG_POST_SLUGS.includes(slug)) {
     return null;
   }
   return (
