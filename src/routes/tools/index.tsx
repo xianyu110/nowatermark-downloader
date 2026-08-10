@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import {
   ArrowRight,
   Clapperboard,
+  FileText,
   Globe2,
   Music2,
   Sparkles,
@@ -49,6 +50,108 @@ const musicSlugs = new Set([
   'qq-music-downloader',
   'qishui-music-downloader',
 ]);
+
+const contentToolCopy: Record<
+  SiteLocale,
+  {
+    eyebrow: string;
+    title: string;
+    description: string;
+    cardTitle: string;
+    cardDescription: string;
+  }
+> = {
+  en: {
+    eyebrow: 'Content tools',
+    title: 'Article and text extraction',
+    description:
+      'Parse public article pages into editable text, Markdown, JSON, and reusable media lists.',
+    cardTitle: 'WeChat article parser',
+    cardDescription:
+      'Extract public mp.weixin.qq.com articles into text, Markdown, images, and exposed video sources.',
+  },
+  zh: {
+    eyebrow: '内容工具',
+    title: '文章与文本提取',
+    description:
+      '将公开文章页解析为可编辑正文、Markdown、JSON 和可复用媒体列表。',
+    cardTitle: '公众号文章解析',
+    cardDescription:
+      '提取公开 mp.weixin.qq.com 文章正文、Markdown、图片和页面暴露的视频源。',
+  },
+  es: {
+    eyebrow: 'Herramientas de contenido',
+    title: 'Extracción de artículos y texto',
+    description:
+      'Convierte páginas públicas en texto editable, Markdown, JSON y listas de medios reutilizables.',
+    cardTitle: 'Analizador de artículos WeChat',
+    cardDescription:
+      'Extrae artículos públicos de mp.weixin.qq.com como texto, Markdown, imágenes y videos expuestos.',
+  },
+  pt: {
+    eyebrow: 'Ferramentas de conteúdo',
+    title: 'Extração de artigos e texto',
+    description:
+      'Analise páginas públicas em texto editável, Markdown, JSON e listas de mídia reutilizáveis.',
+    cardTitle: 'Analisador de artigos WeChat',
+    cardDescription:
+      'Extraia artigos públicos do mp.weixin.qq.com como texto, Markdown, imagens e vídeos expostos.',
+  },
+  fr: {
+    eyebrow: 'Outils de contenu',
+    title: 'Extraction d’articles et de texte',
+    description:
+      'Analysez des pages publiques en texte modifiable, Markdown, JSON et listes de médias réutilisables.',
+    cardTitle: 'Analyseur d’articles WeChat',
+    cardDescription:
+      'Extrayez les articles publics mp.weixin.qq.com en texte, Markdown, images et vidéos exposées.',
+  },
+  de: {
+    eyebrow: 'Content-Tools',
+    title: 'Artikel- und Textextraktion',
+    description:
+      'Analysiere öffentliche Seiten in bearbeitbaren Text, Markdown, JSON und wiederverwendbare Medienlisten.',
+    cardTitle: 'WeChat-Artikel-Parser',
+    cardDescription:
+      'Extrahiere öffentliche mp.weixin.qq.com-Artikel als Text, Markdown, Bilder und sichtbare Videoquellen.',
+  },
+  it: {
+    eyebrow: 'Strumenti contenuto',
+    title: 'Estrazione articoli e testo',
+    description:
+      'Analizza pagine pubbliche in testo modificabile, Markdown, JSON e liste media riutilizzabili.',
+    cardTitle: 'Parser articoli WeChat',
+    cardDescription:
+      'Estrai articoli pubblici mp.weixin.qq.com in testo, Markdown, immagini e video esposti.',
+  },
+  id: {
+    eyebrow: 'Alat konten',
+    title: 'Ekstraksi artikel dan teks',
+    description:
+      'Parse halaman publik menjadi teks yang dapat diedit, Markdown, JSON, dan daftar media.',
+    cardTitle: 'Parser artikel WeChat',
+    cardDescription:
+      'Ekstrak artikel publik mp.weixin.qq.com menjadi teks, Markdown, gambar, dan video yang terekspos.',
+  },
+  ja: {
+    eyebrow: 'コンテンツツール',
+    title: '記事とテキストの抽出',
+    description:
+      '公開ページを編集可能なテキスト、Markdown、JSON、再利用可能なメディア一覧に解析します。',
+    cardTitle: 'WeChat記事解析',
+    cardDescription:
+      '公開 mp.weixin.qq.com 記事を本文、Markdown、画像、公開動画ソースとして抽出します。',
+  },
+  ko: {
+    eyebrow: '콘텐츠 도구',
+    title: '글과 텍스트 추출',
+    description:
+      '공개 페이지를 편집 가능한 텍스트, Markdown, JSON, 재사용 가능한 미디어 목록으로 파싱합니다.',
+    cardTitle: 'WeChat 글 파서',
+    cardDescription:
+      '공개 mp.weixin.qq.com 글을 텍스트, Markdown, 이미지, 노출된 동영상 소스로 추출합니다.',
+  },
+};
 
 const featuredCopy: Partial<
   Record<
@@ -661,6 +764,7 @@ function ToolsDirectoryPage() {
   const locale = currentLocale();
   const t = copy[locale];
   const featured = featuredCopy[locale] || featuredCopy.en;
+  const contentTools = contentToolCopy[locale] || contentToolCopy.en;
   const comingSoonLabel = locale === 'zh' ? '即将上线' : 'Coming soon';
   const appUrl = envConfigs.app_url.replace(/\/$/, '');
   const transcribeHref = localePath(locale, '/transcribe');
@@ -781,6 +885,47 @@ function ToolsDirectoryPage() {
                   </div>
                 )
               )}
+            </div>
+          </section>
+
+          <section aria-labelledby="tools-content">
+            <div className="mb-6 flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-md bg-[#e9f6f1] text-[#107b59]">
+                <FileText size={20} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold tracking-[0.18em] text-[#107b59] uppercase">
+                  {contentTools.eyebrow}
+                </p>
+                <h2 id="tools-content" className="text-2xl font-bold">
+                  {contentTools.title}
+                </h2>
+              </div>
+            </div>
+            <p className="mb-6 max-w-3xl text-base leading-7 text-[#536861]">
+              {contentTools.description}
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <a
+                href={localePath(locale, '/tools/wechat-article-parser')}
+                className="group flex min-h-36 flex-col justify-between rounded-md border border-[#d6e4df] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#91c8b5] hover:shadow-[0_10px_28px_rgba(16,77,57,0.08)]"
+              >
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    {contentTools.cardTitle}
+                  </h3>
+                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#63756f]">
+                    {contentTools.cardDescription}
+                  </p>
+                </div>
+                <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#107b59]">
+                  {t.open}
+                  <ArrowRight
+                    size={16}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                </span>
+              </a>
             </div>
           </section>
 
