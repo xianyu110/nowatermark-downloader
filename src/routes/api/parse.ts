@@ -762,20 +762,36 @@ async function requestProvider(
     const apiKey = process.env.BUGPK_API_KEY || '';
     if (apiKey) endpoint.searchParams.set('key', apiKey);
 
-    const response = await fetch(endpoint, {
-      headers: { Accept: 'application/json' },
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-    const payload = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      const error = new Error(`HTTP ${response.status}`) as ParseError;
-      error.retryable = response.status === 429 || response.status >= 500;
-      throw error;
+    const endpoints = [endpoint];
+    if (apiKey) {
+      const anonymousEndpoint = new URL(endpoint);
+      anonymousEndpoint.searchParams.delete('key');
+      endpoints.push(anonymousEndpoint);
     }
 
-    const code = Number(payload?.code ?? payload?.status);
-    if (code !== 0 && code !== 200) {
+    let payload: any = null;
+    let lastError: ParseError | null = null;
+
+    for (const candidate of endpoints) {
+      const response = await fetch(candidate, {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+      payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const error = new Error(`HTTP ${response.status}`) as ParseError;
+        error.retryable = response.status === 429 || response.status >= 500;
+        lastError = error;
+        continue;
+      }
+
+      const code = Number(payload?.code ?? payload?.status);
+      if (code === 0 || code === 200) {
+        lastError = null;
+        break;
+      }
+
       const error = new Error(
         payload?.msg || payload?.message || 'BugPk parsing failed'
       ) as ParseError;
@@ -784,8 +800,10 @@ async function requestProvider(
       if (Number.isFinite(retryAfter) && retryAfter > 0) {
         error.retryAfterMs = Math.min(retryAfter * 1000, 3000);
       }
-      throw error;
+      lastError = error;
     }
+
+    if (lastError) throw lastError;
 
     const parsed = normalizeBugpkResult(payload, sourceUrl, provider.url);
     if (!parsed) {
@@ -1057,7 +1075,14 @@ async function POST({ request }: { request: Request }) {
       continue;
     }
 
-    if (!(await isMediaUrlUsableWithRetry(parsed.mediaUrl, requestDeadline))) {
+    const shouldTrustBugpkMusicUrl =
+      provider.kind === 'bugpk' &&
+      isBugpkMusicEndpoint(provider.url) &&
+      parsed.mediaType === 'audio';
+    if (
+      !shouldTrustBugpkMusicUrl &&
+      !(await isMediaUrlUsableWithRetry(parsed.mediaUrl, requestDeadline))
+    ) {
       console.error('[video/parse] provider returned unusable media', {
         provider: provider.name,
       });

@@ -75,6 +75,7 @@ const content = {
       home: 'Home',
       transcribe: 'Video to text',
       platforms: 'Platforms',
+      blog: 'Blog',
       howItWorks: 'How it works',
       faq: 'FAQ',
       pricing: 'Pricing',
@@ -328,6 +329,7 @@ const content = {
       home: '首页',
       transcribe: '视频转文字',
       platforms: '支持平台',
+      blog: '博客',
       howItWorks: '使用方法',
       faq: '常见问题',
       pricing: '价格',
@@ -598,6 +600,7 @@ const localizedContent: Record<string, DownloaderCopy> = {
       home: 'Inicio',
       transcribe: 'Video a texto',
       platforms: 'Plataformas',
+      blog: 'Blog',
       howItWorks: 'Cómo funciona',
       faq: 'FAQ',
       pricing: 'Precios',
@@ -857,6 +860,7 @@ const localizedContent: Record<string, DownloaderCopy> = {
       home: 'Início',
       transcribe: 'Vídeo para texto',
       platforms: 'Plataformas',
+      blog: 'Blog',
       howItWorks: 'Como funciona',
       faq: 'FAQ',
       pricing: 'Preços',
@@ -1118,6 +1122,7 @@ const localizedContent: Record<string, DownloaderCopy> = {
       home: 'Accueil',
       transcribe: 'Vidéo en texte',
       platforms: 'Plateformes',
+      blog: 'Blog',
       howItWorks: 'Comment ça marche',
       faq: 'FAQ',
       pricing: 'Tarifs',
@@ -1379,6 +1384,7 @@ const localizedContent: Record<string, DownloaderCopy> = {
       home: 'Startseite',
       transcribe: 'Video zu Text',
       platforms: 'Plattformen',
+      blog: 'Blog',
       howItWorks: 'So funktioniert es',
       faq: 'FAQ',
       pricing: 'Preise',
@@ -1642,6 +1648,7 @@ const localizedContent: Record<string, DownloaderCopy> = {
       home: 'Home',
       transcribe: 'Video in testo',
       platforms: 'Piattaforme',
+      blog: 'Blog',
       howItWorks: 'Come funziona',
       faq: 'FAQ',
       pricing: 'Prezzi',
@@ -1902,6 +1909,7 @@ const localizedContent: Record<string, DownloaderCopy> = {
       home: 'Beranda',
       transcribe: 'Video ke teks',
       platforms: 'Platform',
+      blog: 'Blog',
       howItWorks: 'Cara kerja',
       faq: 'FAQ',
       pricing: 'Harga',
@@ -2161,6 +2169,7 @@ const localizedContent: Record<string, DownloaderCopy> = {
       home: '홈',
       transcribe: '동영상 텍스트 변환',
       platforms: '지원 플랫폼',
+      blog: '블로그',
       howItWorks: '사용 방법',
       faq: '자주 묻는 질문',
       pricing: '요금제',
@@ -2416,6 +2425,7 @@ const localizedContent: Record<string, DownloaderCopy> = {
       home: 'ホーム',
       transcribe: '動画を文字起こし',
       platforms: '対応サイト',
+      blog: 'ブログ',
       howItWorks: '使い方',
       faq: 'よくある質問',
       pricing: '料金',
@@ -2753,9 +2763,171 @@ export function CopypilotDownloader() {
   const accountHref = localizedPath(locale, '/settings');
   const homeHref = localizedPath(locale, '/');
   const apiDocsHref = localizedPath(locale, '/api-docs');
+  const blogHref = localizedPath(locale, '/blog');
   const toolsHref = localizedPath(locale, '/tools');
+  const wechatArticleHref = localizedPath(
+    locale,
+    '/tools/wechat-article-parser'
+  );
+  const musicToolHref = localizedPath(locale, '/tools/music-downloader');
   const signInHref = `${localizedPath(locale, '/sign-in')}?callbackUrl=${encodeURIComponent(homeHref)}`;
   const localizedResourceHref = (path: string) => localizedPath(locale, path);
+  const wechatArticlePromo = {
+    en: {
+      eyebrow: 'New content tool',
+      title: 'WeChat article parser',
+      description:
+        'Extract public mp.weixin.qq.com articles into clean text, Markdown, images, and exposed video sources.',
+      action: 'Open parser',
+    },
+    zh: {
+      eyebrow: '新内容工具',
+      title: '公众号文章解析',
+      description:
+        '提取公开 mp.weixin.qq.com 文章正文、Markdown、图片和页面暴露的视频源。',
+      action: '打开解析器',
+    },
+    es: {
+      eyebrow: 'Nueva herramienta de contenido',
+      title: 'Analizador de artículos WeChat',
+      description:
+        'Extrae artículos públicos de mp.weixin.qq.com como texto limpio, Markdown, imágenes y videos expuestos.',
+      action: 'Abrir',
+    },
+    pt: {
+      eyebrow: 'Nova ferramenta de conteúdo',
+      title: 'Analisador de artigos WeChat',
+      description:
+        'Extraia artigos públicos do mp.weixin.qq.com como texto limpo, Markdown, imagens e vídeos expostos.',
+      action: 'Abrir parser',
+    },
+    fr: {
+      eyebrow: 'Nouvel outil de contenu',
+      title: 'Analyseur d’articles WeChat',
+      description:
+        'Extrayez les articles publics mp.weixin.qq.com en texte propre, Markdown, images et vidéos exposées.',
+      action: 'Ouvrir',
+    },
+    de: {
+      eyebrow: 'Neues Content-Tool',
+      title: 'WeChat-Artikel-Parser',
+      description:
+        'Extrahiere öffentliche mp.weixin.qq.com-Artikel als sauberen Text, Markdown, Bilder und sichtbare Videoquellen.',
+      action: 'Öffnen',
+    },
+    it: {
+      eyebrow: 'Nuovo strumento contenuti',
+      title: 'Parser articoli WeChat',
+      description:
+        'Estrai articoli pubblici mp.weixin.qq.com come testo pulito, Markdown, immagini e video esposti.',
+      action: 'Apri parser',
+    },
+    id: {
+      eyebrow: 'Alat konten baru',
+      title: 'Parser artikel WeChat',
+      description:
+        'Ekstrak artikel publik mp.weixin.qq.com menjadi teks bersih, Markdown, gambar, dan video yang terekspos.',
+      action: 'Buka parser',
+    },
+    ja: {
+      eyebrow: '新しいコンテンツツール',
+      title: 'WeChat記事解析',
+      description:
+        '公開 mp.weixin.qq.com 記事を本文、Markdown、画像、公開動画ソースとして抽出します。',
+      action: '開く',
+    },
+    ko: {
+      eyebrow: '새 콘텐츠 도구',
+      title: 'WeChat 글 파서',
+      description:
+        '공개 mp.weixin.qq.com 글을 정리된 텍스트, Markdown, 이미지, 노출된 동영상 소스로 추출합니다.',
+      action: '열기',
+    },
+  }[locale] || {
+    eyebrow: 'New content tool',
+    title: 'WeChat article parser',
+    description:
+      'Extract public mp.weixin.qq.com articles into clean text, Markdown, images, and exposed video sources.',
+    action: 'Open parser',
+  };
+  const musicToolPromo = {
+    en: {
+      eyebrow: 'Music tool',
+      title: 'Music parser',
+      description:
+        'Parse public NetEase Cloud Music, QQ Music, Kuwo Music, and Qishui links into song metadata, covers, lyrics, and audio URLs.',
+      action: 'Open music tools',
+    },
+    zh: {
+      eyebrow: '音乐工具',
+      title: '音乐解析',
+      description:
+        '解析公开的网易云、QQ 音乐、酷我音乐和汽水音乐链接，提取歌曲信息、封面、歌词和音频直链。',
+      action: '打开音乐工具',
+    },
+    es: {
+      eyebrow: 'Herramienta musical',
+      title: 'Analizador de música',
+      description:
+        'Analiza enlaces públicos de NetEase, QQ Music, Kuwo y Qishui para obtener metadatos, portada, letra y audio directo.',
+      action: 'Abrir',
+    },
+    pt: {
+      eyebrow: 'Ferramenta musical',
+      title: 'Analisador de música',
+      description:
+        'Analise links públicos do NetEase, QQ Music, Kuwo e Qishui para obter metadados, capa, letra e áudio direto.',
+      action: 'Abrir música',
+    },
+    fr: {
+      eyebrow: 'Outil musical',
+      title: 'Analyseur de musique',
+      description:
+        'Analysez les liens publics NetEase, QQ Music, Kuwo et Qishui pour obtenir les métadonnées, la pochette, les paroles et l’audio.',
+      action: 'Ouvrir',
+    },
+    de: {
+      eyebrow: 'Musik-Tool',
+      title: 'Musik-Parser',
+      description:
+        'Analysiere öffentliche NetEase-, QQ-Music-, Kuwo- und Qishui-Links und erhalte Metadaten, Cover, Lyrics und Audio-URLs.',
+      action: 'Öffnen',
+    },
+    it: {
+      eyebrow: 'Strumento musicale',
+      title: 'Parser musicale',
+      description:
+        'Analizza link pubblici NetEase, QQ Music, Kuwo e Qishui per ottenere metadati, copertina, testo e URL audio.',
+      action: 'Apri musica',
+    },
+    id: {
+      eyebrow: 'Alat musik',
+      title: 'Parser musik',
+      description:
+        'Ekstrak tautan publik NetEase, QQ Music, Kuwo, dan Qishui menjadi metadata lagu, cover, lirik, dan URL audio.',
+      action: 'Buka musik',
+    },
+    ja: {
+      eyebrow: '音楽ツール',
+      title: '音楽解析',
+      description:
+        '公開された NetEase、QQ Music、Kuwo、Qishui のリンクから曲情報、カバー、歌詞、音声 URL を抽出します。',
+      action: '音楽ツールを開く',
+    },
+    ko: {
+      eyebrow: '음악 도구',
+      title: '음악 파서',
+      description:
+        '공개 NetEase, QQ Music, Kuwo, Qishui 링크에서 곡 정보, 커버, 가사, 오디오 URL을 추출합니다.',
+      action: '음악 도구 열기',
+    },
+  }[locale] || {
+    eyebrow: 'Music tool',
+    title: 'Music parser',
+    description:
+      'Parse public NetEase Cloud Music, QQ Music, Kuwo Music, and Qishui links into song metadata, covers, lyrics, and audio URLs.',
+    action: 'Open music tools',
+  };
 
   const platformLabel = useMemo(() => {
     const source = result?.sourceUrl || extractUrl(input);
@@ -3027,6 +3199,7 @@ export function CopypilotDownloader() {
           <a href="#top">{t.navigation.home}</a>
           <a href={transcribeHref}>{t.navigation.transcribe}</a>
           <a href={toolsHref}>{t.navigation.platforms}</a>
+          <a href={blogHref}>{t.navigation.blog}</a>
           <a href={apiDocsHref}>{t.navigation.apiDocs}</a>
           <a href="#steps">{t.navigation.howItWorks}</a>
           <a href="#faq">{t.navigation.faq}</a>
@@ -3050,6 +3223,7 @@ export function CopypilotDownloader() {
         <a href="#top">{t.navigation.home}</a>
         <a href={transcribeHref}>{t.navigation.transcribe}</a>
         <a href={toolsHref}>{t.navigation.platforms}</a>
+        <a href={blogHref}>{t.navigation.blog}</a>
         <a href={apiDocsHref}>{t.navigation.apiDocs}</a>
         <a href="#steps">{t.navigation.howItWorks}</a>
         <a href="#faq">{t.navigation.faq}</a>
@@ -3299,6 +3473,36 @@ export function CopypilotDownloader() {
           {t.hero.chips.map((chip) => (
             <span key={chip}>{chip}</span>
           ))}
+        </div>
+        <div className="cp-content-tool-grid">
+          <a className="cp-content-tool-card" href={wechatArticleHref}>
+            <div className="cp-content-tool-icon" aria-hidden="true">
+              <FileText size={20} />
+            </div>
+            <div className="cp-content-tool-copy">
+              <p>{wechatArticlePromo.eyebrow}</p>
+              <h3>{wechatArticlePromo.title}</h3>
+              <span>{wechatArticlePromo.description}</span>
+            </div>
+            <div className="cp-content-tool-action">
+              <span>{wechatArticlePromo.action}</span>
+              <ExternalLink size={16} />
+            </div>
+          </a>
+          <a className="cp-content-tool-card" href={musicToolHref}>
+            <div className="cp-content-tool-icon" aria-hidden="true">
+              <Sparkles size={20} />
+            </div>
+            <div className="cp-content-tool-copy">
+              <p>{musicToolPromo.eyebrow}</p>
+              <h3>{musicToolPromo.title}</h3>
+              <span>{musicToolPromo.description}</span>
+            </div>
+            <div className="cp-content-tool-action">
+              <span>{musicToolPromo.action}</span>
+              <ExternalLink size={16} />
+            </div>
+          </a>
         </div>
       </section>
 
@@ -3661,6 +3865,7 @@ export function CopypilotDownloader() {
           <strong>{t.footer.core}</strong>
           <a href="#top">{t.footer.downloader}</a>
           <a href={toolsHref}>{t.navigation.platforms}</a>
+          <a href={blogHref}>{t.navigation.blog}</a>
           <a href="#steps">{t.navigation.howItWorks}</a>
           <a href="#faq">{t.navigation.faq}</a>
           <a href={pricingHref}>{t.footer.pricing}</a>

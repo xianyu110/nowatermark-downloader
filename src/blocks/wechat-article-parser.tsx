@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import JSZip from 'jszip';
 import {
   Clipboard,
   Copy,
@@ -24,6 +25,10 @@ type WechatArticleVideo = {
   url: string;
   poster: string;
 };
+
+function proxiedWechatImageUrl(url: string) {
+  return `/api/wechat-article/image?url=${encodeURIComponent(url)}`;
+}
 
 type WechatArticleResult = {
   url: string;
@@ -352,6 +357,17 @@ function downloadFile(contents: string, filename: string, type: string) {
   URL.revokeObjectURL(href);
 }
 
+function downloadBlob(blob: Blob, filename: string) {
+  const href = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = href;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(href);
+}
+
 function slugify(value: string) {
   return (
     value
@@ -362,13 +378,97 @@ function slugify(value: string) {
   );
 }
 
+function imageExtension(contentType: string, fallbackUrl: string) {
+  const normalized = contentType.toLowerCase();
+  if (normalized.includes('jpeg') || normalized.includes('jpg')) return 'jpg';
+  if (normalized.includes('png')) return 'png';
+  if (normalized.includes('webp')) return 'webp';
+  if (normalized.includes('gif')) return 'gif';
+  if (normalized.includes('avif')) return 'avif';
+  const match = fallbackUrl.match(/\.([a-z0-9]+)(?:$|[?#])/i);
+  return match?.[1]?.toLowerCase() || 'jpg';
+}
+
 export function WechatArticleParser({ locale }: { locale: SiteLocale }) {
   const t = copy[locale] || copy.en;
   const [url, setUrl] = useState('');
   const [result, setResult] = useState<WechatArticleResult | null>(null);
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [downloadingImages, setDownloadingImages] = useState(false);
   const [copied, setCopied] = useState('');
+
+  const downloadImagesLabel: Record<SiteLocale, string> = {
+    en: 'Download all images',
+    zh: '一键下载全部图片',
+    es: 'Descargar todas las imágenes',
+    pt: 'Baixar todas as imagens',
+    fr: 'Télécharger toutes les images',
+    de: 'Alle Bilder herunterladen',
+    it: 'Scarica tutte le immagini',
+    id: 'Unduh semua gambar',
+    ja: 'すべての画像をダウンロード',
+    ko: '모든 이미지 다운로드',
+  };
+
+  const downloadingImagesLabel: Record<SiteLocale, string> = {
+    en: 'Packaging images...',
+    zh: '正在打包图片...',
+    es: 'Empaquetando imágenes...',
+    pt: 'Empacotando imagens...',
+    fr: 'Préparation des images...',
+    de: 'Bilder werden gepackt...',
+    it: 'Preparazione immagini...',
+    id: 'Sedang mengemas gambar...',
+    ja: '画像をまとめています...',
+    ko: '이미지를 묶는 중...',
+  };
+
+  const imageZipSummaryLabel: Record<
+    SiteLocale,
+    (success: number, failed: number) => string
+  > = {
+    en: (success, failed) =>
+      failed
+        ? `Downloaded ${success} images, ${failed} failed.`
+        : `Downloaded ${success} images.`,
+    zh: (success, failed) =>
+      failed
+        ? `已下载 ${success} 张图片，${failed} 张失败。`
+        : `已下载 ${success} 张图片。`,
+    es: (success, failed) =>
+      failed
+        ? `Se descargaron ${success} imágenes y fallaron ${failed}.`
+        : `Se descargaron ${success} imágenes.`,
+    pt: (success, failed) =>
+      failed
+        ? `${success} imagens baixadas, ${failed} falharam.`
+        : `${success} imagens baixadas.`,
+    fr: (success, failed) =>
+      failed
+        ? `${success} images téléchargées, ${failed} en échec.`
+        : `${success} images téléchargées.`,
+    de: (success, failed) =>
+      failed
+        ? `${success} Bilder heruntergeladen, ${failed} fehlgeschlagen.`
+        : `${success} Bilder heruntergeladen.`,
+    it: (success, failed) =>
+      failed
+        ? `${success} immagini scaricate, ${failed} non riuscite.`
+        : `${success} immagini scaricate.`,
+    id: (success, failed) =>
+      failed
+        ? `${success} gambar berhasil diunduh, ${failed} gagal.`
+        : `${success} gambar berhasil diunduh.`,
+    ja: (success, failed) =>
+      failed
+        ? `${success}件の画像をダウンロードしました。${failed}件は失敗しました。`
+        : `${success}件の画像をダウンロードしました。`,
+    ko: (success, failed) =>
+      failed
+        ? `이미지 ${success}개를 다운로드했고 ${failed}개는 실패했습니다.`
+        : `이미지 ${success}개를 다운로드했습니다.`,
+  };
 
   async function pasteUrl() {
     try {
@@ -416,6 +516,80 @@ export function WechatArticleParser({ locale }: { locale: SiteLocale }) {
       window.setTimeout(() => setCopied(''), 1500);
     } catch {
       setNotice(t.pasteFailed);
+    }
+  }
+
+  async function downloadAllImages() {
+    if (!result?.images.length || downloadingImages) return;
+
+    setDownloadingImages(true);
+    setNotice('');
+
+    try {
+      const zip = new JSZip();
+      const folder =
+        zip.folder(`${slugify(result.title || 'wechat-article')}-images`) ||
+        zip;
+
+      const jobs = await Promise.allSettled(
+        result.images.map(async (image, index) => {
+          const response = await fetch(proxiedWechatImageUrl(image.url));
+          if (!response.ok) {
+            throw new Error(`Image ${index + 1} failed`);
+          }
+
+          const blob = await response.blob();
+          const bytes = await blob.arrayBuffer();
+          const ext = imageExtension(
+            response.headers.get('content-type') || blob.type,
+            image.url
+          );
+
+          return {
+            fileName: `${String(index + 1).padStart(2, '0')}.${ext}`,
+            bytes,
+          };
+        })
+      );
+
+      let successCount = 0;
+      const failed: string[] = [];
+
+      for (const job of jobs) {
+        if (job.status === 'fulfilled') {
+          successCount += 1;
+          folder.file(job.value.fileName, job.value.bytes);
+        } else {
+          failed.push(
+            job.reason instanceof Error
+              ? job.reason.message
+              : String(job.reason)
+          );
+        }
+      }
+
+      if (!successCount) {
+        throw new Error('No images could be downloaded.');
+      }
+
+      if (failed.length) {
+        zip.file('failed-images.txt', failed.join('\n'));
+      }
+
+      const blob = await zip.generateAsync({
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: { level: 6 },
+      });
+      downloadBlob(
+        blob,
+        `${slugify(result.title || 'wechat-article')}-images.zip`
+      );
+      setNotice(imageZipSummaryLabel[locale](successCount, failed.length));
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : String(error));
+    } finally {
+      setDownloadingImages(false);
     }
   }
 
@@ -560,6 +734,17 @@ export function WechatArticleParser({ locale }: { locale: SiteLocale }) {
                       <Download size={16} />
                       {t.downloadMarkdown}
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => void downloadAllImages()}
+                      disabled={!result.images.length || downloadingImages}
+                      className="inline-flex items-center gap-2 rounded-md border border-[#c8d8d2] px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Download size={16} />
+                      {downloadingImages
+                        ? downloadingImagesLabel[locale]
+                        : downloadImagesLabel[locale]}
+                    </button>
                   </div>
                 </div>
               </section>
@@ -599,13 +784,13 @@ export function WechatArticleParser({ locale }: { locale: SiteLocale }) {
                       {result.images.slice(0, 8).map((image, index) => (
                         <a
                           key={image.url}
-                          href={image.url}
+                          href={proxiedWechatImageUrl(image.url)}
                           target="_blank"
                           rel="noreferrer"
                           className="overflow-hidden rounded-md border border-[#d6e4df] bg-[#f7faf9]"
                         >
                           <img
-                            src={image.url}
+                            src={proxiedWechatImageUrl(image.url)}
                             alt={image.alt || `${t.images} ${index + 1}`}
                             className="aspect-square w-full object-cover"
                             loading="lazy"
