@@ -673,6 +673,92 @@
   font-weight: 850;
 }
 
+.cp-blog-section {
+  padding: 56px max(24px, calc((100% - 1248px) / 2));
+  background:
+    radial-gradient(circle at 12% 20%, rgba(37, 99, 235, 0.1), transparent 32%),
+    linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%);
+}
+
+.cp-blog-grid {
+  display: grid;
+  max-width: 1120px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 28px auto 0;
+}
+
+.cp-blog-card {
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px;
+  border: 1px solid #cfe3fb;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease;
+}
+
+.cp-blog-card:hover {
+  transform: translateY(-2px);
+  border-color: #9eb8ed;
+  box-shadow: 0 24px 56px rgba(15, 23, 42, 0.13);
+}
+
+.cp-blog-card p {
+  margin: 0 0 10px;
+  color: var(--cp-blue);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cp-blog-card h3 {
+  margin: 0;
+  color: var(--cp-ink);
+  font-size: 18px;
+  font-weight: 850;
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+}
+
+.cp-blog-card span {
+  display: block;
+  margin-top: 12px;
+  color: var(--cp-muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.cp-blog-card strong,
+.cp-blog-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cp-blue);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.cp-blog-view-all {
+  width: max-content;
+  margin: 22px auto 0;
+  padding: 11px 16px;
+  border: 1px solid #cfe3fb;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+}
+
 .cp-section,
 .cp-result-section {
   padding: 56px max(24px, calc((100% - 1248px) / 2));
@@ -1441,6 +1527,18 @@
 
   .cp-content-tool-action {
     margin-top: 2px;
+  }
+
+  .cp-blog-section {
+    padding: 50px 18px;
+  }
+
+  .cp-blog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-blog-card {
+    min-height: auto;
   }
 
   .cp-section,

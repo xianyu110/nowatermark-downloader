@@ -2928,6 +2928,123 @@ export function CopypilotDownloader() {
       'Parse public NetEase Cloud Music, QQ Music, Kuwo Music, and Qishui links into song metadata, covers, lyrics, and audio URLs.',
     action: 'Open music tools',
   };
+  const blogPromo = (
+    {
+      en: {
+        eyebrow: 'Creator guides',
+        title: 'Learn better video download and transcription workflows',
+        description:
+          'Practical guides for public video downloading, no-watermark parsing, video-to-text, and API-based creator operations.',
+        action: 'Read guide',
+        viewAll: 'View all guides',
+        posts: [
+          {
+            title: 'How to download TikTok videos without a watermark',
+            description:
+              'Use public TikTok links, retry safely, and understand why some videos fail to parse.',
+            slug: 'how-to-download-tiktok-videos-without-watermark',
+          },
+          {
+            title: 'Instagram video downloader guide',
+            description:
+              'Download public Reels and posts while keeping source links and usage rights organized.',
+            slug: 'instagram-video-downloader-guide',
+          },
+          {
+            title: 'Video to text workflow for creators',
+            description:
+              'Turn public videos into editable transcripts, subtitles, summaries, and research notes.',
+            slug: 'video-to-text-workflow-for-creators',
+          },
+          {
+            title: 'Public video downloader API guide',
+            description:
+              'Know when to move from manual downloads to an API workflow with quotas and retries.',
+            slug: 'public-video-downloader-api-guide',
+          },
+        ],
+      },
+      zh: {
+        eyebrow: '创作者指南',
+        title: '学习更高效的视频下载与转文字工作流',
+        description:
+          '围绕公开视频下载、去水印解析、视频转文字和 API 自动化的实用指南。',
+        action: '阅读指南',
+        viewAll: '查看全部指南',
+        posts: [
+          {
+            title: '如何下载无水印 TikTok 视频',
+            description:
+              '使用公开 TikTok 链接、安全重试，并理解部分视频解析失败的原因。',
+            slug: 'how-to-download-tiktok-videos-without-watermark',
+          },
+          {
+            title: 'Instagram Reels 和公开视频下载指南',
+            description:
+              '下载公开 Reels 和帖子，同时保留来源链接、作者信息和授权状态。',
+            slug: 'instagram-video-downloader-guide',
+          },
+          {
+            title: '视频转文字工作流',
+            description:
+              '把公开视频变成可编辑文字稿、字幕、摘要和可复用选题笔记。',
+            slug: 'video-to-text-workflow-for-creators',
+          },
+          {
+            title: '公开视频下载 API 指南',
+            description:
+              '判断什么时候该从手动下载升级到带额度、重试和节点切换的 API 工作流。',
+            slug: 'public-video-downloader-api-guide',
+          },
+        ],
+      },
+    } as Partial<
+      Record<
+        SiteLocale,
+        {
+          eyebrow: string;
+          title: string;
+          description: string;
+          action: string;
+          viewAll: string;
+          posts: Array<{ title: string; description: string; slug: string }>;
+        }
+      >
+    >
+  )[locale] || {
+    eyebrow: 'Creator guides',
+    title: 'Learn better video download and transcription workflows',
+    description:
+      'Practical guides for public video downloading, no-watermark parsing, video-to-text, and API-based creator operations.',
+    action: 'Read guide',
+    viewAll: 'View all guides',
+    posts: [
+      {
+        title: 'How to download TikTok videos without a watermark',
+        description:
+          'Use public TikTok links, retry safely, and understand why some videos fail to parse.',
+        slug: 'how-to-download-tiktok-videos-without-watermark',
+      },
+      {
+        title: 'Instagram video downloader guide',
+        description:
+          'Download public Reels and posts while keeping source links and usage rights organized.',
+        slug: 'instagram-video-downloader-guide',
+      },
+      {
+        title: 'Video to text workflow for creators',
+        description:
+          'Turn public videos into editable transcripts, subtitles, summaries, and research notes.',
+        slug: 'video-to-text-workflow-for-creators',
+      },
+      {
+        title: 'Public video downloader API guide',
+        description:
+          'Know when to move from manual downloads to an API workflow with quotas and retries.',
+        slug: 'public-video-downloader-api-guide',
+      },
+    ],
+  };
 
   const platformLabel = useMemo(() => {
     const source = result?.sourceUrl || extractUrl(input);
@@ -3504,6 +3621,37 @@ export function CopypilotDownloader() {
             </div>
           </a>
         </div>
+      </section>
+
+      <section className="cp-blog-section" aria-labelledby="creator-guides">
+        <div className="cp-section-heading">
+          <span>{blogPromo.eyebrow}</span>
+          <h2 id="creator-guides">{blogPromo.title}</h2>
+          <p>{blogPromo.description}</p>
+        </div>
+        <div className="cp-blog-grid">
+          {blogPromo.posts.map((post) => (
+            <a
+              className="cp-blog-card"
+              href={localizedPath(locale, `/blog/${post.slug}`)}
+              key={post.slug}
+            >
+              <div>
+                <p>{blogPromo.eyebrow}</p>
+                <h3>{post.title}</h3>
+                <span>{post.description}</span>
+              </div>
+              <strong>
+                {blogPromo.action}
+                <ExternalLink size={15} />
+              </strong>
+            </a>
+          ))}
+        </div>
+        <a className="cp-blog-view-all" href={blogHref}>
+          {blogPromo.viewAll}
+          <ExternalLink size={16} />
+        </a>
       </section>
 
       {result ? (
