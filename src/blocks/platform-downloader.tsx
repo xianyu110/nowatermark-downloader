@@ -1458,18 +1458,26 @@ function localizedHomePath(locale: SeoLocale) {
 export function PlatformDownloader({
   locale,
   slug,
+  pagePathOverride,
+  headingOverride,
+  descriptionOverride,
 }: {
   locale: SeoLocale;
   slug: string;
+  pagePathOverride?: string;
+  headingOverride?: string;
+  descriptionOverride?: string;
 }) {
   const item = getPlatformCopy(slug, locale);
   const t = common[locale] || common.en;
   const [url, setUrl] = useState('');
 
   if (!item) return null;
-  const pagePath = platformPath(locale, slug);
+  const pagePath = pagePathOverride || platformPath(locale, slug);
   const appUrl = envConfigs.app_url.replace(/\/$/, '');
   const canonical = `${appUrl}${pagePath}`;
+  const heading = headingOverride || item.name;
+  const pageDescription = descriptionOverride || item.description;
   const homePath = localizedHomePath(locale);
   const resourcePath = (path: string) =>
     locale === 'en' ? path : `/${locale}${path}`;
@@ -1508,8 +1516,8 @@ export function PlatformDownloader({
         '@type': 'WebPage',
         '@id': `${canonical}#webpage`,
         url: canonical,
-        name: item.name,
-        description: item.description,
+        name: heading,
+        description: pageDescription,
         inLanguage: locale,
         isPartOf: {
           '@type': 'WebSite',
@@ -1526,7 +1534,7 @@ export function PlatformDownloader({
       {
         '@type': 'SoftwareApplication',
         '@id': `${canonical}#app`,
-        name: item.name,
+        name: heading,
         applicationCategory:
           toolKind === 'music'
             ? 'MusicApplication'
@@ -1537,7 +1545,7 @@ export function PlatformDownloader({
         browserRequirements: 'Requires JavaScript and a modern web browser',
         url: canonical,
         image: `${appUrl}/og-image.png`,
-        description: item.description,
+        description: pageDescription,
         inLanguage: locale,
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
         featureList,
@@ -1562,7 +1570,7 @@ export function PlatformDownloader({
           {
             '@type': 'ListItem',
             position: 3,
-            name: item.name,
+            name: heading,
             item: canonical,
           },
         ],
@@ -1605,10 +1613,10 @@ export function PlatformDownloader({
         <div className="mx-auto max-w-4xl text-center">
           <p className="mb-4 text-sm font-bold text-cyan-300">{t.eyebrow}</p>
           <h1 className="mx-auto max-w-3xl text-4xl leading-tight font-extrabold md:text-6xl">
-            {item.name}
+            {heading}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-300 md:text-lg">
-            {item.description}
+            {pageDescription}
           </p>
           <form
             className="mx-auto mt-9 max-w-3xl rounded-lg bg-white p-4 text-left shadow-2xl"

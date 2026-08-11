@@ -32,6 +32,11 @@ const SEO_PATHS = [
   '/song-recognizer',
   '/data-deletion',
 ];
+const ROOT_LANDING_PATHS = [
+  '/tiktok-downloader',
+  '/instagram-downloader',
+  '/youtube-downloader',
+];
 const TOOL_SLUGS = [
   'tiktok-downloader',
   'instagram-downloader',
@@ -148,6 +153,14 @@ export const Route = createFileRoute('/sitemap.xml')({
             changeFrequency: path === '/api-docs' ? 'weekly' : 'monthly',
             priority: path === '/tools' ? 0.95 : path === '/faq' ? 0.8 : 0.7,
             locales: SEO_LOCALES,
+          });
+        }
+        for (const path of ROOT_LANDING_PATHS) {
+          entries.push({
+            path,
+            changeFrequency: 'daily',
+            priority: path === '/tiktok-downloader' ? 1 : 0.96,
+            locales: ['en'],
           });
         }
         for (const slug of TOOL_SLUGS) {

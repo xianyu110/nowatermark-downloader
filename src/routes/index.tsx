@@ -13,7 +13,7 @@ export const Route = createFileRoute('/')({
   head: () => {
     const locale = normalizeLocale(getLocale());
     const titles: Record<SiteLocale, string> = {
-      en: 'NoWatermark Downloader',
+      en: 'Free TikTok Video Downloader — No Watermark, No Signup',
       zh: 'NoWatermark 视频去水印下载器',
       es: 'Descargador NoWatermark',
       pt: 'Baixador NoWatermark',
@@ -25,7 +25,7 @@ export const Route = createFileRoute('/')({
       ko: '워터마크 없는 동영상 다운로드 | NoWatermark',
     };
     const descriptions: Record<SiteLocale, string> = {
-      en: 'Download public videos without watermarks from TikTok, Instagram, YouTube, X, Facebook, and more.',
+      en: 'Free TikTok video downloader without watermark for public videos. Paste a TikTok, Instagram, or YouTube link to extract clean media URLs with no signup.',
       zh: '免费下载 TikTok、Instagram、YouTube、X、Facebook 等平台的公开无水印视频。',
       es: 'Descarga videos públicos sin marca de agua de TikTok, Instagram, YouTube, X, Facebook y más.',
       pt: 'Baixe vídeos públicos sem marca d’água do TikTok, Instagram, YouTube, X, Facebook e outros.',
@@ -38,7 +38,21 @@ export const Route = createFileRoute('/')({
     };
     const title = titles[locale];
     const description = descriptions[locale];
-    return localizedPageHead({ locale, path: '/', title, description });
+    return localizedPageHead({
+      locale,
+      path: '/',
+      title,
+      description,
+      keywords:
+        locale === 'en'
+          ? [
+              'tiktok video downloader without watermark',
+              'free tiktok video downloader',
+              'download tiktok videos without watermark',
+              'no watermark video downloader',
+            ]
+          : undefined,
+    });
   },
   component: HomePage,
 });

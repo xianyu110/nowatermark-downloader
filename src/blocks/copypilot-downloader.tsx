@@ -98,9 +98,9 @@ const content = {
     },
     hero: {
       eyebrow: 'Free online video downloader',
-      title: 'Download videos without watermarks for free',
+      title: 'Download TikTok Videos Without Watermark — Free',
       description:
-        'Paste a public post link to get a clean video, direct media URL, cover, and metadata. 3 free downloads per day, no account required.',
+        'Use a free TikTok video downloader without watermark for public posts. Paste a TikTok, Instagram, or YouTube link to extract a clean media URL, cover, and metadata with no signup.',
       downloaderLabel: 'Video downloader',
       placeholder: 'Paste a TikTok, Instagram, YouTube, X, or Facebook link',
       inputLabel: 'Public video URL',
@@ -2772,6 +2772,37 @@ export function CopypilotDownloader() {
   const musicToolHref = localizedPath(locale, '/tools/music-downloader');
   const signInHref = `${localizedPath(locale, '/sign-in')}?callbackUrl=${encodeURIComponent(homeHref)}`;
   const localizedResourceHref = (path: string) => localizedPath(locale, path);
+  const corePlatformLinks = [
+    {
+      label: 'TikTok',
+      Icon: FileVideo,
+      href:
+        locale === 'en'
+          ? '/tiktok-downloader'
+          : localizedResourceHref('/tools/tiktok-downloader'),
+    },
+    {
+      label: 'Instagram',
+      Icon: ImageIcon,
+      href:
+        locale === 'en'
+          ? '/instagram-downloader'
+          : localizedResourceHref('/tools/instagram-downloader'),
+    },
+    {
+      label: 'YouTube',
+      Icon: Play,
+      href:
+        locale === 'en'
+          ? '/youtube-downloader'
+          : localizedResourceHref('/tools/youtube-downloader'),
+    },
+    {
+      label: 'Music',
+      Icon: Sparkles,
+      href: musicToolHref,
+    },
+  ];
   const wechatArticlePromo = {
     en: {
       eyebrow: 'New content tool',
@@ -3113,6 +3144,74 @@ export function CopypilotDownloader() {
       },
     ],
   };
+
+  const homeSeoCopy =
+    locale === 'en'
+      ? {
+          eyebrow: 'TikTok video downloader without watermark',
+          title: 'A focused downloader workflow for public TikTok videos',
+          intro:
+            'NoWatermark Downloader is built around one simple job: take a public video link and turn it into a clean, download-ready media asset. The homepage targets creators who need a free TikTok video downloader without watermark, but the same input also supports public Instagram, YouTube, X, Facebook, and other links when the parser chain can access them. Instead of asking visitors to install software, open a browser extension, or create an account before testing the product, the workflow starts with a single paste box. You copy a public share URL, paste it into the downloader, and receive the best available media result, metadata, cover image, and direct URL when the upstream provider returns them.',
+          sections: [
+            {
+              title: 'How to use the free TikTok video downloader',
+              body: [
+                'First, open TikTok and copy the share link for a public video. Browser URLs, mobile share URLs, and shortened links can all work when they resolve to a public post. Paste the link into the main input box above and click Extract. NoWatermark sends the URL through a parser chain, checks the returned media response, and displays the available result on the same page. If the primary provider is unavailable, the system can retry and fall back to configured backup providers instead of failing immediately.',
+                'After the result loads, preview the video, download the available file, or copy the direct media URL. Monthly members can use higher-value workflow options such as batch parsing, audio-only output, mute video, best quality selection, API access, and video-to-text transcription. Free visitors still get a clear trial flow for basic public downloads, which is important for search traffic because users can verify that the tool works before deciding whether they need a paid workflow.',
+              ],
+            },
+            {
+              title: 'Before and after: what the downloader changes',
+              body: [
+                'Before using a downloader, a creator usually has only the social platform page: a post URL, an embedded player, captions mixed with interface elements, and platform-specific restrictions. That is useful for watching, but inefficient for research, editing, archiving, or documenting public material. After parsing a public link, NoWatermark organizes the result into a cleaner media workflow. You can see the title, source platform, author when available, duration, cover image, direct media URL, and the available download action.',
+                'The practical difference is speed. A social link is good for sharing. A clean media result is better for content review, subtitling, repurposing with permission, competitor research, and team handoff. This is why the homepage focuses on “download TikTok videos without watermark” while still linking to dedicated Instagram and YouTube pages. Each platform has a different user intent, so each platform gets a focused page instead of forcing every visitor through one generic feature list.',
+              ],
+            },
+            {
+              title: 'Why choose NoWatermark Downloader',
+              body: [
+                'The product is intentionally simple at the entry point. The homepage does not try to explain every tool at once. It gives search visitors a fast TikTok downloader, then routes platform-specific and advanced jobs to specialized pages. That structure helps users and search engines understand the site: the homepage owns the broad “TikTok video downloader without watermark” intent, while the Instagram downloader, YouTube downloader, WeChat parser, and music downloader pages each own their narrower keyword sets.',
+                'The parser chain is also designed for real-world failures. Public video platforms change markup, region behavior, rate limits, and media access patterns. A downloader that relies on one upstream endpoint will fail more often. NoWatermark keeps the interface stable while the backend can retry the current provider or move to a backup provider. When no parser can process a public link, the page returns a clear message instead of pretending that private, deleted, login-only, or restricted media can always be downloaded.',
+              ],
+            },
+            {
+              title: 'Creator use cases and responsible downloading',
+              body: [
+                'Typical users include social media managers saving their own posts, editors collecting permitted reference clips, researchers documenting public examples, creators preparing subtitles, and teams that need a repeatable workflow for public video links. A direct download is only one part of the workflow. Many users continue into video-to-text transcription, summaries, audio extraction, frame extraction, or API automation after they confirm that the source media can be parsed.',
+                'NoWatermark is designed for public and authorized content. You should only download videos you own, have permission to use, or may lawfully process. The site does not support bypassing private posts, login requirements, paywalls, or platform access controls. For businesses, that responsible boundary matters because a video downloader should improve productivity without creating a compliance problem. Clear copyright, privacy, deletion, and support pages are kept in the footer so users can report concerns or request removal when needed.',
+              ],
+            },
+          ],
+          linksTitle: 'Specialized downloader pages',
+          links: [
+            {
+              label: 'TikTok video downloader',
+              href: '/tiktok-downloader',
+              text: 'Focused page for public TikTok videos without watermark.',
+            },
+            {
+              label: 'Instagram video downloader',
+              href: '/instagram-downloader',
+              text: 'Dedicated page for public Reels and Instagram post media.',
+            },
+            {
+              label: 'YouTube video downloader',
+              href: '/youtube-downloader',
+              text: 'Dedicated page for public YouTube videos and Shorts.',
+            },
+            {
+              label: 'WeChat article parser',
+              href: wechatArticleHref,
+              text: 'Extract public mp.weixin.qq.com text, images, and media lists.',
+            },
+            {
+              label: 'Music downloader',
+              href: musicToolHref,
+              text: 'Parse supported public music links into metadata and media URLs.',
+            },
+          ],
+        }
+      : null;
 
   const platformLabel = useMemo(() => {
     const source = result?.sourceUrl || extractUrl(input);
@@ -3638,56 +3737,17 @@ export function CopypilotDownloader() {
         </section>
 
         <div className="cp-mode-buttons" aria-label={t.hero.platformsLabel}>
-          {[
-            ['TikTok', FileVideo],
-            ['Instagram', ImageIcon],
-            ['YouTube', Play],
-            ['X / Twitter', FileText],
-          ].map(([label, Icon]) => (
-            <button
-              key={label as string}
-              type="button"
-              onClick={() => inputRef.current?.focus()}
-            >
+          {corePlatformLinks.map(({ label, Icon, href }) => (
+            <a key={label} href={href}>
               <Icon size={17} />
-              {label as string}
-            </button>
+              {label}
+            </a>
           ))}
         </div>
         <div className="cp-platform-chips" aria-label={t.hero.toolsLabel}>
           {t.hero.chips.map((chip) => (
             <span key={chip}>{chip}</span>
           ))}
-        </div>
-        <div className="cp-content-tool-grid">
-          <a className="cp-content-tool-card" href={wechatArticleHref}>
-            <div className="cp-content-tool-icon" aria-hidden="true">
-              <FileText size={20} />
-            </div>
-            <div className="cp-content-tool-copy">
-              <p>{wechatArticlePromo.eyebrow}</p>
-              <h3>{wechatArticlePromo.title}</h3>
-              <span>{wechatArticlePromo.description}</span>
-            </div>
-            <div className="cp-content-tool-action">
-              <span>{wechatArticlePromo.action}</span>
-              <ExternalLink size={16} />
-            </div>
-          </a>
-          <a className="cp-content-tool-card" href={musicToolHref}>
-            <div className="cp-content-tool-icon" aria-hidden="true">
-              <Sparkles size={20} />
-            </div>
-            <div className="cp-content-tool-copy">
-              <p>{musicToolPromo.eyebrow}</p>
-              <h3>{musicToolPromo.title}</h3>
-              <span>{musicToolPromo.description}</span>
-            </div>
-            <div className="cp-content-tool-action">
-              <span>{musicToolPromo.action}</span>
-              <ExternalLink size={16} />
-            </div>
-          </a>
         </div>
       </section>
 
@@ -3990,6 +4050,40 @@ export function CopypilotDownloader() {
           ))}
         </div>
       </section>
+
+      {homeSeoCopy ? (
+        <section className="cp-section cp-home-seo-section">
+          <div className="cp-section-heading">
+            <span>
+              <FileText size={18} />
+              {homeSeoCopy.eyebrow}
+            </span>
+            <h2>{homeSeoCopy.title}</h2>
+            <p>{homeSeoCopy.intro}</p>
+          </div>
+          <div className="cp-home-seo-grid">
+            {homeSeoCopy.sections.map((section) => (
+              <article key={section.title}>
+                <h3>{section.title}</h3>
+                {section.body.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </article>
+            ))}
+          </div>
+          <div className="cp-home-seo-links">
+            <h3>{homeSeoCopy.linksTitle}</h3>
+            <div>
+              {homeSeoCopy.links.map((item) => (
+                <a href={item.href} key={item.href}>
+                  <strong>{item.label}</strong>
+                  <span>{item.text}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="cp-section cp-faq-section" id="faq">
         <div className="cp-section-heading">
