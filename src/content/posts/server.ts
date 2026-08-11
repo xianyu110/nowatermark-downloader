@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 
 import {
+  getLocalPostLocales,
   getLocalPosts,
   HIDDEN_BLOG_POST_SLUGS,
   loadLocalPost,
@@ -72,6 +73,7 @@ export const getBlogPostFn = createServerFn()
           authorImage: row.authorImage || undefined,
           source: 'db',
           content: row.content || '',
+          availableLocales: ['en'],
         };
       }
     } catch {
@@ -90,5 +92,6 @@ export const getBlogPostFn = createServerFn()
       authorName: meta.author_name,
       authorImage: meta.author_image,
       source: 'local',
+      availableLocales: getLocalPostLocales(data.slug),
     };
   });

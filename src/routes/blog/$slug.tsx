@@ -32,11 +32,15 @@ export const Route = createFileRoute('/blog/$slug')({
   head: ({ loaderData }) => {
     if (!loaderData) return {};
     const { locale, post } = loaderData;
+    const normalizedLocale = normalizeLocale(locale);
     return localizedPageHead({
-      locale: normalizeLocale(locale),
+      locale: normalizedLocale,
       path: `/blog/${post.slug}`,
       title: `${post.title} | ${envConfigs.app_name}`,
       description: post.description,
+      locales: post.availableLocales?.length
+        ? post.availableLocales
+        : [normalizedLocale],
     });
   },
   component: BlogPostPage,
@@ -95,7 +99,9 @@ export function BlogPostContent({
   // Local posts render their bundled MDX component; database posts render
   // raw markdown through MarkdownContent.
   const LocalContent =
-    post.source === 'local' ? loadLocalPost(post.slug, locale)?.default : null;
+    post.source === 'local'
+      ? loadLocalPost(post.slug, normalizedLocale)?.default
+      : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f3fbf7] text-[#193d32]">

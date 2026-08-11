@@ -50,6 +50,7 @@ export function localizedPageHead({
   description,
   keywords,
   image,
+  locales = siteLocales,
 }: {
   locale: SiteLocale;
   path: string;
@@ -57,6 +58,7 @@ export function localizedPageHead({
   description: string;
   keywords?: string[];
   image?: string;
+  locales?: readonly SiteLocale[];
 }) {
   const canonical = localizedUrl(locale, path);
   const ogImage = image || `${appUrl()}/og-image.png`;
@@ -83,7 +85,7 @@ export function localizedPageHead({
       { property: 'og:image:height', content: '630' },
       { property: 'og:image:type', content: 'image/png' },
       { property: 'og:image:alt', content: title },
-      ...siteLocales
+      ...locales
         .filter((alternateLocale) => alternateLocale !== locale)
         .map((alternateLocale) => ({
           property: 'og:locale:alternate',
@@ -97,7 +99,7 @@ export function localizedPageHead({
     ],
     links: [
       { rel: 'canonical', href: canonical },
-      ...siteLocales.map((alternateLocale) => ({
+      ...locales.map((alternateLocale) => ({
         rel: 'alternate',
         hrefLang: hreflangForLocale(alternateLocale),
         href: localizedUrl(alternateLocale, path),

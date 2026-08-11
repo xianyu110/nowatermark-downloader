@@ -5,6 +5,7 @@ import { localePath, siteLocales } from '@/config/locale';
 import { hreflangForLocale } from '@/lib/seo';
 import { baseLocale, locales } from '@/paraglide/runtime.js';
 import {
+  getLocalPostLocales,
   getLocalPosts,
   HIDDEN_BLOG_POST_SLUGS,
   mergePosts,
@@ -180,23 +181,26 @@ export const Route = createFileRoute('/sitemap.xml')({
             }));
           const posts = mergePosts(dbPosts, getLocalPosts(baseLocale));
           for (const post of posts) {
+            const postLocales =
+              post.source === 'local' ? getLocalPostLocales(post.slug) : ['en'];
             entries.push({
               path: `/blog/${post.slug}`,
               lastModified: post.createdAt,
               changeFrequency: 'monthly',
               priority: 0.6,
-              locales: ['en', 'zh', 'es', 'pt'],
+              locales: postLocales.length ? postLocales : ['en'],
             });
           }
         } catch {
           // Database unreachable — static paths + local posts still listed.
           for (const post of getLocalPosts(baseLocale)) {
+            const postLocales = getLocalPostLocales(post.slug);
             entries.push({
               path: `/blog/${post.slug}`,
               lastModified: post.createdAt,
               changeFrequency: 'monthly',
               priority: 0.6,
-              locales: ['en', 'zh', 'es', 'pt'],
+              locales: postLocales.length ? postLocales : ['en'],
             });
           }
         }

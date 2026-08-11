@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react';
 
-import { baseLocale } from '@/paraglide/runtime.js';
+import { normalizeLocale, siteLocales, type SiteLocale } from '@/config/locale';
 
 export const HIDDEN_BLOG_POST_SLUGS = new Set([
   'what-is-shipany',
@@ -31,6 +31,7 @@ export type BlogPost = {
   authorName?: string;
   authorImage?: string;
   source: 'local' | 'db';
+  availableLocales?: SiteLocale[];
 };
 
 export type BlogPostDetail = BlogPost & {
@@ -69,10 +70,15 @@ export function loadLocalPost(slug: string, locale: string): PostModule | null {
   if (!BLOG_POST_SLUGS.includes(slug)) {
     return null;
   }
-  return (
-    postModules[`/src/content/posts/${slug}.${locale}.mdx`] ??
-    postModules[`/src/content/posts/${slug}.${baseLocale}.mdx`] ??
-    null
+  return postModules[`/src/content/posts/${slug}.${locale}.mdx`] ?? null;
+}
+
+export function getLocalPostLocales(slug: string): SiteLocale[] {
+  if (!BLOG_POST_SLUGS.includes(slug)) {
+    return [];
+  }
+  return siteLocales.filter((locale) =>
+    Boolean(postModules[`/src/content/posts/${slug}.${locale}.mdx`])
   );
 }
 
@@ -90,12 +96,16 @@ function localPostToItem(slug: string, meta: BlogPostMeta): BlogPost {
 }
 
 export function getLocalPosts(locale: string): BlogPost[] {
+  const normalizedLocale = normalizeLocale(locale);
   return BLOG_POST_SLUGS.map((slug) => ({
     slug: slug as string,
-    mod: loadLocalPost(slug, locale),
+    mod: loadLocalPost(slug, normalizedLocale),
   }))
     .filter((m): m is { slug: string; mod: PostModule } => m.mod !== null)
-    .map(({ slug, mod }) => localPostToItem(slug, mod.meta));
+    .map(({ slug, mod }) => ({
+      ...localPostToItem(slug, mod.meta),
+      availableLocales: getLocalPostLocales(slug),
+    }));
 }
 
 /**
