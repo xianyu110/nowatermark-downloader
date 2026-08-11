@@ -1,0 +1,22 @@
+export const meta = {
+  title: 'NetEase Cloud Music Download Workflow',
+  description:
+    'A practical guide to parsing public NetEase Cloud Music links, checking returned metadata, and handling unavailable audio URLs.',
+  created_at: '2026-08-12',
+  author_name: 'NoWatermark Team',
+  author_image: '/logo.svg',
+};
+
+NetEase Cloud Music links can return track metadata, cover art, artist information, and sometimes a playable audio URL. Availability depends on the source, platform restrictions, and parser account status.
+
+Use [https://nowatermarkdownloader.com/tools/netease-music-downloader](https://nowatermarkdownloader.com/tools/netease-music-downloader) for NetEase links, or use [https://nowatermarkdownloader.com/tools/music-downloader](https://nowatermarkdownloader.com/tools/music-downloader) for mixed music parsing.
+
+## What to save
+
+Keep the original URL, song title, artist, album, cover, returned audio status, and parse time. If the URL cannot be fetched, record that result instead of treating it as missing work.
+
+## Common limitations
+
+Some tracks may require account access, region availability, or membership status. If a parser account is rate limited or risk controlled, metadata may still return while the audio URL does not.
+
+For automated checks, use [https://nowatermarkdownloader.com/api-docs](https://nowatermarkdownloader.com/api-docs) and store unavailable results as structured events.

@@ -1,0 +1,22 @@
+export const meta = {
+  title: 'X Video API Workflow for Public Link Parsing',
+  description:
+    'How teams can structure an X video parser workflow with request ids, retries, provider fallback, and clean error handling.',
+  created_at: '2026-08-12',
+  author_name: 'NoWatermark Team',
+  author_image: '/logo.svg',
+};
+
+Manual parsing is enough for occasional downloads. Teams that process X videos every day need a more structured API workflow with clear logging and retry behavior.
+
+Start with the public product at [https://nowatermarkdownloader.com/tools/twitter-video-downloader](https://nowatermarkdownloader.com/tools/twitter-video-downloader), then review the developer flow at [https://nowatermarkdownloader.com/api-docs](https://nowatermarkdownloader.com/api-docs).
+
+## API workflow design
+
+Send the original public URL with a request id. Store the platform, timestamp, user, and business reason before parsing. When a provider returns a result, save the media URL, type, quality, and source metadata. When every provider fails, save the exact failure class.
+
+## Retry policy
+
+Use limited retries with backoff. A newly published post may need time before the platform exposes a stable media source, but private, deleted, or unsupported URLs should not be retried forever.
+
+For transcript automation, pass successful media into [https://nowatermarkdownloader.com/transcribe](https://nowatermarkdownloader.com/transcribe) only after confirming that the result is public and allowed for your use case.

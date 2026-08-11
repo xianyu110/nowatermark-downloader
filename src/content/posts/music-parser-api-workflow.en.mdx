@@ -1,0 +1,22 @@
+export const meta = {
+  title: 'Music Parser API Workflow for Track Metadata and Audio Links',
+  description:
+    'Design a safer music parser API workflow with request ids, platform routing, fallback, retries, and structured errors.',
+  created_at: '2026-08-12',
+  author_name: 'NoWatermark Team',
+  author_image: '/logo.svg',
+};
+
+Music parser automation needs clearer error handling than manual downloads. A track can return metadata, a playable URL, a membership restriction, or no usable result. Each outcome should be stored explicitly.
+
+Review the user-facing music tool at [https://nowatermarkdownloader.com/tools/music-downloader](https://nowatermarkdownloader.com/tools/music-downloader), then design automation with [https://nowatermarkdownloader.com/api-docs](https://nowatermarkdownloader.com/api-docs).
+
+## Request design
+
+Send the original URL, platform hint if known, request id, user id, and project name. Store the raw platform category, parser status, returned metadata, audio URL status, and failure class.
+
+## Retry design
+
+Use short backoff for temporary provider errors. Do not retry account-gated, membership-only, or unsupported links indefinitely. Make the final state visible to the user.
+
+For teams that mix music and video parsing, route public video speech into [https://nowatermarkdownloader.com/transcribe](https://nowatermarkdownloader.com/transcribe) after media parsing succeeds.

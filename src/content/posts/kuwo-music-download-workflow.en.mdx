@@ -1,0 +1,20 @@
+export const meta = {
+  title: 'Kuwo Music Download Workflow for Public Tracks',
+  description:
+    'A workflow for parsing Kuwo Music links, checking returned audio data, and keeping track metadata organized.',
+  created_at: '2026-08-12',
+  author_name: 'NoWatermark Team',
+  author_image: '/logo.svg',
+};
+
+Kuwo Music links are often used for track checks, creator references, and internal music research. A downloader workflow should capture both the available media data and the original link context.
+
+Use [https://nowatermarkdownloader.com/tools/kuwo-music-downloader](https://nowatermarkdownloader.com/tools/kuwo-music-downloader) for Kuwo-specific parsing. Use [https://nowatermarkdownloader.com/tools/music-downloader](https://nowatermarkdownloader.com/tools/music-downloader) when your input list includes multiple platforms.
+
+## What to verify
+
+Check the track name, artist, album, cover, and returned audio URL. If the URL is unavailable, keep the failure reason and parse time. This prevents repeated manual checks of the same unsupported link.
+
+## Automation notes
+
+Teams can use [https://nowatermarkdownloader.com/api-docs](https://nowatermarkdownloader.com/api-docs) to build a queue with request ids, provider fallback, and structured retry behavior.

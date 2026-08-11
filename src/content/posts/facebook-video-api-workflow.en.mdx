@@ -1,0 +1,22 @@
+export const meta = {
+  title: 'Facebook Video Downloader API Workflow',
+  description:
+    'Design a public Facebook video parsing workflow with request IDs, retries, quotas, and structured logs.',
+  created_at: '2026-08-12',
+  author_name: 'NoWatermark Team',
+  author_image: '/logo.svg',
+};
+
+API workflows are useful when public Facebook video parsing becomes a repeatable job. Manual downloads are enough for one clip; queues need structured logging.
+
+Test links manually at [https://nowatermarkdownloader.com/tools/facebook-video-downloader](https://nowatermarkdownloader.com/tools/facebook-video-downloader), then review [https://nowatermarkdownloader.com/api-docs](https://nowatermarkdownloader.com/api-docs).
+
+## Store structured fields
+
+Track source URL, request ID, requested mode, platform, job owner, timestamp, provider status, media URL, and failure reason.
+
+## Retry policy
+
+Retry temporary network or provider errors. Do not retry private, deleted, group-only, login-only, or unsupported links as if they were temporary failures.
+
+For usage limits and paid access, see [https://nowatermarkdownloader.com/pricing](https://nowatermarkdownloader.com/pricing).

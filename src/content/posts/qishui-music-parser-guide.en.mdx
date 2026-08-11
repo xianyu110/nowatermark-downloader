@@ -1,0 +1,22 @@
+export const meta = {
+  title: 'Qishui Music Parser Guide for Public Audio Links',
+  description:
+    'How to parse Qishui Music links, review available audio fields, and store source metadata for creator workflows.',
+  created_at: '2026-08-12',
+  author_name: 'NoWatermark Team',
+  author_image: '/logo.svg',
+};
+
+Qishui Music links are common in short-form content workflows. A parser can help extract available track details, but the result should always be stored with its source context.
+
+Use [https://nowatermarkdownloader.com/tools/qishui-music-downloader](https://nowatermarkdownloader.com/tools/qishui-music-downloader) for Qishui links. Use [https://nowatermarkdownloader.com/tools/music-downloader](https://nowatermarkdownloader.com/tools/music-downloader) for mixed music queues.
+
+## Clean workflow
+
+Paste the public link, review the returned title, author, cover, and available audio URL. Save the original URL, platform, parse date, and project name with the result.
+
+## Troubleshooting
+
+If no audio is returned, confirm that the source link is public and direct. Some music links may be account gated, region restricted, or available only as metadata.
+
+For repeatable jobs, connect the parser to [https://nowatermarkdownloader.com/api-docs](https://nowatermarkdownloader.com/api-docs).
