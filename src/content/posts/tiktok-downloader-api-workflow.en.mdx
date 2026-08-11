@@ -1,0 +1,26 @@
+export const meta = {
+  title: 'TikTok Downloader API Workflow for Automation',
+  description:
+    'How to move from manual TikTok video downloading to an API workflow with retries, source records, quotas, and error logging.',
+  created_at: '2026-08-11',
+  author_name: 'NoWatermark Team',
+  author_image: '/logo.svg',
+};
+
+Manual downloading is enough for occasional TikTok clips. API workflows become useful when the same parsing job happens every day and the team needs structured retries, quotas, and logs.
+
+Use [https://nowatermarkdownloader.com/tiktok-downloader](https://nowatermarkdownloader.com/tiktok-downloader) for manual testing. Move to [https://nowatermarkdownloader.com/api-docs](https://nowatermarkdownloader.com/api-docs) when repeated public links need automation.
+
+## What the API workflow should store
+
+Every request should include a source URL, request ID, platform guess, user or job ID, requested output mode, and timestamp. Every response should store success, failure reason, media type, media URL when available, and provider status.
+
+## Retry design
+
+Do not retry forever. Use a small retry window for network or provider errors, then mark the link as failed. Private, deleted, login-only, or restricted content should not be retried as if it were a temporary error.
+
+## Manual fallback
+
+Keep [https://nowatermarkdownloader.com](https://nowatermarkdownloader.com) available for spot checks. When the API marks a link as failed, a human can test the same public URL in the browser and decide whether the issue is link-specific or provider-wide.
+
+Paid usage and API access details are available at [https://nowatermarkdownloader.com/pricing](https://nowatermarkdownloader.com/pricing).

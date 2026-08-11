@@ -1,0 +1,26 @@
+export const meta = {
+  title: 'Instagram Video Downloader API Workflow',
+  description:
+    'Move from manual Instagram video downloads to an API workflow with request IDs, retries, quotas, and structured parsing logs.',
+  created_at: '2026-08-11',
+  author_name: 'NoWatermark Team',
+  author_image: '/logo.svg',
+};
+
+Manual Instagram downloads work for occasional research. API workflows help when a team processes public links every day and needs consistent logging.
+
+Test links manually at [https://nowatermarkdownloader.com/instagram-downloader](https://nowatermarkdownloader.com/instagram-downloader), then review automation options at [https://nowatermarkdownloader.com/api-docs](https://nowatermarkdownloader.com/api-docs).
+
+## What to send
+
+A good request includes the public URL, requested output mode, request ID, user or job ID, and timestamp. A good response stores parser status, media type, media URL when available, provider error, and retry decision.
+
+## Retry policy
+
+Retry temporary provider or network issues. Do not retry private, deleted, login-only, or unsupported links as if they were temporary failures.
+
+## Manual review
+
+Keep [https://nowatermarkdownloader.com](https://nowatermarkdownloader.com) available for spot checks. If the API fails but the browser can access the public post, mark the issue as provider-specific.
+
+For production usage and paid limits, check [https://nowatermarkdownloader.com/pricing](https://nowatermarkdownloader.com/pricing).

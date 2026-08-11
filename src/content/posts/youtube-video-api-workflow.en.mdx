@@ -1,0 +1,26 @@
+export const meta = {
+  title: 'YouTube Video Downloader API Workflow',
+  description:
+    'Design an API workflow for public YouTube parsing with request IDs, retries, provider status, quotas, and media records.',
+  created_at: '2026-08-11',
+  author_name: 'NoWatermark Team',
+  author_image: '/logo.svg',
+};
+
+API workflows are useful when public YouTube parsing becomes a repeatable job. Manual downloads are fine for one clip; structured requests are better for daily queues.
+
+Test manually at [https://nowatermarkdownloader.com/youtube-downloader](https://nowatermarkdownloader.com/youtube-downloader), then review [https://nowatermarkdownloader.com/api-docs](https://nowatermarkdownloader.com/api-docs) for automation.
+
+## Request design
+
+Send the source URL, requested mode, request ID, user or job ID, and timestamp. Store the response status, media URL when available, provider error, and retry decision.
+
+## Retry limits
+
+Retry network or temporary provider errors. Do not retry private, deleted, region-restricted, login-only, or unsupported links as if they were temporary failures.
+
+## Human review
+
+Keep [https://nowatermarkdownloader.com](https://nowatermarkdownloader.com) available for spot checks when automated status is unclear.
+
+For paid API access and higher-volume work, see [https://nowatermarkdownloader.com/pricing](https://nowatermarkdownloader.com/pricing).

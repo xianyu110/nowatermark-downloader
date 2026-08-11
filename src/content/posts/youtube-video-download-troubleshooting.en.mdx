@@ -1,0 +1,26 @@
+export const meta = {
+  title: 'YouTube Video Download Troubleshooting Guide',
+  description:
+    'Troubleshoot public YouTube and Shorts links that fail to parse, download, or return an available media URL.',
+  created_at: '2026-08-11',
+  author_name: 'NoWatermark Team',
+  author_image: '/logo.svg',
+};
+
+YouTube links can fail for technical or access reasons. Troubleshooting starts with separating source availability from parser availability.
+
+Use [https://nowatermarkdownloader.com/youtube-downloader](https://nowatermarkdownloader.com/youtube-downloader) and test the full public URL.
+
+## Check the source
+
+Open the link in a browser. If it is private, deleted, age restricted, region restricted, or only available after login, a public downloader should not process it.
+
+If the video is public, copy the full URL again and retry at [https://nowatermarkdownloader.com](https://nowatermarkdownloader.com). Remove punctuation copied from messages or documents.
+
+## Check the provider
+
+If one public video fails but others work, the issue is likely link-specific. If every public YouTube link fails, wait and retry later because upstream providers can be rate limited or temporarily unavailable.
+
+## Log failures
+
+For team workflows, record the source URL, error text, time, and retry result. API workflows should store these events through [https://nowatermarkdownloader.com/api-docs](https://nowatermarkdownloader.com/api-docs) instead of relying on screenshots.
