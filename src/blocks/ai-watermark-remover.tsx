@@ -52,6 +52,9 @@ type CleanerCopy = {
   imageError: string;
   originalSize: string;
   cleanedSize: string;
+  scopeTitle: string;
+  scopeBody: string;
+  scriptWarning: string;
   howTitle: string;
   howSteps: { title: string; body: string }[];
   limitsTitle: string;
@@ -59,6 +62,9 @@ type CleanerCopy = {
   openSourceTitle: string;
   openSourceBody: string;
   openSourceUrl: string;
+  relatedTitle: string;
+  relatedDescription: string;
+  relatedArticles: { slug: string; title: string }[];
 };
 
 const copy: Partial<Record<SiteLocale, CleanerCopy>> & {
@@ -72,9 +78,9 @@ const copy: Partial<Record<SiteLocale, CleanerCopy>> & {
       pricing: 'Pricing',
     },
     heroEyebrow: 'Local privacy tool',
-    heroTitle: 'AI Watermark Cleaner for text and image metadata',
+    heroTitle: 'Free Claude Watermark Remover for hidden text characters',
     heroDescription:
-      'Remove invisible Unicode marks from text and strip most image metadata by re-exporting PNG, JPEG, and WebP files locally in your browser.',
+      'Inspect and clean zero-width or hidden Unicode characters from text copied from Claude, or strip most image metadata locally in your browser.',
     privacyBadge: 'Runs locally. No upload.',
     textTab: 'Text cleaner',
     imageTab: 'Image metadata cleaner',
@@ -104,6 +110,11 @@ const copy: Partial<Record<SiteLocale, CleanerCopy>> & {
       'This image could not be processed in the browser. Try PNG, JPEG, or WebP.',
     originalSize: 'Original size',
     cleanedSize: 'Cleaned size',
+    scopeTitle: 'What this Claude watermark remover actually cleans',
+    scopeBody:
+      'This tool removes character-level artifacts in copied Claude text, such as zero-width spaces, word joiners, soft hyphens, bidirectional controls, Unicode tag characters, and unusual spaces. These characters are not proof of an official Anthropic watermark. The tool does not rewrite your prose, remove a model-level statistical watermark, or guarantee a different AI-detector result.',
+    scriptWarning:
+      'Some invisible characters are meaningful in Arabic, Persian, Indic scripts, and emoji sequences. Review the cleaned output before publishing multilingual text.',
     howTitle: 'How the lightweight cleaner works',
     howSteps: [
       {
@@ -130,6 +141,23 @@ const copy: Partial<Record<SiteLocale, CleanerCopy>> & {
     openSourceBody:
       'For heavier server-side workflows, this page can later proxy to an open-source Python service such as watermarks-remover. The current lightweight tool intentionally stays browser-only.',
     openSourceUrl: 'https://github.com/guillaumemeyer/watermarks-remover',
+    relatedTitle: 'Claude watermark and text cleaning guides',
+    relatedDescription:
+      'Use these practical guides to inspect copied Claude text, understand what a character cleaner can change, and prepare clean drafts for Word, Google Docs, and a CMS.',
+    relatedArticles: [
+      {
+        slug: 'how-to-remove-claude-watermark-hidden-characters',
+        title: 'How to remove Claude watermark characters safely',
+      },
+      {
+        slug: 'claude-watermark-vs-ai-detector',
+        title: 'Claude watermark vs AI detector: what is the difference?',
+      },
+      {
+        slug: 'clean-claude-text-for-word-google-docs-cms',
+        title: 'How to clean Claude text for Word, Google Docs, and a CMS',
+      },
+    ],
   },
   zh: {
     nav: {
@@ -167,6 +195,11 @@ const copy: Partial<Record<SiteLocale, CleanerCopy>> & {
     imageError: '浏览器无法处理这张图片。请尝试 PNG、JPEG 或 WebP。',
     originalSize: '原始大小',
     cleanedSize: '清理后大小',
+    scopeTitle: '这个 AI 水印清理工具实际能清理什么',
+    scopeBody:
+      '本工具清理的是字符层面的痕迹，例如零宽空格、连接符、软连字符、双向文本控制符、Unicode Tag 字符和异常空格。它不会改写正文，不能移除模型级统计水印，也不保证改变 AI 检测器的判断。',
+    scriptWarning:
+      '部分隐形字符在阿拉伯语、波斯语、印度文字和 Emoji 组合中有实际作用。发布多语言内容前，请检查清理结果。',
     howTitle: '轻量版如何工作',
     howSteps: [
       {
@@ -193,6 +226,23 @@ const copy: Partial<Record<SiteLocale, CleanerCopy>> & {
     openSourceBody:
       '如果后续要做重型服务，可以让本站代理到 watermarks-remover 这类开源 Python 服务。当前轻量版刻意保持纯浏览器本地处理。',
     openSourceUrl: 'https://github.com/guillaumemeyer/watermarks-remover',
+    relatedTitle: 'Claude 水印与文本清理指南',
+    relatedDescription:
+      '阅读这些实用指南，了解如何检查 AI 复制文本、区分字符清理与 AI 检测，以及为 Word、Google Docs 和 CMS 准备干净文稿。',
+    relatedArticles: [
+      {
+        slug: 'how-to-remove-claude-watermark-hidden-characters',
+        title: '如何安全清理 Claude 隐形水印字符',
+      },
+      {
+        slug: 'claude-watermark-vs-ai-detector',
+        title: 'Claude 水印与 AI 检测器有什么区别？',
+      },
+      {
+        slug: 'clean-claude-text-for-word-google-docs-cms',
+        title: '如何为 Word、Google Docs 和 CMS 清理 Claude 文本',
+      },
+    ],
   },
 };
 
@@ -304,6 +354,13 @@ export function AiWatermarkRemover({ locale }: { locale: SiteLocale }) {
     operatingSystem: 'Web',
     url: pageUrl,
     description: t.heroDescription,
+    featureList: [
+      'Detect hidden Unicode characters',
+      'Remove zero-width characters',
+      'Normalize unusual spaces',
+      'Strip most image metadata with a local re-export',
+    ],
+    isAccessibleForFree: true,
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -627,6 +684,19 @@ export function AiWatermarkRemover({ locale }: { locale: SiteLocale }) {
             </section>
           )}
 
+          <section className="mt-12 border-y border-[#d6e4df] py-10">
+            <div className="max-w-4xl">
+              <h2 className="text-2xl font-bold">{t.scopeTitle}</h2>
+              <p className="mt-3 text-sm leading-7 text-[#536861]">
+                {t.scopeBody}
+              </p>
+              <p className="mt-4 flex items-start gap-2 text-sm leading-6 text-[#8a4b0f]">
+                <AlertTriangle className="mt-1 shrink-0" size={16} />
+                <span>{t.scriptWarning}</span>
+              </p>
+            </div>
+          </section>
+
           <section className="mt-12 grid gap-6 lg:grid-cols-3">
             <div className="rounded-2xl border border-[#d6e4df] bg-white p-6 lg:col-span-2">
               <h2 className="text-2xl font-bold">{t.howTitle}</h2>
@@ -674,6 +744,30 @@ export function AiWatermarkRemover({ locale }: { locale: SiteLocale }) {
             >
               {t.openSourceUrl}
             </a>
+          </section>
+
+          <section className="mt-12 border-t border-[#d6e4df] pt-10">
+            <h2 className="text-2xl font-bold">{t.relatedTitle}</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-[#63756f]">
+              {t.relatedDescription}
+            </p>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {t.relatedArticles.map((article) => {
+                const href = `${appUrl}/blog/${article.slug}`;
+                return (
+                  <a
+                    key={article.slug}
+                    href={href}
+                    className="min-w-0 rounded-md border border-[#d6e4df] bg-white p-5 transition hover:border-[#91c8b5] hover:shadow-[0_10px_30px_rgba(16,77,57,0.08)]"
+                  >
+                    <h3 className="leading-6 font-semibold">{article.title}</h3>
+                    <span className="mt-3 block text-xs leading-5 break-all text-[#107b59]">
+                      {href}
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
           </section>
         </div>
       </main>

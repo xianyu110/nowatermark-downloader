@@ -10,7 +10,7 @@ function currentLocale() {
 }
 
 const titles: Record<SiteLocale, string> = {
-  en: 'AI Watermark Cleaner - Remove Invisible Marks Locally',
+  en: 'Claude Watermark Remover - Clean Hidden Text Unicode',
   zh: 'AI 水印清理 - 本地移除隐形标记',
   es: 'Limpiador de marcas de agua IA - NoWatermark',
   pt: 'Limpador de marcas d’água de IA - NoWatermark',
@@ -23,7 +23,7 @@ const titles: Record<SiteLocale, string> = {
 };
 
 const descriptions: Record<SiteLocale, string> = {
-  en: 'Clean invisible Unicode marks from text and strip most image metadata locally in your browser. No upload, no server-side processing.',
+  en: 'Use this free Claude watermark remover to clean zero-width and hidden Unicode characters from copied text locally in your browser. No text upload required.',
   zh: '在浏览器本地清理文本隐形 Unicode 标记，并通过图片重导出去除大部分元数据。不上传文件。',
   es: 'Limpia marcas Unicode invisibles y elimina la mayoría de metadatos de imágenes localmente en el navegador.',
   pt: 'Limpe marcas Unicode invisíveis e remova a maioria dos metadados de imagens localmente no navegador.',
@@ -44,7 +44,12 @@ export const Route = createFileRoute('/$locale/tools/ai-watermark-remover')({
       title: titles[locale],
       description: descriptions[locale],
       keywords: [
+        'Claude watermark remover',
+        'remove Claude watermark',
+        'Claude AI text cleaner',
         'AI watermark remover',
+        'AI text cleaner',
+        'hidden Unicode cleaner',
         'invisible watermark remover',
         'zero width character remover',
         'image metadata remover',
