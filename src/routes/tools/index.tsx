@@ -5,6 +5,7 @@ import {
   FileText,
   Globe2,
   Music2,
+  ShieldCheck,
   Sparkles,
   Video,
 } from 'lucide-react';
@@ -150,6 +151,52 @@ const contentToolCopy: Record<
     cardTitle: 'WeChat 글 파서',
     cardDescription:
       '공개 mp.weixin.qq.com 글을 텍스트, Markdown, 이미지, 노출된 동영상 소스로 추출합니다.',
+  },
+};
+
+const privacyToolCopy: Partial<
+  Record<
+    SiteLocale,
+    {
+      eyebrow: string;
+      title: string;
+      description: string;
+      cardTitle: string;
+      cardDescription: string;
+    }
+  >
+> & {
+  en: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    cardTitle: string;
+    cardDescription: string;
+  };
+  zh: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    cardTitle: string;
+    cardDescription: string;
+  };
+} = {
+  en: {
+    eyebrow: 'Privacy cleanup',
+    title: 'Local watermark and metadata tools',
+    description:
+      'Clean invisible text marks and image metadata in the browser without uploading files to the server.',
+    cardTitle: 'AI watermark cleaner',
+    cardDescription:
+      'Remove zero-width characters, bidi controls, tag characters, unusual spaces, and most image metadata locally.',
+  },
+  zh: {
+    eyebrow: '隐私清理',
+    title: '本地水印与元数据工具',
+    description: '在浏览器本地清理文本隐形标记和图片元数据，不上传文件。',
+    cardTitle: 'AI 水印清理',
+    cardDescription:
+      '本地移除零宽字符、双向控制符、Tag 字符、异常空格和大部分图片元数据。',
   },
 };
 
@@ -765,6 +812,7 @@ function ToolsDirectoryPage() {
   const t = copy[locale];
   const featured = featuredCopy[locale] || featuredCopy.en;
   const contentTools = contentToolCopy[locale] || contentToolCopy.en;
+  const privacyTools = privacyToolCopy[locale] || privacyToolCopy.en;
   const comingSoonLabel = locale === 'zh' ? '即将上线' : 'Coming soon';
   const appUrl = envConfigs.app_url.replace(/\/$/, '');
   const transcribeHref = localePath(locale, '/transcribe');
@@ -916,6 +964,47 @@ function ToolsDirectoryPage() {
                   </h3>
                   <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#63756f]">
                     {contentTools.cardDescription}
+                  </p>
+                </div>
+                <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#107b59]">
+                  {t.open}
+                  <ArrowRight
+                    size={16}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                </span>
+              </a>
+            </div>
+          </section>
+
+          <section aria-labelledby="tools-privacy-cleanup">
+            <div className="mb-6 flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-md bg-[#e9f6f1] text-[#107b59]">
+                <ShieldCheck size={20} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold tracking-[0.18em] text-[#107b59] uppercase">
+                  {privacyTools.eyebrow}
+                </p>
+                <h2 id="tools-privacy-cleanup" className="text-2xl font-bold">
+                  {privacyTools.title}
+                </h2>
+              </div>
+            </div>
+            <p className="mb-6 max-w-3xl text-base leading-7 text-[#536861]">
+              {privacyTools.description}
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <a
+                href={localePath(locale, '/tools/ai-watermark-remover')}
+                className="group flex min-h-36 flex-col justify-between rounded-md border border-[#d6e4df] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#91c8b5] hover:shadow-[0_10px_28px_rgba(16,77,57,0.08)]"
+              >
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    {privacyTools.cardTitle}
+                  </h3>
+                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#63756f]">
+                    {privacyTools.cardDescription}
                   </p>
                 </div>
                 <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#107b59]">

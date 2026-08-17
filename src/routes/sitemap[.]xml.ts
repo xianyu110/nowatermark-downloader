@@ -30,6 +30,7 @@ const SEO_PATHS = [
   '/audio-extractor',
   '/frame-extractor',
   '/song-recognizer',
+  '/tools/ai-watermark-remover',
   '/data-deletion',
 ];
 const ROOT_LANDING_PATHS = [
