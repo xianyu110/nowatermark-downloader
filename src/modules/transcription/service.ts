@@ -73,9 +73,14 @@ function normalizeContentType(value: string | null) {
   return (value || '').split(';', 1)[0].trim().toLowerCase();
 }
 
-function parseMaxBytes(value: string | undefined) {
-  const parsed = Number.parseInt(value || '', 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_BYTES;
+export function getTranscriptionMaxBytes(configs: Record<string, string>) {
+  const value = Number.parseInt(
+    configs.video_transcription_max_bytes ||
+      process.env.VIDEO_TRANSCRIPTION_MAX_BYTES ||
+      '',
+    10
+  );
+  return Number.isFinite(value) && value > 0 ? value : DEFAULT_MAX_BYTES;
 }
 
 function isBlockedIpv4(host: string) {
@@ -280,12 +285,14 @@ function normalizeSegments(value: unknown): TranscriptSegment[] {
     .filter((segment): segment is TranscriptSegment => Boolean(segment));
 }
 
-export async function transcribeMediaUrl(params: {
-  mediaUrl: string;
+async function transcribeWithMedia(params: {
+  configs: Record<string, string>;
+  media: Blob;
+  filename: string;
   language?: string;
   prompt?: string;
 }): Promise<TranscriptionResult> {
-  const configs = await getAllConfigs();
+  const { configs } = params;
   const apiKey = configs.openai_api_key?.trim();
   if (!apiKey) {
     throw new TranscriptionError(
@@ -295,11 +302,15 @@ export async function transcribeMediaUrl(params: {
     );
   }
 
-  const initialMediaUrl = assertPublicMediaUrl(params.mediaUrl.trim());
-  const maxBytes = parseMaxBytes(
-    configs.video_transcription_max_bytes ||
-      process.env.VIDEO_TRANSCRIPTION_MAX_BYTES
-  );
+  const maxBytes = getTranscriptionMaxBytes(configs);
+  if (params.media.size > maxBytes) {
+    throw new TranscriptionError(
+      'MEDIA_TOO_LARGE',
+      `Media must be smaller than ${Math.round(maxBytes / 1024 / 1024)} MB.`,
+      413
+    );
+  }
+
   const baseUrl = (
     configs.openai_base_url?.trim() || DEFAULT_OPENAI_BASE_URL
   ).replace(/\/+$/, '');
@@ -308,47 +319,7 @@ export async function transcribeMediaUrl(params: {
     process.env.VIDEO_TRANSCRIPTION_MODEL?.trim() ||
     DEFAULT_MODEL;
 
-  let mediaUrl: URL;
-  let mediaResponse: Response;
-  try {
-    const media = await fetchPublicMedia(initialMediaUrl);
-    mediaUrl = media.mediaUrl;
-    mediaResponse = media.response;
-  } catch (error) {
-    if (error instanceof TranscriptionError) throw error;
-    throw new TranscriptionError(
-      'MEDIA_FETCH_FAILED',
-      'The media URL could not be fetched. It may have expired.',
-      502
-    );
-  }
-
-  if (!mediaResponse.ok) {
-    throw new TranscriptionError(
-      'MEDIA_FETCH_FAILED',
-      `The media server returned HTTP ${mediaResponse.status}.`,
-      502
-    );
-  }
-
-  const contentType = normalizeContentType(
-    mediaResponse.headers.get('content-type')
-  );
-  if (
-    contentType &&
-    !contentType.startsWith('audio/') &&
-    !contentType.startsWith('video/') &&
-    contentType !== 'application/octet-stream'
-  ) {
-    await mediaResponse.body?.cancel().catch(() => undefined);
-    throw new TranscriptionError(
-      'UNSUPPORTED_MEDIA_TYPE',
-      'The URL did not return a supported audio or video file.',
-      415
-    );
-  }
-  const bytes = await readBodyWithLimit(mediaResponse, maxBytes);
-  if (!bytes.byteLength) {
+  if (!params.media.size) {
     throw new TranscriptionError(
       'MEDIA_EMPTY',
       'The media file is empty.',
@@ -357,11 +328,7 @@ export async function transcribeMediaUrl(params: {
   }
 
   const form = new FormData();
-  form.append(
-    'file',
-    new Blob([bytes], { type: contentType || 'video/mp4' }),
-    getFilename(mediaUrl, contentType)
-  );
+  form.append('file', params.media, params.filename);
   form.append('model', model);
   form.append('response_format', 'verbose_json');
   if (params.language && /^[a-z]{2,12}$/i.test(params.language.trim())) {
@@ -422,4 +389,86 @@ export async function transcribeMediaUrl(params: {
     segments: normalizeSegments(payload?.segments),
     model,
   };
+}
+
+export async function transcribeMediaFile(params: {
+  mediaFile: File;
+  language?: string;
+  prompt?: string;
+}): Promise<TranscriptionResult> {
+  const configs = await getAllConfigs();
+  return transcribeWithMedia({
+    configs,
+    media: params.mediaFile,
+    filename: params.mediaFile.name || 'video.mp4',
+    language: params.language,
+    prompt: params.prompt,
+  });
+}
+
+export async function transcribeMediaUrl(params: {
+  mediaUrl: string;
+  language?: string;
+  prompt?: string;
+}): Promise<TranscriptionResult> {
+  const configs = await getAllConfigs();
+  const initialMediaUrl = assertPublicMediaUrl(params.mediaUrl.trim());
+  const maxBytes = getTranscriptionMaxBytes(configs);
+
+  let mediaUrl: URL;
+  let mediaResponse: Response;
+  try {
+    const media = await fetchPublicMedia(initialMediaUrl);
+    mediaUrl = media.mediaUrl;
+    mediaResponse = media.response;
+  } catch (error) {
+    if (error instanceof TranscriptionError) throw error;
+    throw new TranscriptionError(
+      'MEDIA_FETCH_FAILED',
+      'The media URL could not be fetched. It may have expired.',
+      502
+    );
+  }
+
+  if (!mediaResponse.ok) {
+    throw new TranscriptionError(
+      'MEDIA_FETCH_FAILED',
+      `The media server returned HTTP ${mediaResponse.status}.`,
+      502
+    );
+  }
+
+  const contentType = normalizeContentType(
+    mediaResponse.headers.get('content-type')
+  );
+  if (
+    contentType &&
+    !contentType.startsWith('audio/') &&
+    !contentType.startsWith('video/') &&
+    contentType !== 'application/octet-stream'
+  ) {
+    await mediaResponse.body?.cancel().catch(() => undefined);
+    throw new TranscriptionError(
+      'UNSUPPORTED_MEDIA_TYPE',
+      'The URL did not return a supported audio or video file.',
+      415
+    );
+  }
+  const bytes = await readBodyWithLimit(mediaResponse, maxBytes);
+  const blob = new Blob([bytes], { type: contentType || 'video/mp4' });
+  if (!blob.size) {
+    throw new TranscriptionError(
+      'MEDIA_EMPTY',
+      'The media file is empty.',
+      422
+    );
+  }
+
+  return transcribeWithMedia({
+    configs,
+    media: blob,
+    filename: getFilename(mediaUrl, contentType),
+    language: params.language,
+    prompt: params.prompt,
+  });
 }

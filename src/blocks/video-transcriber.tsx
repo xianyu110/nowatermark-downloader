@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import {
   Check,
   CircleUserRound,
@@ -13,6 +13,7 @@ import {
   Languages,
   LoaderCircle,
   Sparkles,
+  Upload,
 } from 'lucide-react';
 
 import { useSession } from '@/core/auth/client';
@@ -59,7 +60,7 @@ const copy = {
     eyebrow: 'Paid member AI transcription',
     title: 'Turn any public video into editable text',
     description:
-      'Paste a public video link or continue from a parsed download. Get a clean transcript with timestamped segments.',
+      'Paste a public video link, upload a local video, or continue from a parsed download. Get a clean transcript with timestamped segments.',
     inputLabel: 'Public video URL',
     inputPlaceholder: 'Paste a TikTok, Instagram, YouTube, X, or media URL',
     paste: 'Paste',
@@ -116,7 +117,7 @@ const copy = {
     eyebrow: '付费会员 AI 视频转写',
     title: '将公开视频转换为可编辑文字',
     description:
-      '粘贴公开视频链接，或从解析结果继续。自动提取音频并生成带时间轴的干净文本。',
+      '粘贴公开视频链接，上传本地视频，或从解析结果继续。自动提取音频并生成带时间轴的干净文本。',
     inputLabel: '公开视频链接',
     inputPlaceholder: '粘贴 TikTok、Instagram、YouTube、X 或媒体直链',
     paste: '粘贴',
@@ -696,6 +697,99 @@ const guestParseCopy: Record<
   },
 };
 
+const uploadCopy: Record<
+  SiteLocale,
+  {
+    label: string;
+    choose: string;
+    replace: string;
+    clear: string;
+    empty: string;
+    hint: string;
+  }
+> = {
+  en: {
+    label: 'Local video upload',
+    choose: 'Choose file',
+    replace: 'Replace file',
+    clear: 'Remove',
+    empty: 'No local file selected.',
+    hint: 'Upload a local MP4, MOV, WebM, or similar video file for transcription.',
+  },
+  zh: {
+    label: '本地视频上传',
+    choose: '选择文件',
+    replace: '重新选择',
+    clear: '移除',
+    empty: '尚未选择本地视频。',
+    hint: '上传本地 MP4、MOV、WebM 等视频文件后即可开始转文字。',
+  },
+  es: {
+    label: 'Subida de video local',
+    choose: 'Elegir archivo',
+    replace: 'Cambiar archivo',
+    clear: 'Quitar',
+    empty: 'No hay archivo local seleccionado.',
+    hint: 'Sube un archivo MP4, MOV, WebM o similar para transcribirlo.',
+  },
+  pt: {
+    label: 'Envio de vídeo local',
+    choose: 'Escolher arquivo',
+    replace: 'Trocar arquivo',
+    clear: 'Remover',
+    empty: 'Nenhum arquivo local selecionado.',
+    hint: 'Envie um vídeo local MP4, MOV, WebM ou similar para transcrição.',
+  },
+  fr: {
+    label: 'Téléversement vidéo local',
+    choose: 'Choisir un fichier',
+    replace: 'Remplacer le fichier',
+    clear: 'Supprimer',
+    empty: 'Aucun fichier local sélectionné.',
+    hint: 'Téléversez un fichier MP4, MOV, WebM ou similaire pour la transcription.',
+  },
+  de: {
+    label: 'Lokaler Video-Upload',
+    choose: 'Datei auswählen',
+    replace: 'Datei ersetzen',
+    clear: 'Entfernen',
+    empty: 'Keine lokale Datei ausgewählt.',
+    hint: 'Lade eine lokale MP4-, MOV-, WebM- oder ähnliche Videodatei hoch.',
+  },
+  it: {
+    label: 'Caricamento video locale',
+    choose: 'Scegli file',
+    replace: 'Cambia file',
+    clear: 'Rimuovi',
+    empty: 'Nessun file locale selezionato.',
+    hint: 'Carica un file MP4, MOV, WebM o simile per la trascrizione.',
+  },
+  id: {
+    label: 'Unggah video lokal',
+    choose: 'Pilih file',
+    replace: 'Ganti file',
+    clear: 'Hapus',
+    empty: 'Belum ada file lokal yang dipilih.',
+    hint: 'Unggah file video MP4, MOV, WebM, atau serupa untuk ditranskrip.',
+  },
+  ja: {
+    label: 'ローカル動画アップロード',
+    choose: 'ファイルを選択',
+    replace: 'ファイルを変更',
+    clear: '削除',
+    empty: 'ローカル動画が選択されていません。',
+    hint: 'MP4、MOV、WebM などのローカル動画ファイルをアップロードして文字起こしできます。',
+  },
+  ko: {
+    label: '로컬 동영상 업로드',
+    choose: '파일 선택',
+    replace: '파일 변경',
+    clear: '삭제',
+    empty: '선택된 로컬 동영상이 없습니다.',
+    hint: 'MP4, MOV, WebM 등 로컬 동영상 파일을 업로드해 전사할 수 있습니다.',
+  },
+};
+
 function formatTimestamp(value: number) {
   const safeValue = Math.max(0, value || 0);
   const hours = Math.floor(safeValue / 3600);
@@ -723,6 +817,19 @@ function downloadFile(contents: string, filename: string, type: string) {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(href);
+}
+
+function formatBytes(bytes: number) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let value = bytes;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+  const precision = unitIndex === 0 ? 0 : value < 10 ? 1 : 0;
+  return `${value.toFixed(precision)} ${units[unitIndex]}`;
 }
 
 function errorMessage(
@@ -759,12 +866,15 @@ export function VideoTranscriber({
   const t =
     (copy as unknown as Record<string, (typeof copy)['en']>)[locale] || copy.en;
   const guestCopy = guestParseCopy[locale] || guestParseCopy.en;
+  const upload = uploadCopy[locale] || uploadCopy.en;
   const { data: session } = useSession();
   const membershipQuery = usePaidMembership(Boolean(session?.user));
   const isPaidMember = Boolean(membershipQuery.data);
   const membershipLoading = Boolean(session?.user) && membershipQuery.isPending;
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [input, setInput] = useState(initialSourceUrl || initialMediaUrl);
   const [resolvedMediaUrl, setResolvedMediaUrl] = useState(initialMediaUrl);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [language, setLanguage] = useState('auto');
   const [progress, setProgress] = useState<Progress>('idle');
   const [notice, setNotice] = useState('');
@@ -805,7 +915,23 @@ export function VideoTranscriber({
   useEffect(() => {
     setInput(initialSourceUrl || initialMediaUrl);
     setResolvedMediaUrl(initialMediaUrl);
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }, [initialMediaUrl, initialSourceUrl]);
+
+  function clearSelectedFile() {
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] || null;
+    if (!file) return;
+    setSelectedFile(file);
+    setInput('');
+    setResolvedMediaUrl('');
+    setNotice('');
+  }
 
   async function pasteUrl() {
     try {
@@ -813,6 +939,7 @@ export function VideoTranscriber({
       if (!value) return;
       setInput(value.trim());
       setResolvedMediaUrl('');
+      clearSelectedFile();
       setNotice('');
     } catch {
       setNotice(t.pasteFailed);
@@ -846,15 +973,41 @@ export function VideoTranscriber({
   }
 
   async function transcribe() {
-    const sourceUrl = input.trim();
-    if (!/^https?:\/\//i.test(sourceUrl)) {
-      setNotice(t.invalidUrl);
-      return;
-    }
-
     setNotice('');
     setResult(null);
     try {
+      if (selectedFile) {
+        if (!session?.user) {
+          setNotice(t.accountRequired);
+          return;
+        }
+        if (membershipLoading) return;
+        if (!isPaidMember) {
+          setNotice(t.membershipRequired);
+          return;
+        }
+        setProgress('transcribing');
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        if (language !== 'auto') formData.append('language', language);
+        const response = await fetch('/api/transcribe', {
+          method: 'POST',
+          body: formData,
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || payload?.code !== 0) {
+          throw new Error(errorMessage(response, payload, t));
+        }
+        setResult(payload.data as TranscriptionResult);
+        return;
+      }
+
+      const sourceUrl = input.trim();
+      if (!/^https?:\/\//i.test(sourceUrl)) {
+        setNotice(t.invalidUrl);
+        return;
+      }
+
       const mediaUrl = await resolveAudioUrl(sourceUrl);
       if (!session?.user) {
         setNotice(guestCopy.parsed);
@@ -977,6 +1130,7 @@ export function VideoTranscriber({
               onChange={(event) => {
                 setInput(event.target.value);
                 setResolvedMediaUrl('');
+                clearSelectedFile();
               }}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' && !busy) void transcribe();
@@ -986,6 +1140,49 @@ export function VideoTranscriber({
               <Clipboard size={18} />
               {t.paste}
             </button>
+          </div>
+
+          <div className="cp-transcriber-upload">
+            <label htmlFor="transcription-file">{upload.label}</label>
+            <div className="cp-transcriber-upload-row">
+              <input
+                ref={fileInputRef}
+                id="transcription-file"
+                className="cp-transcriber-file-input"
+                type="file"
+                accept="video/*"
+                disabled={busy}
+                onChange={handleFileChange}
+              />
+              <label
+                className="cp-transcriber-upload-button"
+                htmlFor="transcription-file"
+              >
+                <Upload size={18} />
+                <span>{selectedFile ? upload.replace : upload.choose}</span>
+              </label>
+              <div className="cp-transcriber-upload-file">
+                {selectedFile ? (
+                  <>
+                    <FileVideo size={16} aria-hidden="true" />
+                    <div>
+                      <strong>{selectedFile.name}</strong>
+                      <span>{formatBytes(selectedFile.size)}</span>
+                    </div>
+                  </>
+                ) : (
+                  <span>{upload.empty}</span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={clearSelectedFile}
+                disabled={busy || !selectedFile}
+              >
+                {upload.clear}
+              </button>
+            </div>
+            <p className="cp-transcriber-upload-hint">{upload.hint}</p>
           </div>
 
           <div className="cp-transcriber-controls">

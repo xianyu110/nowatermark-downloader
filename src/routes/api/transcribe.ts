@@ -12,6 +12,8 @@ import { getAllConfigs } from '@/modules/config/service';
 import { getBalance } from '@/modules/credits/service';
 import { hasActivePaidMembership } from '@/modules/subscriptions/service';
 import {
+  getTranscriptionMaxBytes,
+  transcribeMediaFile,
   transcribeMediaUrl,
   TranscriptionError,
 } from '@/modules/transcription/service';
@@ -122,22 +124,6 @@ async function POST({ request }: { request: Request }) {
   });
   if (limited) return limited;
 
-  const body = await request.json().catch(() => ({}));
-  const mediaUrl =
-    typeof body?.mediaUrl === 'string' ? body.mediaUrl.trim() : '';
-  const language =
-    typeof body?.language === 'string' ? body.language.trim() : '';
-  const prompt = typeof body?.prompt === 'string' ? body.prompt.trim() : '';
-
-  if (!mediaUrl)
-    return respErr('A parsed media URL is required.', { status: 400 });
-  if (mediaUrl.length > MAX_URL_LENGTH) {
-    return respErr('The media URL is too long.', { status: 400 });
-  }
-  if (prompt.length > MAX_PROMPT_LENGTH) {
-    return respErr('The transcription prompt is too long.', { status: 400 });
-  }
-
   const configs = await getAllConfigs();
   const resolved = await resolveUser(request, configs);
   if ('response' in resolved) return resolved.response;
@@ -146,6 +132,49 @@ async function POST({ request }: { request: Request }) {
     return respErr('Video transcription requires an active paid membership.', {
       status: 403,
     });
+  }
+
+  const contentType = request.headers.get('content-type') || '';
+  let mediaUrl = '';
+  let mediaFile: File | null = null;
+  let language = '';
+  let prompt = '';
+
+  if (contentType.includes('multipart/form-data')) {
+    const formData = await request.formData();
+    const rawFile = formData.get('file');
+    const rawMediaUrl = formData.get('mediaUrl');
+    const rawLanguage = formData.get('language');
+    const rawPrompt = formData.get('prompt');
+    mediaFile = rawFile instanceof File && rawFile.size > 0 ? rawFile : null;
+    mediaUrl = typeof rawMediaUrl === 'string' ? rawMediaUrl.trim() : '';
+    language = typeof rawLanguage === 'string' ? rawLanguage.trim() : '';
+    prompt = typeof rawPrompt === 'string' ? rawPrompt.trim() : '';
+  } else {
+    const body = await request.json().catch(() => ({}));
+    mediaUrl = typeof body?.mediaUrl === 'string' ? body.mediaUrl.trim() : '';
+    language = typeof body?.language === 'string' ? body.language.trim() : '';
+    prompt = typeof body?.prompt === 'string' ? body.prompt.trim() : '';
+  }
+
+  if (!mediaFile && !mediaUrl) {
+    return respErr('A parsed media URL or uploaded file is required.', {
+      status: 400,
+    });
+  }
+  if (prompt.length > MAX_PROMPT_LENGTH) {
+    return respErr('The transcription prompt is too long.', { status: 400 });
+  }
+  if (mediaUrl.length > MAX_URL_LENGTH) {
+    return respErr('The media URL is too long.', { status: 400 });
+  }
+
+  const maxBytes = getTranscriptionMaxBytes(configs);
+  if (mediaFile && mediaFile.size > maxBytes) {
+    return respErr(
+      `Media must be smaller than ${Math.round(maxBytes / 1024 / 1024)} MB.`,
+      { status: 413 }
+    );
   }
 
   const costCredits = parseCost(configs);
@@ -168,9 +197,33 @@ async function POST({ request }: { request: Request }) {
         'whisper-1',
       prompt: 'Transcribe the supplied video or audio.',
       costCredits,
-      options: { mediaUrl, language: language || undefined },
+      options: {
+        mediaUrl: mediaFile ? mediaFile.name : mediaUrl,
+        mediaSource: mediaFile ? 'upload' : 'url',
+        language: language || undefined,
+      },
     });
     await updateTask({ taskId: task.id, status: AITaskStatus.PROCESSING });
+
+    if (mediaFile) {
+      const result = await transcribeMediaFile({
+        mediaFile,
+        language: language || undefined,
+        prompt: prompt || undefined,
+      });
+      await updateTask({
+        taskId: task.id,
+        status: AITaskStatus.SUCCESS,
+        taskResult: result,
+      });
+
+      return respData({
+        taskId: task.id,
+        status: AITaskStatus.SUCCESS,
+        ...result,
+        creditsRemaining: Math.max(0, startingBalance - costCredits),
+      });
+    }
 
     const result = await transcribeMediaUrl({
       mediaUrl,
