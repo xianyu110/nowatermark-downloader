@@ -19,6 +19,11 @@ import {
 import { useSession } from '@/core/auth/client';
 import { normalizeLocale, type SiteLocale } from '@/config/locale';
 import {
+  LOCAL_TRANSCRIPTION_PREPROCESS_THRESHOLD,
+  LocalMediaPreparationError,
+  prepareLocalTranscriptionMedia,
+} from '@/lib/local-transcription-media';
+import {
   VIDEO_SUITE_FEATURE_LABELS,
   VIDEO_SUITE_ROADMAP_COPY,
 } from '@/lib/video-suite-copy';
@@ -46,7 +51,7 @@ type TranscriptionResult = {
   creditsRemaining?: number;
 };
 
-type Progress = 'idle' | 'parsing' | 'transcribing';
+type Progress = 'idle' | 'parsing' | 'preparing' | 'transcribing';
 
 const copy = {
   en: {
@@ -706,6 +711,8 @@ const uploadCopy: Record<
     clear: string;
     empty: string;
     hint: string;
+    preparing: string;
+    prepareFailed: string;
   }
 > = {
   en: {
@@ -714,7 +721,10 @@ const uploadCopy: Record<
     replace: 'Replace file',
     clear: 'Remove',
     empty: 'No local file selected.',
-    hint: 'Upload a local MP4, MOV, WebM, or similar video file for transcription.',
+    hint: 'Upload a local MP4, MOV, WebM, or similar video. Large files are compressed locally before transcription.',
+    preparing: 'Preparing audio',
+    prepareFailed:
+      'This browser could not prepare the video audio. Try another MP4 or WebM file.',
   },
   zh: {
     label: '本地视频上传',
@@ -722,7 +732,10 @@ const uploadCopy: Record<
     replace: '重新选择',
     clear: '移除',
     empty: '尚未选择本地视频。',
-    hint: '上传本地 MP4、MOV、WebM 等视频文件后即可开始转文字。',
+    hint: '支持本地 MP4、MOV、WebM 等视频；大文件会先在浏览器中自动压缩音频。',
+    preparing: '正在处理音频',
+    prepareFailed:
+      '浏览器无法处理该视频的音轨，请换一个 MP4 或 WebM 文件重试。',
   },
   es: {
     label: 'Subida de video local',
@@ -731,6 +744,8 @@ const uploadCopy: Record<
     clear: 'Quitar',
     empty: 'No hay archivo local seleccionado.',
     hint: 'Sube un archivo MP4, MOV, WebM o similar para transcribirlo.',
+    preparing: 'Preparando audio',
+    prepareFailed: 'El navegador no pudo preparar el audio del video.',
   },
   pt: {
     label: 'Envio de vídeo local',
@@ -739,6 +754,8 @@ const uploadCopy: Record<
     clear: 'Remover',
     empty: 'Nenhum arquivo local selecionado.',
     hint: 'Envie um vídeo local MP4, MOV, WebM ou similar para transcrição.',
+    preparing: 'Preparando áudio',
+    prepareFailed: 'O navegador não conseguiu preparar o áudio do vídeo.',
   },
   fr: {
     label: 'Téléversement vidéo local',
@@ -747,6 +764,8 @@ const uploadCopy: Record<
     clear: 'Supprimer',
     empty: 'Aucun fichier local sélectionné.',
     hint: 'Téléversez un fichier MP4, MOV, WebM ou similaire pour la transcription.',
+    preparing: 'Préparation de l’audio',
+    prepareFailed: 'Le navigateur n’a pas pu préparer l’audio de cette vidéo.',
   },
   de: {
     label: 'Lokaler Video-Upload',
@@ -755,6 +774,8 @@ const uploadCopy: Record<
     clear: 'Entfernen',
     empty: 'Keine lokale Datei ausgewählt.',
     hint: 'Lade eine lokale MP4-, MOV-, WebM- oder ähnliche Videodatei hoch.',
+    preparing: 'Audio wird vorbereitet',
+    prepareFailed: 'Der Browser konnte die Audiospur nicht vorbereiten.',
   },
   it: {
     label: 'Caricamento video locale',
@@ -763,6 +784,8 @@ const uploadCopy: Record<
     clear: 'Rimuovi',
     empty: 'Nessun file locale selezionato.',
     hint: 'Carica un file MP4, MOV, WebM o simile per la trascrizione.',
+    preparing: 'Preparazione audio',
+    prepareFailed: 'Il browser non ha potuto preparare l’audio del video.',
   },
   id: {
     label: 'Unggah video lokal',
@@ -771,6 +794,8 @@ const uploadCopy: Record<
     clear: 'Hapus',
     empty: 'Belum ada file lokal yang dipilih.',
     hint: 'Unggah file video MP4, MOV, WebM, atau serupa untuk ditranskrip.',
+    preparing: 'Menyiapkan audio',
+    prepareFailed: 'Browser tidak dapat menyiapkan audio video ini.',
   },
   ja: {
     label: 'ローカル動画アップロード',
@@ -779,6 +804,8 @@ const uploadCopy: Record<
     clear: '削除',
     empty: 'ローカル動画が選択されていません。',
     hint: 'MP4、MOV、WebM などのローカル動画ファイルをアップロードして文字起こしできます。',
+    preparing: '音声を準備中',
+    prepareFailed: 'ブラウザで動画の音声を処理できませんでした。',
   },
   ko: {
     label: '로컬 동영상 업로드',
@@ -787,6 +814,8 @@ const uploadCopy: Record<
     clear: '삭제',
     empty: '선택된 로컬 동영상이 없습니다.',
     hint: 'MP4, MOV, WebM 등 로컬 동영상 파일을 업로드해 전사할 수 있습니다.',
+    preparing: '오디오 준비 중',
+    prepareFailed: '브라우저에서 동영상 오디오를 준비하지 못했습니다.',
   },
 };
 
@@ -875,6 +904,7 @@ export function VideoTranscriber({
   const [input, setInput] = useState(initialSourceUrl || initialMediaUrl);
   const [resolvedMediaUrl, setResolvedMediaUrl] = useState(initialMediaUrl);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [preparedFile, setPreparedFile] = useState<File | null>(null);
   const [language, setLanguage] = useState('auto');
   const [progress, setProgress] = useState<Progress>('idle');
   const [notice, setNotice] = useState('');
@@ -893,11 +923,13 @@ export function VideoTranscriber({
     ? t.checkingMembership
     : progress === 'parsing'
       ? t.parsing
-      : progress === 'transcribing'
-        ? t.transcribing
-        : session?.user
-          ? t.submit
-          : guestCopy.submit;
+      : progress === 'preparing'
+        ? upload.preparing
+        : progress === 'transcribing'
+          ? t.transcribing
+          : session?.user
+            ? t.submit
+            : guestCopy.submit;
 
   const languageOptions = useMemo(
     () => [
@@ -916,11 +948,13 @@ export function VideoTranscriber({
     setInput(initialSourceUrl || initialMediaUrl);
     setResolvedMediaUrl(initialMediaUrl);
     setSelectedFile(null);
+    setPreparedFile(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, [initialMediaUrl, initialSourceUrl]);
 
   function clearSelectedFile() {
     setSelectedFile(null);
+    setPreparedFile(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
@@ -928,6 +962,7 @@ export function VideoTranscriber({
     const file = event.target.files?.[0] || null;
     if (!file) return;
     setSelectedFile(file);
+    setPreparedFile(null);
     setInput('');
     setResolvedMediaUrl('');
     setNotice('');
@@ -986,9 +1021,18 @@ export function VideoTranscriber({
           setNotice(t.membershipRequired);
           return;
         }
+        let uploadFile = preparedFile || selectedFile;
+        if (
+          !preparedFile &&
+          selectedFile.size > LOCAL_TRANSCRIPTION_PREPROCESS_THRESHOLD
+        ) {
+          setProgress('preparing');
+          uploadFile = await prepareLocalTranscriptionMedia(selectedFile);
+          setPreparedFile(uploadFile);
+        }
         setProgress('transcribing');
         const formData = new FormData();
-        formData.append('file', selectedFile);
+        formData.append('file', uploadFile);
         if (language !== 'auto') formData.append('language', language);
         const response = await fetch('/api/transcribe', {
           method: 'POST',
@@ -1033,7 +1077,13 @@ export function VideoTranscriber({
       }
       setResult(payload.data as TranscriptionResult);
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : t.transcribeFailed);
+      if (error instanceof LocalMediaPreparationError) {
+        setNotice(
+          error.code === 'too_large' ? t.tooLarge : upload.prepareFailed
+        );
+      } else {
+        setNotice(error instanceof Error ? error.message : t.transcribeFailed);
+      }
     } finally {
       setProgress('idle');
     }
